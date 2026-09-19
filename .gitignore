@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build
+dist/
+dist-ssr/
+build/
+
+# Local Environment & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Cloudflare / Vercel / Firebase caches
+.vercel/
+.firebase/
+
+# OS and Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Large Cloudflare R2 Hosted Media Assets (Do not commit to GitHub)
+public/3d-assets/
+public/images/products/
+public/images/redesign/
+public/videos/

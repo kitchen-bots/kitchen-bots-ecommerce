@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "kitchenbots-site-prod"
+  },
+  "targets": {},
+  "etags": {}
+}

@@ -1,0 +1,74 @@
+{
+  "kb-flip-bbq-std": {
+    "id": "kb-flip-bbq-std",
+    "frames": 40,
+    "image": "/images/products/kb-flip-bbq-std.webp",
+    "video": "/videos/Flip BBQ with Standard Base V1.mp4"
+  },
+  "kb-flip-bbq-adj": {
+    "id": "kb-flip-bbq-adj",
+    "frames": 40,
+    "image": "/images/products/kb-flip-bbq-adj.webp",
+    "video": "/videos/Flip Height Adjustable Open Model Pint 4.mp4"
+  },
+  "kb-collapsible-bbq-big": {
+    "id": "kb-collapsible-bbq-big",
+    "frames": 40,
+    "image": "/images/products/kb-collapsible-bbq-big.webp",
+    "video": "/videos/1_Collapasible Big SS Model 2.mp4"
+  },
+  "kb-collapsible-flip": {
+    "id": "kb-collapsible-flip",
+    "frames": 40,
+    "image": "/images/products/kb-collapsible-flip.webp",
+    "video": "/videos/Collapsible BBQ and Flip 6.mp4"
+  },
+  "kb-collapsible-bbq-small": {
+    "id": "kb-collapsible-bbq-small",
+    "frames": 6,
+    "image": "/images/products/kb-collapsible-bbq-small.webp",
+    "video": "/videos/1_Collapasible Big SS Model 2.mp4"
+  },
+  "kb-rocket-stove-150": {
+    "id": "kb-rocket-stove-150",
+    "frames": 40,
+    "image": "/images/products/kb-rocket-stove-150.webp",
+    "video": "/videos/1_Rocket Stove 150MM Painted Model 5.mp4"
+  },
+  "kb-rocket-stove-coll": {
+    "id": "kb-rocket-stove-coll",
+    "frames": 40,
+    "image": "/images/products/kb-rocket-stove-coll.webp",
+    "video": "/videos/Rocket Stove Collapsible Small 7.mp4"
+  },
+  "kb-auto-bbq-ss": {
+    "id": "kb-auto-bbq-ss",
+    "frames": 40,
+    "image": "/images/products/kb-auto-bbq-ss.webp",
+    "video": "/videos/Automatic BBQ SS Model.mp4"
+  },
+  "kb-santa-maria-med": {
+    "id": "kb-santa-maria-med",
+    "frames": 40,
+    "image": "/images/products/kb-santa-maria-med.webp",
+    "video": "/videos/SantaMaria BBQ Meduim- Paint Model 4.1.mp4"
+  },
+  "kb-santa-maria-small": {
+    "id": "kb-santa-maria-small",
+    "frames": 3,
+    "image": "/images/products/kb-santa-maria-small.webp",
+    "video": "/videos/SantaMaria BBQ Meduim- Paint Model 4.mp4"
+  },
+  "kb-suitcase-bbq-big": {
+    "id": "kb-suitcase-bbq-big",
+    "frames": 40,
+    "image": "/images/products/kb-suitcase-bbq-big.webp",
+    "video": "/videos/1_Suitcase BBQ Big Painted 3.mp4"
+  },
+  "kb-suitcase-bbq-small": {
+    "id": "kb-suitcase-bbq-small",
+    "frames": 40,
+    "image": "/images/products/kb-suitcase-bbq-small.webp",
+    "video": "/videos/Suitcase BBQ Small - Paint Model 5.mp4"
+  }
+}
