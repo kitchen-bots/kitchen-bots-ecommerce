@@ -26,7 +26,11 @@ Thumbs.db
 .idea/
 
 # Large Cloudflare R2 Hosted Media Assets (Do not commit to GitHub)
+public/3d-assets
 public/3d-assets/
+public/images/products
 public/images/products/
+public/images/redesign
 public/images/redesign/
+public/videos
 public/videos/

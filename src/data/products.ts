@@ -1,6 +1,7 @@
 import type { Product } from '../types/product';
+import { getMediaUrl } from '../lib/cdn';
 
-export const PRODUCTS: Product[] = [
+const RAW_PRODUCTS: Product[] = [
 {
     id: 'prod-1',
     name: 'Commercial BBQ Grill',
@@ -188,5 +189,11 @@ export const PRODUCTS: Product[] = [
     specifications: { 'Material': 'Stainless/Painted', 'Size': 'Medium' },
 }
 ];
+
+export const PRODUCTS: Product[] = RAW_PRODUCTS.map(p => ({
+    ...p,
+    image: getMediaUrl(p.image),
+    images: (p.images || []).map(img => getMediaUrl(img)),
+}));
 
 export const getProductById = (id: string) => PRODUCTS.find(p => p.id === id);
