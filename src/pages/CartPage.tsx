@@ -1,9 +1,10 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, CreditCard } from 'lucide-react';
+import type { Page } from '../App';
 
 interface CartPageProps {
-  onNavigate: (page: string, data?: any) => void;
+  onNavigate: (page: Page) => void;
 }
 
 const CartPage: React.FC<CartPageProps> = ({ onNavigate }) => {
@@ -140,4 +141,3 @@ const CartPage: React.FC<CartPageProps> = ({ onNavigate }) => {
 };
 
 export default CartPage;
-

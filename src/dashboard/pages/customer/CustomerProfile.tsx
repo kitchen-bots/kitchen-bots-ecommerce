@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Building, Phone, Mail, Lock, Camera } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import InputField from '../../components/InputField';
 import ToggleSwitch from '../../components/ToggleSwitch';
 import { getInitials } from '../../utils/formatters';
