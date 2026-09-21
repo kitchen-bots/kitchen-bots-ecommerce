@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { ChevronDown, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { useCart } from '../hooks/use-cart';
 import { PRODUCTS } from '../data/products';
+import { getPortalUrl } from '../lib/portal';
 import type { Page } from '../App';
 import { Button } from './ui/button';
 
@@ -14,6 +15,7 @@ interface NavigationProps {
 }
 
 const CATEGORIES = ['All', ...new Set(PRODUCTS.map(product => product.category))];
+const ACCOUNT_URL = getPortalUrl(import.meta.env.VITE_PORTAL_URL);
 
 export default function Navigation({ currentPage, onNavigate, onCartClick, onCatalog }: NavigationProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -139,8 +141,8 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
           >
             <Search size={20} />
           </Button>
-          <Button variant="ghost" className="hidden rounded-lg sm:flex" onClick={() => navigate('dashboard')}>
-            <User size={18} /> My Account
+          <Button asChild variant="ghost" className="hidden rounded-lg sm:flex">
+            <a href={ACCOUNT_URL}><User size={18} /> My Account</a>
           </Button>
           <Button variant="ghost" size="icon" className="relative rounded-lg" onClick={onCartClick} aria-label={`Open cart, ${totalItems} items`}>
             <ShoppingBag size={20} />
@@ -193,7 +195,9 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             <Button variant="ghost" className="mt-3 justify-start rounded-md" onClick={() => navigate('capabilities')}>Capabilities</Button>
             <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('about')}>About</Button>
             <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('contact')}>Contact</Button>
-            <Button variant="outline" className="mt-4 rounded-md" onClick={() => navigate('dashboard')}><User size={18} /> My Account</Button>
+            <Button asChild variant="outline" className="mt-4 rounded-md">
+              <a href={ACCOUNT_URL}><User size={18} /> My Account</a>
+            </Button>
           </nav>
         </div>
       </div>

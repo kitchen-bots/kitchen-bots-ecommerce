@@ -13,8 +13,6 @@ import ContactPage from './pages/ContactPage';
 import AboutPage from './pages/AboutPage';
 import PoliciesPage from './pages/PoliciesPage';
 import CapabilitiesPage from './pages/CapabilitiesPage';
-import CheckoutPage from './pages/CheckoutPage';
-import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import BulkEnquiryPage from './pages/BulkEnquiryPage';
 import CartDrawer from './components/CartDrawer';
 import MobileStickyCart from './components/MobileStickyCart';
@@ -24,8 +22,6 @@ import { WishlistProvider } from './context/WishlistContext';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import WishlistPage from './pages/WishlistPage';
-import CustomerPortal from './dashboard/CustomerPortal';
-import AdminPortal from './dashboard/AdminPortal';
 
 import SEOHead from './components/SEOHead';
 import { PAGE_SEO, getProductSEO } from './lib/seo';
@@ -37,7 +33,7 @@ import CartPage from './pages/CartPage';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export type Page = 'home' | 'products' | 'product-detail' | 'contact' | 'about' | 'policies' | 'capabilities' | 'blog' | 'login' | 'forgot-password' | 'cart' | 'wishlist' | 'checkout' | 'order-confirmation' | 'bulk-enquiry' | 'dashboard' | 'admin';
+export type Page = 'home' | 'products' | 'product-detail' | 'contact' | 'about' | 'policies' | 'capabilities' | 'blog' | 'login' | 'forgot-password' | 'cart' | 'wishlist' | 'bulk-enquiry';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -53,7 +49,7 @@ function App() {
       setCatalogKey(key => key + 1);
       const rawPath = window.location.pathname.replace('/', '');
       const path = rawPath as Page;
-      const validPages: Page[] = ['home', 'products', 'product-detail', 'contact', 'about', 'policies', 'capabilities', 'blog', 'login', 'forgot-password', 'cart', 'wishlist', 'checkout', 'order-confirmation', 'bulk-enquiry', 'dashboard', 'admin'];
+      const validPages: Page[] = ['home', 'products', 'product-detail', 'contact', 'about', 'policies', 'capabilities', 'blog', 'login', 'forgot-password', 'cart', 'wishlist', 'bulk-enquiry'];
       
       if (rawPath === '' || rawPath === 'home') {
         setCurrentPage('home');
@@ -150,18 +146,10 @@ function App() {
         return <ForgotPasswordPage onNavigate={navigateTo} />;
       case 'cart':
         return <CartPage onNavigate={navigateTo} />;
-      case 'checkout':
-        return <CheckoutPage onNavigate={navigateTo} />;
-      case 'order-confirmation':
-        return <OrderConfirmationPage onNavigate={navigateTo} />;
       case 'wishlist':
         return <WishlistPage onProductClick={(id) => navigateTo('product-detail', id)} onNavigate={navigateTo} />;
       case 'bulk-enquiry':
         return <BulkEnquiryPage onNavigate={navigateTo} />;
-      case 'dashboard':
-        return <CustomerPortal onSiteNavigate={navigateTo} />;
-      case 'admin':
-        return <AdminPortal onSiteNavigate={navigateTo} />;
       case 'home':
       default:
         return (
@@ -188,23 +176,18 @@ function App() {
         <WishlistProvider>
           <CartProvider>
             <div className="min-h-screen bg-white">
-              {/* Portal pages and checkout are self-contained — hide shared chrome */}
-              {currentPage !== 'checkout' && currentPage !== 'dashboard' && currentPage !== 'admin' && (
-                <Navigation
-                  currentPage={currentPage}
-                  onNavigate={navigateTo}
-                  onCatalog={browseCatalog}
-                  onCartClick={() => setIsCartOpen(true)}
-                />
-              )}
+              <Navigation
+                currentPage={currentPage}
+                onNavigate={navigateTo}
+                onCatalog={browseCatalog}
+                onCartClick={() => setIsCartOpen(true)}
+              />
               
               <main>
                 {renderPage()}
               </main>
 
-              {currentPage !== 'checkout' && currentPage !== 'dashboard' && currentPage !== 'admin' && (
-                <Footer onNavigate={navigateTo} />
-              )}
+              <Footer onNavigate={navigateTo} />
               
               <CartDrawer 
                 isOpen={isCartOpen} 
@@ -212,9 +195,7 @@ function App() {
                 onNavigate={navigateTo}
               />
               
-              {currentPage !== 'checkout' && currentPage !== 'dashboard' && currentPage !== 'admin' && (
-                <MobileStickyCart onOpenCart={() => setIsCartOpen(true)} />
-              )}
+              <MobileStickyCart onOpenCart={() => setIsCartOpen(true)} />
 
               {/* Scroll to Top Button */}
               <button

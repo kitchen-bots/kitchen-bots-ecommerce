@@ -68,13 +68,7 @@ export const PAGE_SEO: Record<string, SEOMeta> = {
     },
     cart: {
         title: 'Shopping Cart | KitchenBots India',
-        description: 'Review your selected equipment and proceed to secure checkout.',
-        ogImage: '/images/og-home.jpg',
-        ogType: 'website',
-    },
-    checkout: {
-        title: 'Secure Checkout | KitchenBots India',
-        description: 'Complete your purchase with secure payment options.',
+        description: 'Review selected equipment and request a confirmed order quote from KitchenBots India.',
         ogImage: '/images/og-home.jpg',
         ogType: 'website',
     },

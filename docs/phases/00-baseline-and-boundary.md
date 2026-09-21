@@ -8,6 +8,18 @@
 
 **Tech Stack:** React, TypeScript, Vite, ESLint, npm audit.
 
+## Status
+
+Completed on branch `codex/phase-00-boundary`.
+
+- Removed embedded customer and admin dashboard code.
+- Changed My Account to use `VITE_PORTAL_URL`, with `/login` as local fallback.
+- Removed simulated checkout and order-confirmation pages.
+- Changed cart completion to the existing quote-request flow until trusted order endpoints exist.
+- Added Node 22 pinning, typecheck/test/check scripts, focused portal URL tests, and CI.
+- Removed unused dashboard chart dependencies.
+- Verified typecheck, lint, tests, build, and no high or critical production audit findings.
+
 ---
 
 ### Task 1: Record the baseline

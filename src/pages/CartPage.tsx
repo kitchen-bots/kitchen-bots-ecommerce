@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../hooks/use-cart';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, CreditCard } from 'lucide-react';
 import type { Page } from '../App';
 
@@ -58,9 +58,9 @@ const CartPage: React.FC<CartPageProps> = ({ onNavigate }) => {
                 <div className="flex-1 w-full text-center sm:text-left">
                   <div className="flex flex-col sm:flex-row justify-between items-start mb-2 gap-2">
                     <h3 className="text-xl font-bold text-white group-hover:text-amber-500 transition-colors">{item.name}</h3>
-                    <p className="text-2xl font-mono text-white">${item.price.toLocaleString()}</p>
+                    <p className="text-2xl font-mono text-white">₹{item.price.toLocaleString('en-IN')}</p>
                   </div>
-                  <p className="text-gray-400 text-sm mb-6 line-clamp-1">Industrial Grade Components • Certified Unit</p>
+                  <p className="text-gray-400 text-sm mb-6">Quantity: {item.quantity}</p>
                   
                   <div className="flex items-center justify-between mt-auto">
                     <div className="flex items-center bg-black/40 rounded-lg p-1 border border-white/5">
@@ -100,37 +100,37 @@ const CartPage: React.FC<CartPageProps> = ({ onNavigate }) => {
               
               <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
                 <CreditCard className="w-6 h-6 text-amber-500" />
-                TRANS MISSION
+                Order Summary
               </h2>
               
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-gray-400 font-medium">
                   <span>Subtotal</span>
-                  <span className="text-white font-mono">${totalPrice.toLocaleString()}</span>
+                  <span className="text-white font-mono">₹{totalPrice.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between text-gray-400 font-medium">
                   <span>Shipping</span>
-                  <span className="text-kb-primary font-mono font-bold">COMPLIMENTARY</span>
+                  <span className="text-kb-primary font-mono font-bold">Confirmed by quote</span>
                 </div>
                 <div className="h-px bg-white/5 my-6" />
                 <div className="flex justify-between items-end">
                   <span className="text-xl font-bold text-white">Total</span>
                   <span className="text-4xl font-black text-amber-500 font-mono tracking-tighter">
-                    ${totalPrice.toLocaleString()}
+                    ₹{totalPrice.toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
               
               <button 
-                onClick={() => onNavigate('checkout')}
+                onClick={() => onNavigate('bulk-enquiry')}
                 className="w-full bg-kb-primary hover:bg-kb-primary-dark text-white py-5 rounded-2xl font-black text-lg transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-kb-primary/30 flex items-center justify-center gap-3 group/btn"
               >
-                INITIATE CHECKOUT
+                REQUEST ORDER QUOTE
                 <ShoppingBag className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
               </button>
               
               <p className="text-center text-gray-500 text-xs mt-6 font-mono uppercase tracking-widest leading-relaxed">
-                SECURE AES-256 ENCRYPTED TRANSACTION • 2-YEAR INDUSTRIAL WARRANTY INCLUDED
+                Final price, shipping, taxes, and warranty terms are confirmed in writing.
               </p>
             </div>
           </div>
