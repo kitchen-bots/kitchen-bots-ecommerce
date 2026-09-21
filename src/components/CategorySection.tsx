@@ -1,134 +1,77 @@
-import { ArrowRight, ChefHat, Factory, Warehouse, WashingMachine } from 'lucide-react';
-import type { Page } from '../App';
+import { ArrowRight, Flame, Gauge, PackageOpen, RotateCw } from 'lucide-react';
+import { PRODUCTS } from '../data/products';
+import type { ProductCategory } from '../types/product';
 
 interface CategorySectionProps {
-  onNavigate?: (page: Page, params?: string) => void;
+  onCatalog: (category: ProductCategory) => void;
 }
 
-const SOLUTIONS = [
+const OPERATIONS: Array<{
+  title: string;
+  description: string;
+  category: ProductCategory;
+  icon: typeof Flame;
+}> = [
   {
-    id: 'commercial-kitchens',
-    title: 'Commercial Kitchens',
-    subtitle: 'Restaurants & Hotels',
-    icon: ChefHat,
-    image: '/images/solution-kitchen.png',
-    link: 'products'
+    title: 'Open-fire grilling',
+    description: 'Adjustable-grate grills for wood and charcoal cooking.',
+    category: 'Santa Maria Series',
+    icon: Flame,
   },
   {
-    id: 'food-processing',
-    title: 'Food Processing',
-    subtitle: 'Mass Production Units',
-    icon: Factory,
-    image: '/images/solution-processing.png',
-    link: 'capabilities'
+    title: 'Fuel-efficient cooking',
+    description: 'Rocket stoves for focused heat and compact setups.',
+    category: 'Rocket Stoves',
+    icon: Gauge,
   },
   {
-    id: 'cold-storage',
-    title: 'Cold Storage',
-    subtitle: 'Preservation Systems',
-    icon: Warehouse,
-    image: '/images/solution-coldstorage.png',
-    link: 'products'
+    title: 'Portable cooking',
+    description: 'Collapsible grills built for transport and quick setup.',
+    category: 'Collapsible BBQ',
+    icon: PackageOpen,
   },
   {
-    id: 'industrial-laundry',
-    title: 'Industrial Laundry',
-    subtitle: 'High-Volume Systems',
-    icon: WashingMachine,
-    image: '/images/solution-laundry.png',
-    link: 'products'
-  }
+    title: 'Automated grilling',
+    description: 'Rotisserie equipment for consistent turning during cooking.',
+    category: 'Automatic BBQ',
+    icon: RotateCw,
+  },
 ];
 
-export default function CategorySection({ onNavigate }: CategorySectionProps) {
+export default function CategorySection({ onCatalog }: CategorySectionProps) {
   return (
-    <section className="w-full py-24 lg:py-32 bg-white overflow-hidden">
+    <section className="w-full overflow-hidden bg-white py-20 lg:py-28">
       <div className="container mx-auto px-6 lg:px-[80px]">
-        
-        {/* HEADER */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-20">
-          <div className="max-w-2xl">
-            <span className="inline-block px-4 py-1.5 bg-[#F0FDF4] text-kb-primary text-[12px] font-bold uppercase tracking-widest rounded-full mb-6 font-['Outfit']">
-              Sector Expertise
-            </span>
-            <h2 className="text-[40px] md:text-[56px] font-bold text-[#111827] leading-[1.1] mb-6 font-['Outfit']">
-              Industry Specific <br />
-              <span className="text-kb-primary">Commercial Solutions</span>
-            </h2>
-            <p className="text-[#64748B] text-[18px] leading-relaxed font-['DM_Sans']">
-              Our engineering fleet is purpose-built to deliver operational excellence across diverse high-demand environments.
-            </p>
-          </div>
-          <button
-            onClick={() => onNavigate && onNavigate('products')}
-            className="mt-10 lg:mt-0 flex items-center gap-3 text-[#111827] font-bold uppercase tracking-widest text-[14px] font-['Outfit'] group"
-          >
-            All Sectors <div className="w-10 h-10 bg-[#F8FAFC] rounded-full flex items-center justify-center group-hover:bg-kb-tertiary group-hover:text-white transition-all"><ArrowRight size={18} /></div>
-          </button>
+        <div className="mb-14 max-w-2xl">
+          <h2 className="font-['Outfit'] text-[38px] font-bold leading-tight text-[#111827] md:text-[52px]">
+            Solutions by operation
+          </h2>
+          <p className="mt-5 text-[17px] leading-relaxed text-[#64748B]">
+            Start with the way you cook, then browse the equipment category built for that operation.
+          </p>
         </div>
 
-        {/* SOLUTIONS GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {SOLUTIONS.map((item) => {
-            const Icon = item.icon;
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {OPERATIONS.map(operation => {
+            const Icon = operation.icon;
+            const image = PRODUCTS.find(product => product.category === operation.category)?.image;
             return (
-              <div 
-                key={item.id}
-                className="group relative aspect-[4/5] rounded-[40px] overflow-hidden cursor-pointer shadow-premium hover:shadow-lg transition-all duration-700"
-                onClick={() => onNavigate && onNavigate(item.link as Page)}
+              <button
+                key={operation.category}
+                onClick={() => onCatalog(operation.category)}
+                className="group relative aspect-[4/5] overflow-hidden rounded-3xl bg-[#111827] text-left shadow-premium focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[#E45400]"
               >
-                {/* Background Image */}
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                />
-                
-                {/* Advanced Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/90 via-[#111827]/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-500" />
-                
-                {/* Content */}
-                <div className="absolute inset-x-0 bottom-0 p-10 flex flex-col items-start">
-                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-white mb-6 border border-white/20 group-hover:bg-kb-tertiary group-hover:border-kb-tertiary transition-all duration-500">
-                    <Icon size={24} />
-                  </div>
-                  <h3 className="text-white text-[24px] font-bold leading-tight font-['Outfit'] mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-white/60 text-[14px] font-['DM_Sans'] mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    {item.subtitle}
-                  </p>
-                  <div className="flex items-center gap-2 text-kb-tertiary font-bold text-[12px] uppercase tracking-widest font-['Outfit'] translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                    View Systems <ArrowRight size={16} />
-                  </div>
-                </div>
-              </div>
+                {image && <img src={image} alt="" className="h-full w-full object-cover opacity-75 transition-transform duration-300 group-hover:scale-[1.03]" />}
+                <span className="absolute inset-0 bg-gradient-to-t from-[#111827] via-[#111827]/35 to-transparent" />
+                <span className="absolute inset-x-0 bottom-0 p-7 text-white">
+                  <Icon size={23} className="mb-4 text-kb-tertiary" />
+                  <span className="block font-['Outfit'] text-[22px] font-bold">{operation.title}</span>
+                  <span className="mt-2 block text-sm leading-relaxed text-white/75">{operation.description}</span>
+                  <span className="mt-5 flex items-center gap-2 text-sm font-bold text-kb-tertiary">Browse products <ArrowRight size={16} /></span>
+                </span>
+              </button>
             );
           })}
-        </div>
-
-        {/* CUSTOM CTA */}
-        <div className="mt-24 p-12 md:p-20 rounded-[56px] bg-[#1E2329] relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-1/3 h-full bg-kb-primary opacity-5 blur-[100px]" />
-          <div className="absolute bottom-0 left-0 w-1/3 h-full bg-kb-tertiary opacity-5 blur-[100px]" />
-          
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12 text-center lg:text-left">
-            <div className="max-w-2xl">
-              <h3 className="text-white text-[32px] md:text-[40px] font-bold mb-6 font-['Outfit'] leading-tight">
-                Specialized Engineering <br />
-                <span className="text-kb-tertiary">Requirements?</span>
-              </h3>
-              <p className="text-white/60 text-[18px] font-['DM_Sans'] leading-relaxed">
-                Our R&D unit specializes in manufacturing bespoke equipment for niche culinary processes and industrial kitchen waste management.
-              </p>
-            </div>
-            <button
-              onClick={() => onNavigate && onNavigate('contact')}
-              className="h-[64px] px-10 bg-kb-tertiary text-white font-bold rounded-2xl hover:bg-[#D18509] transition-all shadow-xl shadow-kb-tertiary font-['Outfit'] flex items-center justify-center gap-3 active:scale-95 whitespace-nowrap"
-            >
-              Start Custom Project <ArrowRight size={20} />
-            </button>
-          </div>
         </div>
       </div>
     </section>

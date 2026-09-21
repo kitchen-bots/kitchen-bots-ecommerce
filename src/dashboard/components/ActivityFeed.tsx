@@ -1,6 +1,5 @@
 import { Package, FileText, User, Wrench, ShoppingBag } from 'lucide-react';
 import { mockActivity } from '../data/mockData';
-import { formatDate } from '../utils/formatters';
 
 const iconMap: Record<string, React.ReactNode> = {
   package:      <Package size={14} />,

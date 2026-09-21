@@ -1,235 +1,202 @@
-import { useState } from 'react';
-import { Menu, X, User, MapPin, Phone, Mail, Twitter, Linkedin, ShoppingBag, Search } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
+import { ChevronDown, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { useCart } from '../hooks/use-cart';
+import { PRODUCTS } from '../data/products';
 import type { Page } from '../App';
-import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 
 interface NavigationProps {
   currentPage: Page;
   onNavigate: (page: Page) => void;
   onCartClick: () => void;
+  onCatalog: (query?: string, category?: string) => void;
 }
 
-export default function Navigation({ currentPage, onNavigate, onCartClick }: NavigationProps) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const CATEGORIES = ['All', ...new Set(PRODUCTS.map(product => product.category))];
+
+export default function Navigation({ currentPage, onNavigate, onCartClick, onCatalog }: NavigationProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const { totalItems } = useCart();
+  const productMenu = useRef<HTMLDivElement>(null);
+  const productButton = useRef<HTMLButtonElement>(null);
+  const searchButton = useRef<HTMLButtonElement>(null);
+  const searchInput = useRef<HTMLInputElement>(null);
 
-  const navLinks = [
-    { label: 'Home', page: 'home' as Page },
-    { label: 'Products', page: 'products' as Page },
-    { label: 'Our Capabilities', page: 'capabilities' as Page },
-    { label: 'About', page: 'about' as Page },
-    { label: 'Contact', page: 'contact' as Page },
-  ];
+  useEffect(() => {
+    if (searchOpen) searchInput.current?.focus();
+  }, [searchOpen]);
 
-  const handleNavClick = (page: Page) => {
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    const close = (event: PointerEvent) => {
+      if (!productMenu.current?.contains(event.target as Node)) setProductsOpen(false);
+    };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, []);
+
+  const navigate = (page: Page) => {
+    setMobileOpen(false);
+    setProductsOpen(false);
+    setSearchOpen(false);
     onNavigate(page);
-    setIsMobileMenuOpen(false);
-    document.body.style.overflow = 'unset';
   };
 
-  const toggleMobileMenu = () => {
-    const newState = !isMobileMenuOpen;
-    setIsMobileMenuOpen(newState);
-    document.body.style.overflow = newState ? 'hidden' : 'unset';
+  const browse = (category = 'All') => {
+    setMobileOpen(false);
+    setProductsOpen(false);
+    setSearchOpen(false);
+    onCatalog('', category);
+  };
+
+  const submitSearch = (event: FormEvent) => {
+    event.preventDefault();
+    setSearchOpen(false);
+    setMobileOpen(false);
+    onCatalog(query);
   };
 
   return (
-    <>
-      {/* TOP INFO BAR */}
-      <div className="hidden lg:flex h-10 bg-white border-b border-[#F1F5F9] px-[80px] items-center justify-between z-[1001]">
-        <div className="flex items-center gap-6 text-[13px] text-[#64748B] font-medium font-['DM_Sans']">
-          <div className="flex items-center gap-1.5 hover:text-[#111827] cursor-pointer transition-colors">
-            <MapPin size={14} className="text-kb-primary" />
-            <span>Hyderabad, India</span>
-          </div>
-          <div className="flex items-center gap-1.5 hover:text-[#111827] cursor-pointer transition-colors">
-            <Mail size={14} className="text-kb-primary" />
-            <span>info@kitchenbots.in</span>
-          </div>
-          <div className="flex items-center gap-1.5 hover:text-[#111827] cursor-pointer transition-colors">
-            <Phone size={14} className="text-kb-primary" />
-            <span>+91 94907 01421</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-5">
-          <div className="flex items-center gap-3">
-            <Twitter size={14} className="text-[#94A3B8] hover:text-[#1DA1F2] cursor-pointer transition-colors" />
-            <Linkedin size={14} className="text-[#94A3B8] hover:text-[#0077B5] cursor-pointer transition-colors" />
-          </div>
-          <div className="h-4 w-[1px] bg-[#E2E8F0]" />
-          <Button 
-            variant="ghost"
-            size="sm"
-            onClick={() => handleNavClick('dashboard')}
-            className="flex items-center gap-1.5 text-[13px] text-[#64748B] hover:text-[#111827] font-bold font-['Outfit']"
+    <header className="sticky top-0 z-50 h-20 border-b border-[#F1F5F9] bg-white shadow-sm">
+      <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between gap-6 px-6 lg:px-[80px]">
+        <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0">
+          <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-12 w-auto object-contain" />
+        </button>
+
+        <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
+          <button className="nav-link" aria-current={currentPage === 'home' ? 'page' : undefined} onClick={() => navigate('home')}>Home</button>
+          <div
+            ref={productMenu}
+            className="relative"
+            onMouseEnter={() => setProductsOpen(true)}
+            onMouseLeave={() => setProductsOpen(false)}
+            onBlur={event => {
+              if (!event.currentTarget.contains(event.relatedTarget)) setProductsOpen(false);
+            }}
+            onKeyDown={event => {
+              if (event.key === 'Escape') {
+                setProductsOpen(false);
+                productButton.current?.focus();
+              }
+            }}
           >
-            <User size={14} />
-            My Account
+            <button
+              ref={productButton}
+              className="nav-link flex items-center gap-1.5"
+              aria-expanded={productsOpen}
+              aria-controls="product-menu"
+              onClick={() => setProductsOpen(open => !open)}
+              onKeyDown={event => {
+                if (event.key === 'ArrowDown') {
+                  event.preventDefault();
+                  setProductsOpen(true);
+                  requestAnimationFrame(() => productMenu.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus());
+                }
+              }}
+            >
+              Products <ChevronDown size={15} />
+            </button>
+            {productsOpen && (
+              <div id="product-menu" role="menu" className="absolute left-0 top-full mt-3 w-64 border border-[#E2E8F0] bg-white p-2 shadow-xl">
+                <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Product categories</p>
+                {CATEGORIES.map(category => (
+                  <button
+                    key={category}
+                    role="menuitem"
+                    className="block w-full px-3 py-2.5 text-left text-sm font-semibold text-[#334155] hover:bg-[#FFF7ED] hover:text-[#C2410C] focus:bg-[#FFF7ED] focus:text-[#C2410C]"
+                    onClick={() => browse(category)}
+                  >
+                    {category === 'All' ? 'All products' : category}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button className="nav-link" aria-current={currentPage === 'capabilities' ? 'page' : undefined} onClick={() => navigate('capabilities')}>Capabilities</button>
+          <button className="nav-link" aria-current={currentPage === 'about' ? 'page' : undefined} onClick={() => navigate('about')}>About</button>
+          <button className="nav-link" aria-current={currentPage === 'contact' ? 'page' : undefined} onClick={() => navigate('contact')}>Contact</button>
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <Button
+            ref={searchButton}
+            variant="ghost"
+            size="icon"
+            className="rounded-lg"
+            aria-label="Search products"
+            aria-expanded={searchOpen}
+            onClick={() => setSearchOpen(open => !open)}
+          >
+            <Search size={20} />
+          </Button>
+          <Button variant="ghost" className="hidden rounded-lg sm:flex" onClick={() => navigate('dashboard')}>
+            <User size={18} /> My Account
+          </Button>
+          <Button variant="ghost" size="icon" className="relative rounded-lg" onClick={onCartClick} aria-label={`Open cart, ${totalItems} items`}>
+            <ShoppingBag size={20} />
+            {totalItems > 0 && <span className="absolute -right-1 -top-1 min-w-4 rounded-sm bg-[#C2410C] px-1 text-[10px] text-white">{totalItems}</span>}
+          </Button>
+          <Button variant="ghost" size="icon" className="rounded-lg lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
+            <Menu size={22} />
           </Button>
         </div>
       </div>
 
-      {/* MAIN NAVBAR */}
-      <header 
-        className="sticky top-0 z-[1000] bg-white border-b border-[#F1F5F9] shadow-sm shadow-black/[0.02]" 
-        style={{ height: '80px' }}
-      >
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-[80px] h-full flex items-center justify-between">
-          
-          {/* LOGO - LEFT */}
-          <div 
-            onClick={() => handleNavClick('home')} 
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <img 
-              src="/images/kitchen-bots-white.png" 
-              alt="KitchenBots" 
-              className="h-[48px] w-auto object-contain transition-transform group-hover:scale-105" 
+      {searchOpen && (
+        <div className="absolute right-6 top-[calc(100%+8px)] w-[min(560px,calc(100%-3rem))] border border-[#E2E8F0] bg-white p-4 shadow-xl lg:right-[80px]">
+          <form role="search" className="flex gap-2" onSubmit={submitSearch} onKeyDown={event => {
+            if (event.key === 'Escape') {
+              setSearchOpen(false);
+              searchButton.current?.focus();
+            }
+          }}>
+            <label className="sr-only" htmlFor="navbar-search">Search products</label>
+            <input
+              ref={searchInput}
+              id="navbar-search"
+              type="search"
+              value={query}
+              onChange={event => setQuery(event.target.value)}
+              placeholder="Search grills, stoves, features..."
+              className="min-w-0 flex-1 border border-[#CBD5E1] px-4 py-3 outline-none focus:border-[#E45400]"
             />
-          </div>
+            <Button type="submit" className="rounded-md"><Search size={17} /> Search</Button>
+          </form>
+        </div>
+      )}
 
-          {/* DESKTOP NAV - CENTER */}
-          <nav className="hidden lg:flex items-center gap-10">
-            {navLinks.map((link) => {
-              const isActive = currentPage === link.page;
-              return (
-                <Button
-                  key={link.label}
-                  variant="ghost"
-                  onClick={() => handleNavClick(link.page)}
-                  className={cn(
-                    "flex items-center gap-1.5 text-[15px] font-bold transition-all font-['Outfit'] relative py-2 h-auto px-0 hover:bg-transparent",
-                    isActive 
-                      ? "text-kb-tertiary after:content-[''] after:absolute after:bottom-[4px] after:left-0 after:w-full after:h-[2px] after:bg-kb-tertiary after:rounded-[2px]" 
-                      : "text-[#475569] hover:text-kb-tertiary"
-                  )}
-                >
-                  {link.label}
-                </Button>
-              );
-            })}
+      <div className={`fixed inset-0 z-[60] lg:hidden ${mobileOpen ? '' : 'pointer-events-none'}`}>
+        <button className={`absolute inset-0 bg-[#0F172A]/40 transition-opacity ${mobileOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setMobileOpen(false)} aria-label="Close navigation" />
+        <div className={`absolute bottom-0 right-0 top-0 w-[min(88%,360px)] bg-white transition-transform duration-200 ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          <div className="flex items-center justify-between border-b border-[#F1F5F9] p-5">
+            <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-10 w-auto" />
+            <Button variant="ghost" size="icon" className="rounded-lg" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X /></Button>
+          </div>
+          <nav className="flex flex-col gap-1 p-4" aria-label="Mobile navigation">
+            <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('home')}>Home</Button>
+            <p className="mt-3 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#64748B]">Products</p>
+            {CATEGORIES.map(category => (
+              <Button key={category} variant="ghost" className="justify-start rounded-md" onClick={() => browse(category)}>
+                {category === 'All' ? 'All products' : category}
+              </Button>
+            ))}
+            <Button variant="ghost" className="mt-3 justify-start rounded-md" onClick={() => navigate('capabilities')}>Capabilities</Button>
+            <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('about')}>About</Button>
+            <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('contact')}>Contact</Button>
+            <Button variant="outline" className="mt-4 rounded-md" onClick={() => navigate('dashboard')}><User size={18} /> My Account</Button>
           </nav>
-
-          {/* ACTIONS - RIGHT */}
-          <div className="flex items-center gap-5 lg:gap-8">
-            <div className="hidden sm:flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-[#475569] hover:bg-[#F1F5F9] rounded-full"
-              >
-                <Search size={20} />
-              </Button>
-              <div className="relative cursor-pointer group" onClick={onCartClick}>
-                <div className="p-2 text-[#475569] group-hover:bg-[#F1F5F9] rounded-full transition-all">
-                  <ShoppingBag size={20} />
-                </div>
-                {totalItems > 0 && (
-                  <div className="absolute top-0 right-0 w-4 h-4 bg-[#EF4444] rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-bold animate-in fade-in zoom-in duration-300">
-                    {totalItems}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <Button
-              onClick={() => handleNavClick('bulk-enquiry')}
-              variant="accent"
-              size="sm"
-              className="hidden md:flex"
-            >
-              Get Bulk Quote
-            </Button>
-
-            {/* MOBILE TOGGLE */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleMobileMenu}
-              className="lg:hidden text-[#111827] hover:bg-[#F1F5F9] rounded-lg relative z-[1001]"
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </Button>
-          </div>
         </div>
-
-        {/* MOBILE DRAWER */}
-        <div 
-          className={cn(
-            "fixed inset-0 z-[2000] lg:hidden transition-all duration-300",
-            isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          )}
-        >
-          <div 
-            className="absolute inset-0 bg-[#0F172A]/40 backdrop-blur-sm"
-            onClick={toggleMobileMenu}
-          />
-          
-          <div 
-            className={cn(
-              "absolute top-0 right-0 bottom-0 w-[85%] max-w-[340px] bg-white flex flex-col transition-transform duration-300 ease-out",
-              isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-            )}
-          >
-            <div className="flex items-center justify-between p-6 border-b border-[#F1F5F9]">
-              <div className="flex items-center gap-2" onClick={() => handleNavClick('home')}>
-                <img 
-                  src="/images/kitchen-bots-white.png" 
-                  alt="KitchenBots" 
-                  className="h-[36px] w-auto object-contain" 
-                />
-              </div>
-              <Button 
-                variant="ghost"
-                size="icon"
-                onClick={toggleMobileMenu} 
-                className="text-[#64748B] hover:bg-[#F1F5F9] rounded-full"
-              >
-                <X size={24} />
-              </Button>
-            </div>
-            <div className="flex-1 overflow-y-auto py-6">
-              <nav className="px-4 space-y-1">
-                {navLinks.map((link) => (
-                  <Button
-                    key={link.label}
-                    variant="ghost"
-                    onClick={() => handleNavClick(link.page)}
-                    className={cn(
-                      "w-full px-4 py-3 justify-start text-[16px] font-bold rounded-xl transition-all font-['Outfit'] h-auto",
-                      currentPage === link.page ? "text-kb-tertiary bg-[#FFF7EC] hover:bg-[#FFF7EC]" : "text-[#475569] hover:bg-[#F8FAFC]"
-                    )}
-                  >
-                    {link.label}
-                  </Button>
-                ))}
-              </nav>
-            </div>
-
-            <div className="p-6 border-t border-[#F1F5F9] space-y-4">
-              <Button
-                onClick={() => handleNavClick('dashboard')}
-                variant="outline"
-                className="w-full flex items-center justify-center gap-2 h-[52px]"
-              >
-                <User size={18} />
-                My Account
-              </Button>
-              <Button
-                onClick={() => handleNavClick('bulk-enquiry')}
-                variant="accent"
-                className="w-full h-[52px]"
-              >
-                Get Bulk Quote
-              </Button>
-            </div>
-
-          </div>
-        </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }

@@ -1,77 +1,71 @@
-import { Phone, Mail, MessageSquare, Utensils, Zap, ShieldCheck, Settings } from 'lucide-react';
-import { Button } from '../components/ui/button';
+import { Flame, Gauge, Mail, MessageSquare, PackageOpen, Phone, RotateCw } from 'lucide-react';
+import type { ProductCategory } from '../types/product';
 
-export default function CategoriesContactSection() {
-  const categories = [
-    { icon: Utensils, label: 'Advanced Cooking' },
-    { icon: Zap, label: 'Food Prep' },
-    { icon: ShieldCheck, label: 'Storage Solutions' },
-    { icon: Settings, label: 'Robotic Grilling' },
-  ];
+interface CategoriesContactSectionProps {
+  onCatalog: (category: ProductCategory) => void;
+}
 
+const CATEGORIES: Array<{
+  icon: typeof Flame;
+  label: string;
+  category: ProductCategory;
+}> = [
+  { icon: Flame, label: 'Santa Maria grills', category: 'Santa Maria Series' },
+  { icon: Gauge, label: 'Rocket stoves', category: 'Rocket Stoves' },
+  { icon: PackageOpen, label: 'Collapsible BBQs', category: 'Collapsible BBQ' },
+  { icon: RotateCw, label: 'Automatic BBQs', category: 'Automatic BBQ' },
+];
+
+export default function CategoriesContactSection({ onCatalog }: CategoriesContactSectionProps) {
   return (
-    <section className="py-12 bg-white">
-      <div className="max-w-[1200px] mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-12">
-          
-          {/* LEFT: CATEGORIES */}
-          <div className="w-full lg:w-1/2">
-            <h2 className="text-[20px] font-bold text-[#111827] mb-6">Our Product Categories</h2>
-            <div className="flex flex-wrap gap-4">
-              {categories.map((cat, idx) => (
-                <div 
-                  key={idx}
-                  className="flex flex-col items-center justify-center w-[125px] h-[100px] border border-[#E5E7EB] rounded-lg hover:border-kb-primary hover:text-kb-primary transition-all cursor-pointer bg-[#F9FAFB]"
-                >
-                  <cat.icon size={24} className="mb-2 opacity-70" />
-                  <span className="text-[12px] font-bold px-2 text-center">{cat.label}</span>
-                </div>
-              ))}
-            </div>
+    <section className="border-t border-[#E5E7EB] bg-white py-14">
+      <div className="mx-auto grid max-w-[1200px] gap-12 px-6 lg:grid-cols-2">
+        <div>
+          <h2 className="text-[20px] font-bold text-[#111827]">Product categories</h2>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+            {CATEGORIES.map(({ icon: Icon, label, category }) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => onCatalog(category)}
+                className="flex min-h-28 flex-col items-start justify-between border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-left text-[#111827] transition-colors hover:border-[#E45400] hover:bg-[#FFF7ED] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E45400]"
+              >
+                <Icon size={22} className="text-[#E45400]" aria-hidden="true" />
+                <span className="text-[13px] font-bold leading-snug">{label}</span>
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* RIGHT: CONTACT */}
-          <div className="w-full lg:w-1/2">
-            <h2 className="text-[20px] font-bold text-[#111827] mb-6">Get In Touch</h2>
-            <div className="flex flex-col md:flex-row md:items-start gap-8">
-              <div className="space-y-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#111827]">
-                    <Phone size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-[#6B7280] font-medium uppercase tracking-wider">Call Us</p>
-                    <p className="text-[15px] font-bold text-[#111827]">+91 94907 01421</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-[#111827]">
-                    <Mail size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-[#6B7280] font-medium uppercase tracking-wider">Email Us</p>
-                    <p className="text-[15px] font-bold text-[#111827]">info@kitchenbots.in</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="md:border-l md:border-gray-100 md:pl-8 mt-2">
-                <Button 
-                  className="bg-[#25D366] hover:bg-[#20bd5a] rounded-full"
-                >
-                  <MessageSquare size={20} fill="white" />
-                  <span>WhatsApp Us</span>
-                </Button>
-                <p className="mt-2 text-[11px] text-[#6B7280] font-medium text-center md:text-left">
-                  Average response: 5 mins
-                </p>
-              </div>
-            </div>
+        <div>
+          <h2 className="text-[20px] font-bold text-[#111827]">Get in touch</h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <a href="tel:+919490701421" className="flex items-center gap-3 border border-[#E5E7EB] p-4 hover:border-[#E45400] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E45400]">
+              <Phone size={19} className="shrink-0 text-[#E45400]" aria-hidden="true" />
+              <span className="min-w-0">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Call us</span>
+                <span className="block break-words text-[15px] font-bold text-[#111827]">+91 94907 01421</span>
+              </span>
+            </a>
+            <a href="mailto:info@kitchenbots.in" className="flex items-center gap-3 border border-[#E5E7EB] p-4 hover:border-[#E45400] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E45400]">
+              <Mail size={19} className="shrink-0 text-[#E45400]" aria-hidden="true" />
+              <span className="min-w-0">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Email us</span>
+                <span className="block break-all text-[15px] font-bold text-[#111827]">info@kitchenbots.in</span>
+              </span>
+            </a>
           </div>
-
+          <a
+            href="https://wa.me/919490701421"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md bg-[#166534] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#14532D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#166534]"
+          >
+            <MessageSquare size={18} aria-hidden="true" />
+            WhatsApp us
+          </a>
         </div>
       </div>
     </section>
   );
 }
-

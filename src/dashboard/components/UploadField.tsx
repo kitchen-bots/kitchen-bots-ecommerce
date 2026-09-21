@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, X, FileText, Image } from 'lucide-react';
+import { Upload, X, FileText } from 'lucide-react';
 
 interface UploadedFile {
   name: string;

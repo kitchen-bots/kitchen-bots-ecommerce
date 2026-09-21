@@ -5,9 +5,8 @@ import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import HeroSection from './sections/HeroSection';
 import ProductFleetSection from './sections/ProductFleetSection';
-import WhyChooseSection from './sections/WhyChooseSection';
+import CategorySection from './components/CategorySection';
 import CategoriesContactSection from './sections/CategoriesContactSection';
-import FAQSection from './sections/FAQSection';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ContactPage from './pages/ContactPage';
@@ -25,13 +24,12 @@ import { WishlistProvider } from './context/WishlistContext';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import WishlistPage from './pages/WishlistPage';
-import DashboardPage from './pages/DashboardPage';
 import CustomerPortal from './dashboard/CustomerPortal';
 import AdminPortal from './dashboard/AdminPortal';
 
-import SmoothScroller from './components/SmoothScroller';
 import SEOHead from './components/SEOHead';
-import { PAGE_SEO } from './lib/seo';
+import { PAGE_SEO, getProductSEO } from './lib/seo';
+import { getProductById } from './data/products';
 import './App.css';
 
 import BlogPage from './pages/BlogPage';
@@ -44,12 +42,15 @@ export type Page = 'home' | 'products' | 'product-detail' | 'contact' | 'about' 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [catalogKey, setCatalogKey] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Sync state with URL on initial load and back/forward
   useEffect(() => {
     const handleLocationChange = () => {
+      setSelectedProductId(new URLSearchParams(window.location.search).get('id'));
+      setCatalogKey(key => key + 1);
       const rawPath = window.location.pathname.replace('/', '');
       const path = rawPath as Page;
       const validPages: Page[] = ['home', 'products', 'product-detail', 'contact', 'about', 'policies', 'capabilities', 'blog', 'login', 'forgot-password', 'cart', 'wishlist', 'checkout', 'order-confirmation', 'bulk-enquiry', 'dashboard', 'admin'];
@@ -101,8 +102,22 @@ function App() {
     if (productId) {
       setSelectedProductId(productId);
     }
-    const path = page === 'home' ? '/' : `/${page}`;
+    const path = page === 'home'
+      ? '/'
+      : page === 'product-detail' && productId
+        ? `/product-detail?${new URLSearchParams({ id: productId })}`
+        : `/${page}`;
     window.history.pushState({}, '', path);
+    window.scrollTo(0, 0);
+  };
+
+  const browseCatalog = (query = '', category = 'All') => {
+    const params = new URLSearchParams();
+    if (query.trim()) params.set('q', query.trim());
+    if (category !== 'All') params.set('category', category);
+    window.history.pushState({}, '', `/products${params.size ? `?${params}` : ''}`);
+    setCurrentPage('products');
+    setCatalogKey(key => key + 1);
     window.scrollTo(0, 0);
   };
 
@@ -113,7 +128,7 @@ function App() {
       case 'blog':
         return <BlogPage />;
       case 'products':
-        return <ProductsPage onProductClick={(id) => navigateTo('product-detail', id)} onNavigate={navigateTo} />;
+        return <ProductsPage key={catalogKey} onProductClick={(id) => navigateTo('product-detail', id)} onCartOpen={() => setIsCartOpen(true)} onNavigate={navigateTo} />;
       case 'product-detail':
         return selectedProductId ? (
           <ProductDetailPage
@@ -121,7 +136,7 @@ function App() {
             onBack={() => navigateTo('products')}
           />
         ) : (
-          <ProductsPage onProductClick={(id) => navigateTo('product-detail', id)} />
+          <ProductsPage onProductClick={(id) => navigateTo('product-detail', id)} onCartOpen={() => setIsCartOpen(true)} />
         );
       case 'contact':
         return <ContactPage />;
@@ -147,29 +162,28 @@ function App() {
         return <CustomerPortal onSiteNavigate={navigateTo} />;
       case 'admin':
         return <AdminPortal onSiteNavigate={navigateTo} />;
-      // legacy dashboard kept for reference, remove later
-      case 'dashboard-legacy':
-        return <DashboardPage onNavigate={navigateTo} />;
       case 'home':
       default:
         return (
           <>
             <HeroSection onNavigate={navigateTo} />
             <ProductFleetSection 
+              onBrowse={() => browseCatalog()}
               onProductClick={(id) => navigateTo('product-detail', id)} 
               onCartOpen={() => setIsCartOpen(true)} 
             />
-            <WhyChooseSection />
-            <FAQSection />
-            <CategoriesContactSection />
+            <CategorySection onCatalog={category => browseCatalog('', category)} />
+            <CategoriesContactSection onCatalog={category => browseCatalog('', category)} />
           </>
         );
     }
   };
 
   return (
-    <SmoothScroller>
-      <SEOHead {...(PAGE_SEO[currentPage] ?? PAGE_SEO['home'])} />
+    <>
+      <SEOHead {...(currentPage === 'product-detail' && selectedProductId && getProductById(selectedProductId)
+        ? { ...getProductSEO(getProductById(selectedProductId)!), canonical: `/product-detail?id=${encodeURIComponent(selectedProductId)}` }
+        : PAGE_SEO[currentPage] ?? PAGE_SEO['home'])} />
       <ToastProvider>
         <WishlistProvider>
           <CartProvider>
@@ -179,6 +193,7 @@ function App() {
                 <Navigation
                   currentPage={currentPage}
                   onNavigate={navigateTo}
+                  onCatalog={browseCatalog}
                   onCartClick={() => setIsCartOpen(true)}
                 />
               )}
@@ -218,10 +233,7 @@ function App() {
                 aria-label="Chat with us on WhatsApp"
                 title="Chat with us on WhatsApp"
                 className="fixed bottom-[32px] right-[24px] z-[999] flex items-center justify-center w-[56px] h-[56px] rounded-full text-white transition-transform hover:scale-110 shadow-2xl"
-                style={{ 
-                  background: '#25D366', 
-                  animation: 'wa-pulse 4s infinite' 
-                }}
+                style={{ background: '#25D366' }}
               >
                 <svg className="w-[30px] h-[30px]" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -232,7 +244,7 @@ function App() {
           </CartProvider>
         </WishlistProvider>
       </ToastProvider>
-    </SmoothScroller>
+    </>
   );
 }
 

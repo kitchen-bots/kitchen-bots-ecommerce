@@ -1,16 +1,14 @@
 import { mockDocuments } from '../data/mockData';
-import type { Document, DocumentType } from '../data/mockData';
+import type { DocType, Document } from '../data/mockData';
 
 let documents = [...mockDocuments];
 
 export const documentService = {
   getAll: () => [...documents],
 
-  getByType: (type: DocumentType) => documents.filter(d => d.type === type),
+  getByType: (type: DocType) => documents.filter(d => d.type === type),
 
   getByOrder: (orderId: string) => documents.filter(d => d.orderId === orderId),
-
-  getByCustomer: (customerId: string) => documents.filter(d => d.customerId === customerId),
 
   upload: (data: Omit<Document, 'id' | 'uploadedAt'>): Document => {
     const newDoc: Document = {
@@ -28,7 +26,7 @@ export const documentService = {
     return documents.length < prev;
   },
 
-  getTypes: (): DocumentType[] => [
-    'Invoice', 'Manual', 'Service Report', 'Installation Guide', 'Certificate', 'Quotation'
+  getTypes: (): DocType[] => [
+    'Invoice', 'Warranty', 'Quotation', 'AMC', 'Installation'
   ],
 };

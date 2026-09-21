@@ -1,9 +1,9 @@
-import { ShoppingBag, FileText, MessageSquare, TrendingUp, Clock, CheckCircle, Package } from 'lucide-react';
+import { ShoppingBag, MessageSquare, TrendingUp, CheckCircle, Package } from 'lucide-react';
 import StatCard from '../../components/StatCard';
 import ActivityFeed from '../../components/ActivityFeed';
 import StatusBadge from '../../components/StatusBadge';
 import { mockOrders, mockTickets } from '../../data/mockData';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
 
 export default function CustomerOverview() {
   const delivered  = mockOrders.filter(o => o.status === 'Delivered').length;
