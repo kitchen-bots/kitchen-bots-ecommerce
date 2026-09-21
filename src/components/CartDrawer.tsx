@@ -1,11 +1,12 @@
-import { X, Plus, Minus, ShoppingBag, Trash2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { useCart } from '../hooks/use-cart';
+import type { Page } from '../App';
 import { Button } from './ui/button';
 
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate?: (page: any) => void;
+  onNavigate?: (page: Page) => void;
 }
 
 export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerProps) {
@@ -137,20 +138,16 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
                   ₹{totalPrice.toLocaleString('en-IN')}
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[12px] text-kb-primary font-bold font-['DM_Sans'] bg-[#F0FDF4] px-4 py-2 rounded-full border border-[#DCFCE7]">
-                <ShieldCheck size={14} />
-                Secured
-              </div>
             </div>
             
             <div className="space-y-3">
               <Button
-                onClick={() => { onClose(); onNavigate?.('checkout'); }}
+                onClick={() => { onClose(); onNavigate?.('bulk-enquiry'); }}
                 variant="accent"
                 size="lg"
                 className="w-full text-[16px] uppercase tracking-wider gap-3"
               >
-                Continue to Checkout <ArrowRight size={20} />
+                Request an Order Quote <ArrowRight size={20} />
               </Button>
               
               <Button
@@ -164,7 +161,7 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
             </div>
             
             <p className="text-center text-[12px] text-[#94A3B8] mt-6 font-['DM_Sans']">
-              Shipping and taxes calculated during deployment verification.
+              Final pricing, shipping, and taxes are confirmed in your quote.
             </p>
           </div>
         )}

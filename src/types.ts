@@ -2,5 +2,4 @@
 export type Page =
   | 'home' | 'products' | 'product-detail' | 'contact' | 'about'
   | 'policies' | 'capabilities' | 'blog' | 'login' | 'forgot-password'
-  | 'cart' | 'wishlist' | 'checkout' | 'order-confirmation'
-  | 'bulk-enquiry' | 'dashboard' | 'admin';
+  | 'cart' | 'wishlist' | 'bulk-enquiry';
