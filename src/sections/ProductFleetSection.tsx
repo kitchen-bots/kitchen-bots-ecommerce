@@ -23,25 +23,27 @@ export default function ProductFleetSection({ onBrowse, onProductClick, onCartOp
   const { showToast } = useToast();
 
   return (
-    <section className="relative z-20 px-6 pb-24 lg:pb-32">
-      <div className="container mx-auto px-6 lg:px-[80px]">
+    <section className="relative z-20 pb-24 lg:pb-32">
+      <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
         <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div className="max-w-xl">
-            <h2 className="font-['Outfit'] text-[36px] font-bold leading-tight text-[#111827] md:text-[48px]">
+            <h2 className="font-['Outfit'] text-[34px] font-bold leading-tight text-[#111827] sm:text-[42px] lg:text-[48px]">
               Featured equipment
             </h2>
-            <p className="mt-4 text-[#64748B]">Current grills, stoves, and cooking equipment from the product catalog.</p>
+            <p className="mt-3 font-['DM_Sans'] text-[#64748B] sm:text-[17px]">
+              Current commercial grills, rocket stoves, and heavy-duty cooking gear from the catalog.
+            </p>
           </div>
-          <Button variant="outline" onClick={onBrowse} className="rounded-md">
-            View all products <ArrowRight size={18} />
+          <Button variant="outline" onClick={onBrowse} className="rounded-xl border-[#CBD5E1] font-semibold text-[#111827] hover:bg-[#F8FAFC]">
+            View all products <ArrowRight size={18} className="ml-1" />
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURED_PRODUCTS.map(product => (
-            <article key={product.id} className="group flex flex-col overflow-hidden rounded-3xl border border-[#F1F5F9] bg-white shadow-premium">
+            <article key={product.id} className="group flex flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-md">
               <button
-                className="aspect-square overflow-hidden bg-[#F8FAFC] p-8"
+                className="aspect-square overflow-hidden bg-[#F8FAFC] p-8 text-center"
                 onClick={() => onProductClick?.(product.id)}
                 aria-label={`View ${product.name}`}
               >
@@ -49,18 +51,18 @@ export default function ProductFleetSection({ onBrowse, onProductClick, onCartOp
               </button>
               <div className="flex flex-1 flex-col p-6">
                 <button className="text-left" onClick={() => onProductClick?.(product.id)}>
-                  <h3 className="font-['Outfit'] text-[18px] font-bold leading-tight text-[#111827] hover:text-kb-tertiary">{product.name}</h3>
+                  <h3 className="font-['Outfit'] text-[18px] font-bold leading-snug text-[#111827] hover:text-kb-tertiary">{product.name}</h3>
                 </button>
-                <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#64748B]">{product.description}</p>
+                <p className="mt-2.5 line-clamp-2 font-['DM_Sans'] text-sm leading-relaxed text-[#64748B]">{product.description}</p>
                 <div className="mt-5 font-['Outfit'] text-[20px] font-bold text-[#111827]">{formatPrice(product.price)}</div>
                 <Button
-                  className="mt-6 w-full rounded-md"
+                  className="mt-6 w-full rounded-xl font-semibold"
                   onClick={() => {
                     addToCart({ id: product.id, name: product.name, price: product.price, image: product.image });
                     showToast(`${product.name} added to cart`, 'View cart', () => onCartOpen?.());
                   }}
                 >
-                  <ShoppingCart size={18} /> Add to cart
+                  <ShoppingCart size={17} className="mr-1.5" /> Add to cart
                 </Button>
               </div>
             </article>

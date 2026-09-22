@@ -14,7 +14,7 @@ import { fetchCatalogProduct } from '../lib/api';
 interface ProductDetailPageProps {
   productId: string;
   onBack: () => void;
-  onNavigate?: (page: Page) => void;
+  onNavigate?: (page: Page, productId?: string) => void;
 }
 
 type Tab = 'Description' | 'Specifications' | 'Usage' | 'Warranty';
@@ -62,15 +62,15 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
   if (isLoading && !product) {
     return (
       <section className="min-h-screen bg-[#F8FAFC] pb-24 pt-28">
-        <div className="container mx-auto px-6 lg:px-[80px]">
+        <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
           <div className="animate-pulse grid gap-12 lg:grid-cols-2">
-            <div className="aspect-square bg-[#E2E8F0] rounded-3xl" />
+            <div className="aspect-square bg-[#E2E8F0] rounded-2xl" />
             <div className="space-y-6 pt-4">
-              <div className="h-10 bg-[#E2E8F0] rounded w-3/4" />
-              <div className="h-5 bg-[#E2E8F0] rounded w-full" />
-              <div className="h-5 bg-[#E2E8F0] rounded w-2/3" />
-              <div className="h-12 bg-[#E2E8F0] rounded w-1/3 mt-8" />
-              <div className="h-12 bg-[#E2E8F0] rounded w-full mt-6" />
+              <div className="h-10 bg-[#E2E8F0] rounded-xl w-3/4" />
+              <div className="h-5 bg-[#E2E8F0] rounded-lg w-full" />
+              <div className="h-5 bg-[#E2E8F0] rounded-lg w-2/3" />
+              <div className="h-12 bg-[#E2E8F0] rounded-xl w-1/3 mt-8" />
+              <div className="h-12 bg-[#E2E8F0] rounded-xl w-full mt-6" />
             </div>
           </div>
         </div>
@@ -82,8 +82,8 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
     return (
       <section className="min-h-[60vh] bg-[#F8FAFC] px-6 py-32 text-center">
         <h1 className="font-['Outfit'] text-3xl font-bold text-[#111827]">Product not found</h1>
-        <p className="mt-3 text-[#64748B]">This product link is invalid or no longer available.</p>
-        <Button className="mt-7 rounded-md" onClick={onBack}><ArrowLeft size={18} /> Back to products</Button>
+        <p className="mt-3 font-['DM_Sans'] text-[#64748B]">This product link is invalid or no longer available.</p>
+        <Button className="mt-7 rounded-xl" onClick={onBack}><ArrowLeft size={18} /> Back to products</Button>
       </section>
     );
   }
@@ -111,29 +111,29 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
 
   return (
     <section className="min-h-screen overflow-x-hidden bg-[#F8FAFC] pb-24 pt-28">
-      <div className="container mx-auto px-6 lg:px-[80px]">
+      <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
         {error && (
           <div className="mb-6 flex items-center justify-between rounded-xl border border-[#FCA5A5] bg-[#FEF2F2] p-4 text-[#991B1B]">
             <div className="flex items-center gap-3">
               <AlertCircle size={20} className="shrink-0" />
               <p className="text-sm font-['DM_Sans']">{error}</p>
             </div>
-            <Button size="sm" variant="outline" className="gap-2 shrink-0 font-bold" onClick={loadProduct}>
+            <Button size="sm" variant="outline" className="gap-2 shrink-0 rounded-xl font-bold" onClick={loadProduct}>
               <RefreshCw size={14} /> Retry
             </Button>
           </div>
         )}
 
         <div className="mb-10 flex items-center justify-between gap-4">
-          <Button variant="ghost" className="rounded-md px-0 hover:bg-transparent" onClick={onBack}>
-            <ArrowLeft size={18} /> Back to products
+          <Button variant="ghost" className="rounded-xl px-2 text-[#334155] hover:text-[#111827] hover:bg-transparent" onClick={onBack}>
+            <ArrowLeft size={18} className="mr-1" /> Back to products
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="rounded-md" onClick={share} aria-label="Copy product link"><Share2 size={18} /></Button>
+            <Button variant="outline" size="icon" className="rounded-xl border-[#CBD5E1]" onClick={share} aria-label="Copy product link"><Share2 size={18} /></Button>
             <Button
               variant="outline"
               size="icon"
-              className={cn('rounded-md', isInWishlist(product.id) && 'border-red-200 bg-red-50 text-red-600')}
+              className={cn('rounded-xl border-[#CBD5E1]', isInWishlist(product.id) && 'border-red-200 bg-red-50 text-red-600')}
               onClick={() => toggleWishlist(product.id)}
               aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
             >
@@ -144,7 +144,7 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
 
         <div className="grid gap-12 lg:grid-cols-2 xl:gap-20">
           <div className="min-w-0">
-            <button className="block aspect-square w-full overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white p-8" aria-label={`View ${product.name} image`}>
+            <button className="block aspect-square w-full overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm text-center" aria-label={`View ${product.name} image`}>
               <ProductImage src={images[activeImage]} alt={product.name} className="h-full w-full object-contain" />
             </button>
             {images.length > 1 && (
@@ -155,8 +155,8 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
                     onClick={() => setActiveImage(index)}
                     aria-pressed={activeImage === index}
                     className={cn(
-                      'h-20 w-20 shrink-0 overflow-hidden rounded-lg border-2 bg-white p-1',
-                      activeImage === index ? 'border-[#E45400]' : 'border-[#E2E8F0]',
+                      'h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-white p-1 transition-colors',
+                      activeImage === index ? 'border-[#C2410C]' : 'border-[#E2E8F0] hover:border-[#CBD5E1]',
                     )}
                   >
                     <ProductImage src={image} alt="" className="h-full w-full object-contain" />
@@ -167,30 +167,30 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
           </div>
 
           <div className="min-w-0 pt-2">
-            <h1 className="font-['Outfit'] text-4xl font-bold leading-tight text-[#111827] md:text-[54px]">{product.name}</h1>
-            <p className="mt-6 text-[18px] leading-relaxed text-[#64748B]">{product.description}</p>
+            <h1 className="font-['Outfit'] text-3xl font-bold leading-tight text-[#111827] sm:text-4xl lg:text-[46px]">{product.name}</h1>
+            <p className="mt-4 font-['DM_Sans'] text-[17px] leading-relaxed text-[#64748B]">{product.description}</p>
 
             <div className="mt-8 border-y border-[#E2E8F0] py-6">
-              <div className="font-['Outfit'] text-4xl font-bold text-[#111827]">{formatPrice(product.price)}</div>
+              <div className="font-['Outfit'] text-3xl sm:text-4xl font-bold text-[#111827]">{formatPrice(product.price)}</div>
               {product.mrp && <div className="mt-1 text-sm text-[#94A3B8] line-through">{formatPrice(product.mrp)}</div>}
             </div>
 
             <ul className="mt-7 grid gap-3 sm:grid-cols-2">
               {product.features.map(feature => (
-                <li key={feature} className="flex items-start gap-2 text-sm font-medium text-[#475569]">
+                <li key={feature} className="flex items-start gap-2 font-['DM_Sans'] text-sm font-medium text-[#475569]">
                   <Check size={17} className="mt-0.5 shrink-0 text-kb-primary" /> {feature}
                 </li>
               ))}
             </ul>
 
             <div className="mt-9 flex flex-wrap gap-3">
-              <Button size="lg" className="min-w-[210px] flex-1 rounded-md" onClick={addProduct}>
-                {added ? <><Check size={20} /> Added to cart</> : <><ShoppingCart size={20} /> Add to cart</>}
+              <Button size="lg" className="min-w-[210px] flex-1 rounded-xl font-semibold" onClick={addProduct}>
+                {added ? <><Check size={20} className="mr-1.5" /> Added to cart</> : <><ShoppingCart size={20} className="mr-1.5" /> Add to cart</>}
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="min-w-[180px] flex-1 rounded-md"
+                className="min-w-[180px] flex-1 rounded-xl border-[#CBD5E1] font-semibold text-[#111827] hover:bg-[#F8FAFC]"
                 onClick={() => {
                   if (onNavigate) {
                     onNavigate('bulk-enquiry');
@@ -209,8 +209,8 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
                   <button
                     key={item}
                     className={cn(
-                      'shrink-0 border-b-2 px-1 pb-3 text-sm font-bold',
-                      tab === item ? 'border-[#E45400] text-[#9A3412]' : 'border-transparent text-[#64748B] hover:text-[#111827]',
+                      'shrink-0 border-b-2 px-1 pb-3 text-sm font-bold transition-colors',
+                      tab === item ? 'border-[#C2410C] text-[#C2410C]' : 'border-transparent text-[#64748B] hover:text-[#111827]',
                     )}
                     onClick={() => setTab(item)}
                     aria-pressed={tab === item}
@@ -219,13 +219,13 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
                   </button>
                 ))}
               </div>
-              <div className="min-h-40 py-6 text-[15px] leading-relaxed text-[#475569]">
+              <div className="min-h-40 py-6 font-['DM_Sans'] text-[15px] leading-relaxed text-[#475569]">
                 {tab === 'Description' && <p>{product.description}</p>}
                 {tab === 'Specifications' && (
                   specifications.length ? (
                     <dl>
                       {specifications.map(([label, value]) => (
-                        <div key={label} className="grid grid-cols-[minmax(110px,1fr)_1.5fr] gap-4 border-b border-[#E2E8F0] py-3">
+                        <div key={label} className="grid grid-cols-[minmax(120px,1fr)_1.5fr] gap-4 border-b border-[#E2E8F0] py-3">
                           <dt className="font-bold text-[#111827]">{label}</dt>
                           <dd className="min-w-0 break-words">{value}</dd>
                         </div>
@@ -244,9 +244,15 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
           <h2 className="font-['Outfit'] text-2xl font-bold text-[#111827]">Related products</h2>
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {PRODUCTS.filter(item => item.id !== product.id && item.category === product.category).slice(0, 4).map(item => (
-              <button key={item.id} onClick={() => window.location.href = `/product-detail?id=${encodeURIComponent(item.id)}`} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white text-left">
-                <div className="aspect-[4/3] bg-[#F8FAFC] p-5"><ProductImage src={item.image} alt={item.name} className="h-full w-full object-contain" /></div>
-                <span className="block p-4 font-bold text-[#111827]">{item.name}</span>
+              <button
+                key={item.id}
+                onClick={() => onNavigate ? onNavigate('product-detail', item.id) : (window.location.href = `/product-detail?id=${encodeURIComponent(item.id)}`)}
+                className="group overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white text-left transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-md"
+              >
+                <div className="aspect-[4/3] bg-[#F8FAFC] p-5 text-center">
+                  <ProductImage src={item.image} alt={item.name} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
+                </div>
+                <span className="block p-4 font-['Outfit'] font-bold text-[#111827] group-hover:text-kb-tertiary">{item.name}</span>
               </button>
             ))}
           </div>
