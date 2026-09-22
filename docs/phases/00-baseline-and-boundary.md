@@ -10,7 +10,9 @@
 
 ## Status
 
-Completed on branch `codex/phase-00-boundary`.
+**Implementation complete. Integration pending.**
+
+Completed on branch `codex/phase-00-boundary`. Pull request: `workofcharan/kitchen-bots-ecommerce#2`.
 
 - Removed embedded customer and admin dashboard code.
 - Changed My Account to use `VITE_PORTAL_URL`, with `/login` as local fallback.
@@ -19,6 +21,20 @@ Completed on branch `codex/phase-00-boundary`.
 - Added Node 22 pinning, typecheck/test/check scripts, focused portal URL tests, and CI.
 - Removed unused dashboard chart dependencies.
 - Verified typecheck, lint, tests, build, and no high or critical production audit findings.
+
+### Verification evidence
+
+- `npm run check` passed on 22 September 2026.
+- Portal resolver tests: 2 passed.
+- Production audit: zero high or critical findings; one moderate `fflate` advisory remains.
+- Repository pins Node 22. Local verification host still runs Node 20 and reports an npm compatibility warning.
+- No browser QA is claimed. Responsive and interaction checks belong to Phase 02.
+
+### Remaining integration gate
+
+1. Merge pull request #2 into upstream `main`.
+2. Run the global acceptance gate under Node 22 on the merged commit.
+3. Keep cart UI work outside Phase 00. The stopped draft was replaced by the reviewed Phase 02 cart cleanup.
 
 ---
 

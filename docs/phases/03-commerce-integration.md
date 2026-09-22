@@ -10,6 +10,14 @@
 
 ---
 
+## Status
+
+**Blocked by dashboard Phase 01. Not started.**
+
+Backend report confirms no production Firebase Auth, Firestore catalog, Worker API, Turnstile validation, enquiry persistence, or order endpoint exists. Storefront integration must not begin against invented responses. Contract fixtures may start only with matching dashboard schemas.
+
+Dependency: `kitchen-bots-dashboard/docs/phases/01-firebase-worker-and-security.md` tasks 1, 4, 5, and 6.
+
 ### Task 1: Integrate the public catalog
 
 1. Add shared contract fixtures before the fetch client.
@@ -58,6 +66,7 @@
 - Modified browser prices cannot change server totals.
 - No UI shows simulated submission or payment success.
 - Contract and Playwright tests pass.
+- No Google Apps Script endpoint becomes a new storefront dependency.
 
 ## Rollback
 

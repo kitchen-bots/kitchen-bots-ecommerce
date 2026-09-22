@@ -10,6 +10,32 @@
 
 ---
 
+## Status
+
+**Started. Task 0 complete; full route audit remains.**
+
+Known inputs from the project and backend reports:
+
+- Cart and wishlist are client-side only.
+- Bulk enquiry has no durable backend submission yet.
+- Product data remains hardcoded.
+- Login and password recovery are interface-only.
+- Existing UI still contains excessive motion, decorative pills, glass styling, and one-off controls outside the cleaned storefront areas.
+- No responsive browser audit has been completed or claimed.
+
+### Task 0: Finish the stopped cart cleanup
+
+Status: completed in commit `563c504` after isolated Antigravity implementation and Codex review.
+
+1. Start from committed `CartPage.tsx`, not the rejected glass-heavy draft.
+2. Preserve `useCart`, INR formatting, quantity updates, removal, and `onNavigate('bulk-enquiry')`.
+3. Use existing shadcn `Button`, existing `ProductImage`, and Lucide icons.
+4. Match established storefront design: white surfaces, green brand identity, orange functional accents, moderate radii.
+5. Remove glassmorphism, decorative pills, fake commercial claims, excessive motion, and oversized marketing copy.
+6. Verify empty, populated, mobile, keyboard, and overflow states.
+
+Static verification completed: file ESLint, TypeScript, production build, and existing automated checks. Browser viewport verification remains part of Task 1.
+
 ### Task 1: Write the audit
 
 **Files:**
@@ -36,7 +62,7 @@ Review navigation, hierarchy, catalog discovery, filtering, product detail, medi
 5. Provide a useful static fallback for reduced motion, slow connection, or media failure.
 6. Preserve selected configuration into cart or enquiry.
 
-### Task 4: Improve cart, forms, and checkout
+### Task 4: Improve cart, forms, and order/enquiry forms
 
 1. Use persistent labels and field-level errors.
 2. Preserve data after recoverable failures.
@@ -44,6 +70,7 @@ Review navigation, hierarchy, catalog discovery, filtering, product detail, medi
 4. Prevent sticky actions from covering content.
 5. Make order and enquiry submission states accurate and recoverable.
 6. Confirm destructive actions clearly.
+7. Do not add payment or checkout success until trusted backend endpoints exist.
 
 ### Task 5: Accessibility and performance
 
