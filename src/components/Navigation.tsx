@@ -27,6 +27,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   const productButton = useRef<HTMLButtonElement>(null);
   const searchButton = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (searchOpen) searchInput.current?.focus();
@@ -40,14 +41,35 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   }, [mobileOpen]);
 
   useEffect(() => {
-    const close = (event: PointerEvent) => {
-      if (!productMenu.current?.contains(event.target as Node)) setProductsOpen(false);
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!productMenu.current?.contains(event.target as Node)) {
+        setProductsOpen(false);
+      }
     };
-    document.addEventListener('pointerdown', close);
-    return () => document.removeEventListener('pointerdown', close);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    };
   }, []);
 
+  const handleMouseEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setProductsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = setTimeout(() => {
+      setProductsOpen(false);
+    }, 200);
+  };
+
   const navigate = (page: Page) => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     setMobileOpen(false);
     setProductsOpen(false);
     setSearchOpen(false);
@@ -55,6 +77,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   };
 
   const browse = (category = 'All') => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     setMobileOpen(false);
     setProductsOpen(false);
     setSearchOpen(false);
@@ -69,21 +92,31 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   };
 
   return (
-    <header className="sticky top-0 z-50 h-20 border-b border-[#F1F5F9] bg-white shadow-sm">
-      <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between gap-6 px-6 lg:px-[80px]">
-        <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0">
-          <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-12 w-auto object-contain" />
+    <header className="sticky top-0 z-50 h-20 border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm">
+      <div className="mx-auto flex h-full max-w-[1440px] 2xl:max-w-[1480px] items-center justify-between gap-6 px-6 lg:px-12 2xl:px-16">
+        <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-kb-tertiary">
+          <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-11 md:h-12 w-auto object-contain" />
         </button>
 
         <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
-          <button className="nav-link" aria-current={currentPage === 'home' ? 'page' : undefined} onClick={() => navigate('home')}>Home</button>
+          <button 
+            className="nav-link" 
+            aria-current={currentPage === 'home' ? 'page' : undefined} 
+            onClick={() => navigate('home')}
+          >
+            Home
+          </button>
+
           <div
             ref={productMenu}
             className="relative"
-            onMouseEnter={() => setProductsOpen(true)}
-            onMouseLeave={() => setProductsOpen(false)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onFocus={handleMouseEnter}
             onBlur={event => {
-              if (!event.currentTarget.contains(event.relatedTarget)) setProductsOpen(false);
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                setProductsOpen(false);
+              }
             }}
             onKeyDown={event => {
               if (event.key === 'Escape') {
@@ -94,39 +127,92 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
           >
             <button
               ref={productButton}
-              className="nav-link flex items-center gap-1.5"
+              className={`nav-link flex items-center gap-1.5 transition-colors ${productsOpen ? 'text-[#C2410C]' : ''}`}
               aria-expanded={productsOpen}
+              aria-haspopup="menu"
               aria-controls="product-menu"
-              onClick={() => setProductsOpen(open => !open)}
+              onClick={() => {
+                if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+                setProductsOpen(open => !open);
+              }}
               onKeyDown={event => {
-                if (event.key === 'ArrowDown') {
+                if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
                   setProductsOpen(true);
-                  requestAnimationFrame(() => productMenu.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus());
+                  requestAnimationFrame(() => {
+                    productMenu.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus();
+                  });
                 }
               }}
             >
-              Products <ChevronDown size={15} />
+              Products <ChevronDown size={15} className={`transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`} />
             </button>
+
             {productsOpen && (
-              <div id="product-menu" role="menu" className="absolute left-0 top-full mt-3 w-64 border border-[#E2E8F0] bg-white p-2 shadow-xl">
-                <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Product categories</p>
-                {CATEGORIES.map(category => (
-                  <button
-                    key={category}
-                    role="menuitem"
-                    className="block w-full px-3 py-2.5 text-left text-sm font-semibold text-[#334155] hover:bg-[#FFF7ED] hover:text-[#C2410C] focus:bg-[#FFF7ED] focus:text-[#C2410C]"
-                    onClick={() => browse(category)}
-                  >
-                    {category === 'All' ? 'All products' : category}
-                  </button>
-                ))}
+              <div 
+                className="absolute left-0 top-full pt-2 z-50"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <div 
+                  id="product-menu" 
+                  role="menu" 
+                  aria-label="Product categories"
+                  className="w-64 rounded-xl border border-[#E2E8F0] bg-white p-2 shadow-xl"
+                >
+                  <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Product categories</p>
+                  {CATEGORIES.map(category => (
+                    <button
+                      key={category}
+                      role="menuitem"
+                      tabIndex={0}
+                      className="block w-full rounded-lg px-3.5 py-2.5 text-left text-sm font-semibold text-[#334155] transition-colors hover:bg-[#FFF7ED] hover:text-[#C2410C] focus:bg-[#FFF7ED] focus:text-[#C2410C] focus-visible:outline-none"
+                      onClick={() => browse(category)}
+                      onKeyDown={event => {
+                        if (event.key === 'ArrowDown') {
+                          event.preventDefault();
+                          const next = (event.currentTarget.nextElementSibling as HTMLButtonElement);
+                          if (next && next.getAttribute('role') === 'menuitem') next.focus();
+                        } else if (event.key === 'ArrowUp') {
+                          event.preventDefault();
+                          const prev = (event.currentTarget.previousElementSibling as HTMLButtonElement);
+                          if (prev && prev.getAttribute('role') === 'menuitem') {
+                            prev.focus();
+                          } else {
+                            productButton.current?.focus();
+                          }
+                        }
+                      }}
+                    >
+                      {category === 'All' ? 'All products' : category}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
-          <button className="nav-link" aria-current={currentPage === 'capabilities' ? 'page' : undefined} onClick={() => navigate('capabilities')}>Capabilities</button>
-          <button className="nav-link" aria-current={currentPage === 'about' ? 'page' : undefined} onClick={() => navigate('about')}>About</button>
-          <button className="nav-link" aria-current={currentPage === 'contact' ? 'page' : undefined} onClick={() => navigate('contact')}>Contact</button>
+
+          <button 
+            className="nav-link" 
+            aria-current={currentPage === 'capabilities' ? 'page' : undefined} 
+            onClick={() => navigate('capabilities')}
+          >
+            Capabilities
+          </button>
+          <button 
+            className="nav-link" 
+            aria-current={currentPage === 'about' ? 'page' : undefined} 
+            onClick={() => navigate('about')}
+          >
+            About
+          </button>
+          <button 
+            className="nav-link" 
+            aria-current={currentPage === 'contact' ? 'page' : undefined} 
+            onClick={() => navigate('contact')}
+          >
+            Contact
+          </button>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -134,28 +220,44 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             ref={searchButton}
             variant="ghost"
             size="icon"
-            className="rounded-lg"
+            className="rounded-xl text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]"
             aria-label="Search products"
             aria-expanded={searchOpen}
             onClick={() => setSearchOpen(open => !open)}
           >
             <Search size={20} />
           </Button>
-          <Button asChild variant="ghost" className="hidden rounded-lg sm:flex">
+          <Button asChild variant="ghost" className="hidden rounded-xl sm:flex text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]">
             <a href={ACCOUNT_URL}><User size={18} /> My Account</a>
           </Button>
-          <Button variant="ghost" size="icon" className="relative rounded-lg" onClick={onCartClick} aria-label={`Open cart, ${totalItems} items`}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative rounded-xl text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]" 
+            onClick={onCartClick} 
+            aria-label={`Open cart, ${totalItems} items`}
+          >
             <ShoppingBag size={20} />
-            {totalItems > 0 && <span className="absolute -right-1 -top-1 min-w-4 rounded-sm bg-[#C2410C] px-1 text-[10px] text-white">{totalItems}</span>}
+            {totalItems > 0 && (
+              <span className="absolute -right-1 -top-1 min-w-4 rounded-md bg-[#C2410C] px-1 text-[10px] font-bold text-white">
+                {totalItems}
+              </span>
+            )}
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-lg lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-xl lg:hidden text-[#334155] hover:text-[#111827]" 
+            onClick={() => setMobileOpen(true)} 
+            aria-label="Open navigation"
+          >
             <Menu size={22} />
           </Button>
         </div>
       </div>
 
       {searchOpen && (
-        <div className="absolute right-6 top-[calc(100%+8px)] w-[min(560px,calc(100%-3rem))] border border-[#E2E8F0] bg-white p-4 shadow-xl lg:right-[80px]">
+        <div className="absolute right-6 top-[calc(100%+8px)] w-[min(560px,calc(100%-3rem))] rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-xl lg:right-[80px]">
           <form role="search" className="flex gap-2" onSubmit={submitSearch} onKeyDown={event => {
             if (event.key === 'Escape') {
               setSearchOpen(false);
@@ -169,38 +271,80 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
               type="search"
               value={query}
               onChange={event => setQuery(event.target.value)}
-              placeholder="Search grills, stoves, features..."
-              className="min-w-0 flex-1 border border-[#CBD5E1] px-4 py-3 outline-none focus:border-[#E45400]"
+              placeholder="Search grills, rocket stoves, features..."
+              className="min-w-0 flex-1 rounded-xl border border-[#CBD5E1] px-4 py-2.5 outline-none font-['DM_Sans'] text-sm focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
             />
-            <Button type="submit" className="rounded-md"><Search size={17} /> Search</Button>
+            <Button type="submit" className="rounded-xl"><Search size={17} /> Search</Button>
           </form>
         </div>
       )}
 
+      {/* Mobile Drawer */}
       <div className={`fixed inset-0 z-[60] lg:hidden ${mobileOpen ? '' : 'pointer-events-none'}`}>
-        <button className={`absolute inset-0 bg-[#0F172A]/40 transition-opacity ${mobileOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setMobileOpen(false)} aria-label="Close navigation" />
-        <div className={`absolute bottom-0 right-0 top-0 w-[min(88%,360px)] bg-white transition-transform duration-200 ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <button 
+          className={`absolute inset-0 bg-[#0F172A]/40 transition-opacity duration-200 ${mobileOpen ? 'opacity-100' : 'opacity-0'}`} 
+          onClick={() => setMobileOpen(false)} 
+          aria-label="Close navigation" 
+        />
+        <div className={`absolute bottom-0 right-0 top-0 w-[min(88%,360px)] bg-white shadow-2xl transition-transform duration-200 ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="flex items-center justify-between border-b border-[#F1F5F9] p-5">
             <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-10 w-auto" />
-            <Button variant="ghost" size="icon" className="rounded-lg" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X /></Button>
+            <Button variant="ghost" size="icon" className="rounded-xl text-[#64748B]" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X /></Button>
           </div>
-          <nav className="flex flex-col gap-1 p-4" aria-label="Mobile navigation">
-            <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('home')}>Home</Button>
-            <p className="mt-3 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#64748B]">Products</p>
-            {CATEGORIES.map(category => (
-              <Button key={category} variant="ghost" className="justify-start rounded-md" onClick={() => browse(category)}>
-                {category === 'All' ? 'All products' : category}
-              </Button>
-            ))}
-            <Button variant="ghost" className="mt-3 justify-start rounded-md" onClick={() => navigate('capabilities')}>Capabilities</Button>
-            <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('about')}>About</Button>
-            <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('contact')}>Contact</Button>
-            <Button asChild variant="outline" className="mt-4 rounded-md">
-              <a href={ACCOUNT_URL}><User size={18} /> My Account</a>
-            </Button>
+          <nav className="flex flex-col gap-1 p-4 font-['DM_Sans']" aria-label="Mobile navigation">
+            <button 
+              className={`w-full rounded-xl px-4 py-3 text-left text-sm font-semibold transition-colors ${currentPage === 'home' ? 'bg-[#FFF7ED] text-[#C2410C]' : 'text-[#334155] hover:bg-[#F8FAFC]'}`}
+              onClick={() => navigate('home')}
+            >
+              Home
+            </button>
+
+            <div className="my-2 border-t border-[#F1F5F9] pt-2">
+              <p className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#64748B] font-['Outfit']">Product Categories</p>
+              {CATEGORIES.map(category => (
+                <button
+                  key={category}
+                  className="w-full rounded-xl px-4 py-2.5 text-left text-sm font-medium text-[#475569] transition-colors hover:bg-[#FFF7ED] hover:text-[#C2410C]"
+                  onClick={() => browse(category)}
+                >
+                  {category === 'All' ? 'All products' : category}
+                </button>
+              ))}
+            </div>
+
+            <div className="border-t border-[#F1F5F9] pt-2">
+              <button 
+                className={`w-full rounded-xl px-4 py-3 text-left text-sm font-semibold transition-colors ${currentPage === 'capabilities' ? 'bg-[#FFF7ED] text-[#C2410C]' : 'text-[#334155] hover:bg-[#F8FAFC]'}`}
+                onClick={() => navigate('capabilities')}
+              >
+                Capabilities
+              </button>
+              <button 
+                className={`w-full rounded-xl px-4 py-3 text-left text-sm font-semibold transition-colors ${currentPage === 'about' ? 'bg-[#FFF7ED] text-[#C2410C]' : 'text-[#334155] hover:bg-[#F8FAFC]'}`}
+                onClick={() => navigate('about')}
+              >
+                About
+              </button>
+              <button 
+                className={`w-full rounded-xl px-4 py-3 text-left text-sm font-semibold transition-colors ${currentPage === 'contact' ? 'bg-[#FFF7ED] text-[#C2410C]' : 'text-[#334155] hover:bg-[#F8FAFC]'}`}
+                onClick={() => navigate('contact')}
+              >
+                Contact
+              </button>
+            </div>
+
+            <div className="mt-4 border-t border-[#F1F5F9] pt-4">
+              <a 
+                href={ACCOUNT_URL}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#CBD5E1] py-3 text-sm font-bold text-[#111827] hover:bg-[#F8FAFC]"
+              >
+                <User size={18} /> My Account
+              </a>
+            </div>
           </nav>
         </div>
       </div>
     </header>
   );
 }
+
