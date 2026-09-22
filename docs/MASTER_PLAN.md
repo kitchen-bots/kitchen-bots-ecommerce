@@ -59,7 +59,7 @@ This repository does not own:
 
 | Phase | State | Next gate |
 |---|---|---|
-| 00 | Implementation complete; PR #2 pending | Merge and verify under Node 22 |
+| 00 | Complete; PR #2 merged | Begin Phase 01 routing foundation |
 | 01 | Not started | Replace page-state routing and inventory existing primitives |
 | 02 | Started | Cart cleanup complete; complete route-by-route browser audit |
 | 03 | Blocked | Dashboard Worker contracts and endpoints |

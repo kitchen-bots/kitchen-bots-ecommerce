@@ -86,4 +86,6 @@ Completed commits:
 - `3a6279e docs: define Codex and Antigravity ownership`
 - `563c504 fix: clean up cart quote experience`
 
+Storefront boundary work merged through upstream pull request #2. Cart and phase-status updates are proposed in upstream pull request #3.
+
 The backend status and implementation plan are documented in `BACKEND_STATUS_REPORT.md` and its PDF export.
