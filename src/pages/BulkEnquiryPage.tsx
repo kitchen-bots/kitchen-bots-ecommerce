@@ -12,6 +12,7 @@ import type { Page } from '../App';
 import { Button } from '../components/ui/button';
 import { submitEnquiry } from '../lib/api';
 import { useCart } from '../hooks/use-cart';
+import { getMediaUrl } from '../lib/cdn';
 
 interface BulkEnquiryPageProps {
   onNavigate: (page: Page) => void;
@@ -67,10 +68,10 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
       {/* BREADCRUMB */}
       <div className="container mx-auto px-6 md:px-[80px] pt-12 md:pt-20 pb-6">
         <nav className="flex items-center gap-2 text-[13px] text-[#64748B] font-medium font-['DM_Sans']">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => onNavigate('home')} 
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onNavigate('home')}
             className="h-auto p-0 text-[13px] font-medium text-[#64748B] hover:text-kb-primary hover:bg-transparent"
           >
             Home
@@ -98,13 +99,13 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
       {/* CONTENT AREA */}
       <section className="container mx-auto px-6 md:px-[80px] py-12 md:py-20">
         <div className="grid lg:grid-cols-12 gap-12">
-          
+
           {/* LEFT: Info & Benefits */}
           <div className="lg:col-span-5 space-y-8">
             <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl">
-              <img 
-                src="/images/redesign/bulk-enquiry-hero.png" 
-                alt="Bulk Kitchen Equipment" 
+              <img
+                src={getMediaUrl('/images/redesign/bulk-enquiry-hero.png')}
+                alt="Bulk Kitchen Equipment"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-10">
@@ -149,7 +150,7 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                   <p className="text-[#64748B] font-['DM_Sans'] mb-8 max-w-md mx-auto">
                     We have received your requirements and assigned them to our sales engineering team. A formal quote will be delivered to your email within 24 hours.
                   </p>
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={() => {
                       setSubmittedRef(null);
@@ -190,9 +191,9 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[14px] font-bold text-[#475569] ml-1 font-['Outfit']">Full Name *</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g. Rahul Sharma" 
+                        <input
+                          type="text"
+                          placeholder="e.g. Rahul Sharma"
                           required
                           disabled={isSubmitting}
                           className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
@@ -202,9 +203,9 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[14px] font-bold text-[#475569] ml-1 font-['Outfit']">Email Address *</label>
-                        <input 
-                          type="email" 
-                          placeholder="rahul@hotel.com" 
+                        <input
+                          type="email"
+                          placeholder="rahul@hotel.com"
                           required
                           disabled={isSubmitting}
                           className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
@@ -228,9 +229,9 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[14px] font-bold text-[#475569] ml-1 font-['Outfit']">Company Name</label>
-                        <input 
-                          type="text" 
-                          placeholder="Restaurant or Hotel name" 
+                        <input
+                          type="text"
+                          placeholder="Restaurant or Hotel name"
                           disabled={isSubmitting}
                           className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
                           value={formData.company}
@@ -241,19 +242,19 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
 
                     <div className="space-y-2">
                       <label className="text-[14px] font-bold text-[#475569] ml-1 font-['Outfit']">City / Location</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Mumbai, Maharashtra" 
+                      <input
+                        type="text"
+                        placeholder="e.g. Mumbai, Maharashtra"
                         disabled={isSubmitting}
                         className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
                         value={formData.city}
                         onChange={(e) => setFormData({...formData, city: e.target.value})}
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <label className="text-[14px] font-bold text-[#475569] ml-1 font-['Outfit']">Specific Requirements *</label>
-                      <textarea 
+                      <textarea
                         required
                         disabled={isSubmitting}
                         placeholder="Mention products, quantities, and custom specifications (at least 10 characters)..."
@@ -263,7 +264,7 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                       />
                     </div>
 
-                    <Button 
+                    <Button
                       type="submit"
                       variant="accent"
                       size="lg"
@@ -282,7 +283,7 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                         </>
                       )}
                     </Button>
-                    
+
                     <p className="text-center text-[13px] text-[#94A3B8] font-['DM_Sans']">
                       By submitting, you agree to our Privacy Policy.
                     </p>

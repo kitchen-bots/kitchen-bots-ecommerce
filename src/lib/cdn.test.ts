@@ -22,4 +22,30 @@ describe('getMediaUrl', () => {
     expect(getMediaUrl(undefined)).toBe('');
     expect(getMediaUrl(null)).toBe('');
   });
+
+  it('serves relative redesign assets from the public CDN', () => {
+    expect(getMediaUrl('/images/redesign/hero-robot.png')).toBe(
+      'https://pub-a4b0711cb441484fbb54bc792d2312b5.r2.dev/images/redesign/hero-robot.png',
+    );
+    expect(getMediaUrl('/images/redesign/capabilities-hero.png')).toBe(
+      'https://pub-a4b0711cb441484fbb54bc792d2312b5.r2.dev/images/redesign/capabilities-hero.png',
+    );
+  });
+
+  it('regression: ensures no unrouted raw src="/images/redesign/..." exists in JSX files', () => {
+    const rawFiles = import.meta.glob<string>('../**/*.{tsx,jsx}', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    });
+
+    const violations: string[] = [];
+    for (const [file, content] of Object.entries(rawFiles)) {
+      if (/src=["']\/images\/redesign\//.test(content)) {
+        violations.push(file);
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
 });

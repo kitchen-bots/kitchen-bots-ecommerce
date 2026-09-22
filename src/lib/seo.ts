@@ -1,4 +1,5 @@
 import type { Product } from '../types/product';
+import { getMediaUrl } from './cdn';
 
 /** Per-page SEO metadata */
 export interface SEOMeta {
@@ -9,71 +10,78 @@ export interface SEOMeta {
     canonical?: string;
 }
 
+const DEFAULT_OG_IMAGE = getMediaUrl('/images/redesign/hero-robot.png');
+
 /** Default SEO for each static page */
 export const PAGE_SEO: Record<string, SEOMeta> = {
     home: {
         title: 'KitchenBots India | Commercial BBQ Grills & Kitchen Equipment',
         description:
             'KitchenBots India Pvt. Ltd. manufactures heavy-duty commercial BBQ grills, rocket stoves, and industrial kitchen equipment. Pan India delivery. Call: +91 9490701421',
-        ogImage: '/images/og-home.jpg',
+        ogImage: DEFAULT_OG_IMAGE,
         ogType: 'website',
     },
     products: {
         title: 'Industrial Kitchen Products | KitchenBots India',
         description:
             'Explore our high-performance fleet: Automatic BBQ Grills, Santa Maria Series, Rocket Stoves, and more. Built for commercial excellence.',
-        ogImage: '/images/og-products.jpg',
+        ogImage: getMediaUrl('/images/products/kb-commercial-bbq.webp'),
         ogType: 'website',
     },
     about: {
-        title: 'Our Story | KitchenBots India',
+        title: 'About Us | KitchenBots India',
         description:
-            'The premier manufacturer of heavy-duty cooking systems in India. Learn about our commitment to engineering perfection and customer success.',
-        ogImage: '/images/og-about.jpg',
+            'Manufacturer of heavy-duty commercial cooking systems in India. Learn about our precision fabrication, solid-fuel technology, and equipment design.',
+        ogImage: getMediaUrl('/images/redesign/capabilities-hero.png'),
         ogType: 'website',
     },
     contact: {
         title: 'Get a Quote | KitchenBots India',
         description:
-            'Request a bulk quote for your commercial kitchen. Fast response within 24 hours. GST invoices provided for all business orders.',
-        ogImage: '/images/og-contact.jpg',
+            'Request a quote for your commercial kitchen. Directly contact our manufacturing team in Hyderabad for product specifications and delivery timelines.',
+        ogImage: getMediaUrl('/images/redesign/bulk-enquiry-hero.png'),
         ogType: 'website',
     },
     policies: {
         title: 'Customer Policies | KitchenBots India',
         description:
             'Shipping, Warranty, and Return policies for KitchenBots India. Transparency and reliability for every customer.',
-        ogImage: '/images/og-home.jpg',
+        ogImage: DEFAULT_OG_IMAGE,
         ogType: 'website',
     },
     capabilities: {
         title: 'Manufacturing Capabilities | KitchenBots India',
         description:
-            'From custom fabrication to after-sales support, see why KitchenBots is the trusted choice for commercial kitchen setups.',
-        ogImage: '/images/og-home.jpg',
+            'From heavy-gauge stainless steel fabrication to automated turning mechanisms, review our commercial kitchen engineering capabilities.',
+        ogImage: getMediaUrl('/images/redesign/capabilities-hero.png'),
         ogType: 'website',
     },
     blog: {
-        title: 'Blog & Recipes | KitchenBots India',
+        title: 'Journal & Insights | KitchenBots India',
         description:
-            'Commercial cooking tips, maintenance guides, and innovative recipes from the KitchenBots engineering team.',
-        ogImage: '/images/og-home.jpg',
+            'Commercial cooking guidance, maintenance protocols, and thermal engineering insights from the KitchenBots team.',
+        ogImage: DEFAULT_OG_IMAGE,
         ogType: 'website',
     },
     login: {
-        title: 'Secure Login | KitchenBots India',
-        description: 'Login to manage your orders and wishlist.',
-        ogImage: '/images/og-home.jpg',
+        title: 'Account Access | KitchenBots India',
+        description: 'Login to manage your commercial orders and wishlist.',
+        ogImage: DEFAULT_OG_IMAGE,
         ogType: 'website',
     },
     cart: {
         title: 'Shopping Cart | KitchenBots India',
-        description: 'Review selected equipment and request a confirmed order quote from KitchenBots India.',
-        ogImage: '/images/og-home.jpg',
+        description: 'Review selected equipment and submit a confirmed quotation request with KitchenBots India.',
+        ogImage: DEFAULT_OG_IMAGE,
+        ogType: 'website',
+    },
+    'bulk-enquiry': {
+        title: 'Bulk Equipment Enquiry | KitchenBots India',
+        description: 'Submit high-volume commercial kitchen requirements and get a detailed manufacturing quotation.',
+        ogImage: getMediaUrl('/images/redesign/bulk-enquiry-hero.png'),
         ogType: 'website',
     },
 };
-
 
 /** Returns SEO metadata for a product detail page */
 export function getProductSEO(product: Product): SEOMeta {

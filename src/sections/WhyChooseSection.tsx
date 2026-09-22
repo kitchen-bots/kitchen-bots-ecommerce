@@ -1,11 +1,12 @@
 import { LayoutGrid, Zap, ShieldCheck, PlugZap } from 'lucide-react';
+import { getMediaUrl } from '../lib/cdn';
 
 export default function WhyChooseSection() {
   return (
     <section className="py-12 lg:py-[60px] bg-[#EFF3EF]">
       <div className="max-w-[1200px] mx-auto px-6">
         <div className="flex flex-col lg:flex-row gap-12 lg:items-start">
-          
+
           {/* LEFT COLUMN (45%) */}
           <div className="w-full lg:w-[45%]">
             <h2 className="text-[28px] font-bold text-[#111827] mb-4">
@@ -30,7 +31,7 @@ export default function WhyChooseSection() {
                 {/* Row 1 */}
                 <div className="flex gap-3">
                   <div className="w-12 h-12 bg-gray-50 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                    <img src="/images/redesign/fryer.png" alt="" className="w-full h-full object-cover" />
+                    <img src={getMediaUrl('/images/redesign/fryer.png')} alt="Deep Fryers" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h4 className="text-[13px] font-bold text-[#111827]">Deep Fryers</h4>
@@ -38,7 +39,7 @@ export default function WhyChooseSection() {
                 </div>
                 <div className="flex gap-3">
                   <div className="w-12 h-12 bg-gray-50 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                    <img src="/images/redesign/product-grid.png" alt="" className="w-full h-full object-cover" />
+                    <img src={getMediaUrl('/images/redesign/product-grid.png')} alt="Food Preparation" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h4 className="text-[13px] font-bold text-[#111827]">Food Preparation</h4>
@@ -48,7 +49,7 @@ export default function WhyChooseSection() {
                 {/* Row 2 */}
                 <div className="flex gap-3">
                   <div className="w-12 h-12 bg-gray-50 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                    <img src="/images/redesign/hero-robot.png" alt="" className="w-full h-full object-cover" />
+                    <img src={getMediaUrl('/images/redesign/hero-robot.png')} alt="Grilling Solutions" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h4 className="text-[13px] font-bold text-[#111827]">Grilling Solutions</h4>
@@ -57,7 +58,7 @@ export default function WhyChooseSection() {
                 </div>
                 <div className="flex gap-3">
                   <div className="w-12 h-12 bg-gray-50 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
-                    <img src="/images/redesign/product-grid.png" alt="" className="w-full h-full object-cover" />
+                    <img src={getMediaUrl('/images/redesign/product-grid.png')} alt="Custom Solutions" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h4 className="text-[13px] font-bold text-[#111827]">Custom Solutions</h4>
