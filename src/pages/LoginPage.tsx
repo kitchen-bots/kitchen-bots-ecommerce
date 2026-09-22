@@ -38,6 +38,20 @@ interface StoredEnquiry {
   status: string;
 }
 
+interface StoredOrder {
+  reference: string;
+  date: string;
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  items: Array<{ name: string; quantity: number; price: number }>;
+  total: number;
+  status: string;
+}
+
 export default function LoginPage({ onNavigate }: LoginPageProps) {
   const { showToast } = useToast();
   const [showLoginPass, setShowLoginPass] = useState(false);
@@ -63,6 +77,16 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     }
   });
 
+  // Load placed direct orders
+  const [orders] = useState<StoredOrder[]>(() => {
+    try {
+      const stored = localStorage.getItem('kb_orders');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -82,7 +106,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     const account: UserAccount = {
       name: capitalized,
       email: emailToUse,
-      company: 'Commercial Kitchens Partner',
+      company: 'Direct Customer',
     };
 
     try {
@@ -97,9 +121,9 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     const account: UserAccount = {
-      name: signupName.trim() || 'Kitchen Operator',
-      email: signupEmail.trim() || 'commercial@partner.in',
-      company: signupCompany.trim() || 'Commercial Operations',
+      name: signupName.trim() || 'Kitchen Customer',
+      email: signupEmail.trim() || 'customer@kitchenbots.in',
+      company: signupCompany.trim() || 'Direct Customer',
     };
 
     try {
@@ -150,8 +174,8 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="font-['Outfit'] text-2xl font-bold text-[#0F172A]">{currentUser.name}</h1>
-                  <span className="rounded-md bg-[#FFF7ED] px-2 py-0.5 text-xs font-bold text-[#C2410C] border border-[#FFEDD5]">
-                    Commercial Partner
+                  <span className="rounded-md bg-[#F0FDF4] px-2 py-0.5 text-xs font-bold text-[#16A34A] border border-[#DCFCE7]">
+                    Verified Customer
                   </span>
                 </div>
                 <p className="mt-1 font-['DM_Sans'] text-sm text-[#64748B]">
@@ -304,6 +328,80 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             )}
           </div>
 
+          {/* Direct Orders Tracking Section */}
+          <div className="mt-8 rounded-2xl border border-[#E2E8F0] bg-white p-6 sm:p-8 shadow-sm">
+            <div className="flex flex-col justify-between gap-4 border-b border-[#F1F5F9] pb-6 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="font-['Outfit'] text-xl font-bold text-[#0F172A]">Direct Orders</h2>
+                <p className="mt-1 font-['DM_Sans'] text-sm text-[#64748B]">
+                  Orders placed directly from your cart. We will contact you to confirm delivery.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start rounded-xl font-semibold sm:self-auto border-[#CBD5E1] hover:bg-[#F8FAFC]"
+                onClick={() => onNavigate('cart')}
+              >
+                Go to Cart
+              </Button>
+            </div>
+
+            {orders.length > 0 ? (
+              <div className="mt-6 space-y-4">
+                {orders.map((ord) => (
+                  <div
+                    key={ord.reference}
+                    className="flex flex-col justify-between gap-4 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-5 transition-all md:flex-row md:items-start"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="font-mono text-sm font-bold text-[#0F172A]">{ord.reference}</span>
+                        <span className="rounded-full bg-[#F0FDF4] px-2.5 py-0.5 text-xs font-semibold text-[#16A34A] border border-[#DCFCE7]">
+                          {ord.status || 'Order Confirmed'}
+                        </span>
+                        <span className="text-xs text-[#94A3B8]">{ord.date}</span>
+                      </div>
+                      <p className="mt-2 font-['DM_Sans'] text-sm text-[#475569]">
+                        <span className="font-semibold text-[#0F172A]">Items:</span>{' '}
+                        {ord.items?.map((i) => `${i.name} × ${i.quantity}`).join(', ')}
+                      </p>
+                      <p className="mt-1 font-['DM_Sans'] text-sm text-[#475569]">
+                        <span className="font-semibold text-[#0F172A]">Delivery to:</span>{' '}
+                        {ord.city}, {ord.state} — {ord.pincode}
+                      </p>
+                      <p className="mt-1 font-['Outfit'] text-sm font-bold text-[#0F172A]">
+                        ₹{ord.total?.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-lg border-[#CBD5E1] bg-white text-xs font-bold text-[#0F172A] hover:bg-[#F1F5F9]"
+                        onClick={() => onNavigate('contact')}
+                      >
+                        <PhoneCall size={14} className="mr-1.5 text-[#C2410C]" /> Contact Desk
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-6 rounded-xl border border-dashed border-[#CBD5E1] bg-[#FAFAFA] p-8 text-center sm:p-10">
+                <ShoppingBag size={32} className="mx-auto text-[#94A3B8]" />
+                <h3 className="mt-3 font-['Outfit'] text-base font-bold text-[#0F172A]">No direct orders yet</h3>
+                <p className="mx-auto mt-2 max-w-sm font-['DM_Sans'] text-sm text-[#64748B]">
+                  Add products to your cart and place a direct order to track them here.
+                </p>
+                <Button className="mt-5 rounded-xl font-semibold" onClick={() => onNavigate('products')}>
+                  Browse Products
+                </Button>
+              </div>
+            )}
+          </div>
+
           {/* Warranty & Engineering Support Card */}
           <div className="mt-8 rounded-2xl border border-[#E2E8F0] bg-white p-6 sm:p-8 shadow-sm">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -342,14 +440,11 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
               <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 border border-white/15">
                 <ShieldCheck size={24} className="text-[#C2410C]" />
               </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#C2410C]">
-                Commercial Access
-              </span>
-              <h1 className="mt-2 font-['Outfit'] text-2xl font-bold leading-tight text-white md:text-3xl">
-                Commercial Kitchens & Machinery Portal
+              <h1 className="font-['Outfit'] text-2xl font-bold leading-tight text-white md:text-3xl">
+                Customer & Commercial Orders Portal
               </h1>
               <p className="mt-4 font-['DM_Sans'] text-sm leading-relaxed text-slate-300">
-                Track custom manufacturing schedules, review commercial quotations, and collaborate directly with KitchenBots engineering.
+                Track order shipments, review equipment quotations, and coordinate directly with KitchenBots engineering.
               </p>
             </div>
 
@@ -484,16 +579,15 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
                 <div className="space-y-1.5">
                   <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]">
-                    Organization / Restaurant
+                    Organization or City (Optional)
                   </label>
                   <div className="relative">
                     <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={17} />
                     <input
                       type="text"
-                      required
                       value={signupCompany}
                       onChange={(e) => setSignupCompany(e.target.value)}
-                      placeholder="Company or establishment name"
+                      placeholder="Company, restaurant, or city"
                       className="h-11 w-full rounded-xl border border-[#CBD5E1] bg-white pl-10 pr-4 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
                     />
                   </div>

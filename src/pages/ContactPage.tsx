@@ -82,11 +82,8 @@ export default function ContactPage() {
       {/* Header */}
       <section className="border-b border-[#F1F5F9] bg-white pb-12 pt-8 lg:pb-16">
         <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-lg bg-[#FFF7ED] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#C2410C]">
-            Sales & Technical Inquiries
-          </div>
           <h1 className="font-['Outfit'] text-[34px] font-bold leading-tight text-[#111827] sm:text-[44px] md:text-[52px]">
-            Contact our engineering team
+            Contact our engineering & support team
           </h1>
           <p className="mt-4 max-w-2xl font-['DM_Sans'] text-[17px] leading-relaxed text-[#64748B]">
             Reach out for standard product questions, custom kitchen equipment requirements, or bulk quotation requests.

@@ -99,14 +99,11 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
       {/* HEADER SECTION */}
       <section className="container mx-auto px-6 md:px-[80px] pb-12 md:pb-20">
         <div className="max-w-3xl">
-          <span className="inline-block px-3 py-1 bg-[#F0FDF4] text-kb-primary text-[11px] font-bold uppercase tracking-widest rounded-full mb-4 font-['Outfit']">
-            B2B Solutions
-          </span>
           <h1 className="text-[40px] md:text-[52px] font-bold text-[#111827] mb-4 font-['Outfit'] leading-tight">
-            Get Quote / Bulk Enquiry
+            Custom Sizing & Bulk Quotation
           </h1>
           <p className="text-[18px] text-[#475569] leading-relaxed font-['DM_Sans'] max-w-2xl">
-            Streamline your commercial kitchen with our expert solutions. Tell us your requirements and get a customized quote within 24 hours.
+            Need customized dimensions, specialized outdoor setups, or volume equipment orders? Tell us your specifications and our engineering team will provide a comprehensive proposal within 24 hours.
           </p>
         </div>
       </section>

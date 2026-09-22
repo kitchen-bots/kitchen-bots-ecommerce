@@ -20,17 +20,13 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: Page) 
 
       <div className="relative z-10 mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16 py-20 lg:py-28">
         <div className="max-w-2xl 2xl:max-w-3xl rounded-2xl bg-white/70 lg:bg-transparent p-6 sm:p-8 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none border border-white/60 lg:border-none shadow-sm lg:shadow-none">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-lg bg-[#FFF7ED] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#C2410C]">
-            Commercial Kitchen Equipment
-          </div>
-
           <h1 className="font-['Outfit'] text-[38px] font-bold leading-[1.08] tracking-[-0.02em] text-[#112329] sm:text-[54px] lg:text-[68px] 2xl:text-[76px]">
-            Commercial grills and cooking equipment
-            <span className="mt-2 block text-kb-tertiary">for demanding kitchens.</span>
+            Heavy-duty grills & outdoor cooking gear
+            <span className="mt-2 block text-kb-tertiary">for home pitmasters & commercial kitchens.</span>
           </h1>
 
           <p className="mt-6 mb-8 max-w-xl font-['DM_Sans'] text-[17px] leading-relaxed text-[#475569] sm:text-[19px] 2xl:text-[21px]">
-            KitchenBots manufactures heavy-duty BBQ grills, rocket stoves, and automated cooking hardware built for restaurants, caterers, and high-volume food operations.
+            Precision-engineered Santa Maria grills, high-efficiency rocket stoves, and automated BBQ rotisseries. Available for direct individual purchase across India or custom bulk manufacturing for restaurants.
           </p>
 
           <div className="flex flex-wrap items-center gap-4">

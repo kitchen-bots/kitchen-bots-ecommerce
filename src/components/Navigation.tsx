@@ -102,16 +102,26 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   };
 
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 ease-out ${
-      isScrolled 
-        ? 'py-2.5 sm:py-3 px-3 sm:px-6' 
-        : 'py-0 px-0'
-    }`}>
-      <div className={`mx-auto flex items-center justify-between gap-6 transition-all duration-300 ease-out ${
-        isScrolled
-          ? 'h-16 max-w-[1440px] 2xl:max-w-[1480px] rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_10px_35px_rgba(0,0,0,0.06)] px-5 sm:px-8'
-          : 'h-20 w-full border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm px-6 lg:px-12 2xl:px-16'
-      }`}>
+    <header className="sticky top-0 z-50 relative">
+      {/* Outer padding shell — only padding transitions, no height change */}
+      <div
+        style={{
+          padding: isScrolled ? '10px 12px' : '0px',
+          transition: 'padding 500ms cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
+      <div
+        className={`mx-auto flex items-center justify-between gap-6 ${
+          isScrolled
+            ? 'max-w-[1440px] 2xl:max-w-[1480px] h-16 rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_10px_35px_rgba(0,0,0,0.06)] px-5 sm:px-8'
+            : 'h-20 w-full border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm px-6 lg:px-12 2xl:px-16'
+        }`}
+        style={{
+          transitionProperty: 'height, max-width, background-color, border-color, box-shadow, border-radius, padding',
+          transitionDuration: '500ms',
+          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
         <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-kb-tertiary">
           <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className={`w-auto object-contain transition-all duration-300 ${isScrolled ? 'h-9 md:h-10' : 'h-11 md:h-12'}`} />
         </button>
@@ -282,6 +292,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             <Menu size={22} />
           </Button>
         </div>
+      </div>
       </div>
 
       {searchOpen && (

@@ -79,7 +79,7 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
           </nav>
           <h1 className="font-['Outfit'] text-[36px] font-bold leading-tight text-[#111827] sm:text-[46px] md:text-[54px]">Product catalog</h1>
           <p className="mt-4 max-w-2xl font-['DM_Sans'] text-[17px] leading-relaxed text-[#64748B]">
-            Browse commercial Santa Maria grills, rocket stoves, automated BBQ rotisseries, and cooking hardware.
+            Heavy-duty Santa Maria grills, rocket stoves, automated BBQ rotisseries, and cooking hardware built for home chefs, pitmasters, and commercial kitchens.
           </p>
         </div>
       </section>
@@ -193,19 +193,19 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
 
                       <div className="mt-auto flex flex-wrap gap-3 pt-6">
                         {quantityInCart > 0 ? (
-                          <div className="flex h-10 min-w-[140px] flex-1 items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1">
+                          <div className="flex h-[48px] md:h-[52px] min-w-[140px] flex-1 items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1.5 shadow-xs">
                             <button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 updateQuantity(product.id, quantityInCart - 1);
                               }}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-sm hover:bg-[#F1F5F9] transition-colors"
+                              className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-xs hover:bg-[#F1F5F9] active:scale-95 transition-all"
                               aria-label={`Decrease quantity of ${product.name}`}
                             >
-                              <Minus size={14} className="stroke-[2.5]" />
+                              <Minus size={15} className="stroke-[2.5]" />
                             </button>
-                            <span className="font-['Outfit'] font-bold text-sm text-[#0F172A] select-none">
+                            <span className="font-['Outfit'] font-bold text-sm md:text-[15px] text-[#0F172A] select-none">
                               {quantityInCart} in cart
                             </span>
                             <button
@@ -214,10 +214,10 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
                                 e.stopPropagation();
                                 updateQuantity(product.id, quantityInCart + 1);
                               }}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-sm hover:bg-[#9A3412] transition-colors"
+                              className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-xs hover:bg-[#9A3412] active:scale-95 transition-all"
                               aria-label={`Increase quantity of ${product.name}`}
                             >
-                              <Plus size={14} className="stroke-[2.5]" />
+                              <Plus size={15} className="stroke-[2.5]" />
                             </button>
                           </div>
                         ) : (

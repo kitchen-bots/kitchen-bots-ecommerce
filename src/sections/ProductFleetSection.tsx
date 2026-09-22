@@ -28,10 +28,10 @@ export default function ProductFleetSection({ onBrowse, onProductClick, onCartOp
         <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div className="max-w-xl">
             <h2 className="font-['Outfit'] text-[34px] font-bold leading-tight text-[#111827] sm:text-[42px] lg:text-[48px]">
-              Featured equipment
+              Featured gear & equipment
             </h2>
             <p className="mt-3 font-['DM_Sans'] text-[#64748B] sm:text-[17px]">
-              Current commercial grills, rocket stoves, and heavy-duty cooking gear from the catalog.
+              Heavy-duty Santa Maria grills, rocket stoves, and BBQ rotisseries for home pitmasters and commercial operations.
             </p>
           </div>
           <Button variant="outline" onClick={onBrowse} className="rounded-xl border-[#CBD5E1] font-semibold text-[#111827] hover:bg-[#F8FAFC]">
@@ -61,19 +61,19 @@ export default function ProductFleetSection({ onBrowse, onProductClick, onCartOp
                   <div className="mt-5 font-['Outfit'] text-[20px] font-bold text-[#111827]">{formatPrice(product.price)}</div>
 
                   {quantityInCart > 0 ? (
-                    <div className="mt-6 flex h-10 w-full items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1">
+                    <div className="mt-6 flex h-[48px] md:h-[52px] w-full items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1.5 shadow-xs">
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           updateQuantity(product.id, quantityInCart - 1);
                         }}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-sm hover:bg-[#F1F5F9] transition-colors"
+                        className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-xs hover:bg-[#F1F5F9] active:scale-95 transition-all"
                         aria-label={`Decrease quantity of ${product.name}`}
                       >
-                        <Minus size={14} className="stroke-[2.5]" />
+                        <Minus size={15} className="stroke-[2.5]" />
                       </button>
-                      <span className="font-['Outfit'] font-bold text-sm text-[#0F172A] select-none">
+                      <span className="font-['Outfit'] font-bold text-sm md:text-[15px] text-[#0F172A] select-none">
                         {quantityInCart} in cart
                       </span>
                       <button
@@ -82,10 +82,10 @@ export default function ProductFleetSection({ onBrowse, onProductClick, onCartOp
                           e.stopPropagation();
                           updateQuantity(product.id, quantityInCart + 1);
                         }}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-sm hover:bg-[#9A3412] transition-colors"
+                        className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-xs hover:bg-[#9A3412] active:scale-95 transition-all"
                         aria-label={`Increase quantity of ${product.name}`}
                       >
-                        <Plus size={14} className="stroke-[2.5]" />
+                        <Plus size={15} className="stroke-[2.5]" />
                       </button>
                     </div>
                   ) : (

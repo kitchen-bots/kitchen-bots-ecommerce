@@ -29,7 +29,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               </div>
             </button>
             <p className="max-w-sm text-sm leading-relaxed text-[#94A3B8]">
-              Commercial manufacturing of heavy-duty grills, rocket stoves, and automated cooking hardware engineered for high-volume foodservice operations.
+              Heavy-duty grills, rocket stoves, and outdoor cooking hardware engineered for backyard pitmasters, home chefs, and commercial foodservice operations.
             </p>
             <div className="mt-6">
               <a

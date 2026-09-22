@@ -62,14 +62,11 @@ export default function CapabilitiesPage({ onNavigate }: CapabilitiesPageProps) 
         <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div className="max-w-2xl">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#C2410C]">
-                Engineering & Manufacturing
-              </span>
-              <h1 className="mt-3 font-['Outfit'] text-[38px] font-bold leading-[1.08] text-[#111827] sm:text-[48px] lg:text-[56px]">
-                Commercial Kitchen <span className="text-kb-tertiary">Capabilities</span>
+              <h1 className="font-['Outfit'] text-[38px] font-bold leading-[1.08] text-[#111827] sm:text-[48px] lg:text-[56px]">
+                Engineering & Manufacturing <span className="text-kb-tertiary">Capabilities</span>
               </h1>
               <p className="mt-5 font-['DM_Sans'] text-[17px] leading-relaxed text-[#475569] sm:text-[18px]">
-                KitchenBots designs and manufactures heavy-duty cooking hardware, solid-fuel combustion systems, and automated grilling equipment for commercial hospitality and food service operations.
+                KitchenBots designs and manufactures heavy-duty cooking hardware, solid-fuel combustion systems, and automated grilling equipment for food enthusiasts, commercial hospitality, and catering operations.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button

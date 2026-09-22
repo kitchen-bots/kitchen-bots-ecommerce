@@ -66,9 +66,6 @@ export default function BlogPage() {
       <section className="relative pt-32 pb-24 overflow-hidden bg-white">
         <div className="container mx-auto px-6 lg:px-[80px]">
           <div className="max-w-3xl">
-            <span className="inline-block px-4 py-1.5 bg-[#F0FDF4] text-kb-primary text-[12px] font-bold uppercase tracking-widest rounded-full mb-6 font-['Outfit']">
-              KitchenBots Journal
-            </span>
             <h1 className="text-[48px] md:text-[64px] font-bold text-[#111827] leading-[1.1] mb-6 font-['Outfit']">
               Insights & <span className="text-kb-tertiary">Innovations</span>
             </h1>

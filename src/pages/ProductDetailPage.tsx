@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, Check, Heart, Minus, Plus, Share2, ShoppingCart, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Check, Heart, Minus, Plus, Share2, ShoppingCart, AlertCircle, RefreshCw, ZoomIn, Shield, Truck } from 'lucide-react';
 import { PRODUCTS, getProductById } from '../data/products';
 import type { Page } from '../App';
 import type { Product } from '../types/product';
@@ -33,9 +33,19 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
   const [activeImage, setActiveImage] = useState(0);
   const [tab, setTab] = useState<Tab>('Description');
   const [added, setAdded] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+
   const { addToCart, items, updateQuantity } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { showToast } = useToast();
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    setZoomPos({ x, y });
+  };
 
   const loadProduct = useCallback(async () => {
     setIsLoading(true);
@@ -144,9 +154,28 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
 
         <div className="grid gap-12 lg:grid-cols-2 xl:gap-20">
           <div className="min-w-0">
-            <button className="block aspect-square w-full overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm text-center" aria-label={`View ${product.name} image`}>
-              <ProductImage src={images[activeImage]} alt={product.name} className="h-full w-full object-contain" />
-            </button>
+            <div
+              className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-6 sm:p-8 shadow-sm cursor-crosshair select-none group"
+              onMouseEnter={() => setIsZoomed(true)}
+              onMouseLeave={() => setIsZoomed(false)}
+              onMouseMove={handleMouseMove}
+              role="region"
+              aria-label={`Interactive zoom for ${product.name}`}
+            >
+              <div
+                className="h-full w-full transition-transform duration-100 ease-out"
+                style={{
+                  transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                  transform: isZoomed ? 'scale(2.4)' : 'scale(1)',
+                }}
+              >
+                <ProductImage src={images[activeImage]} alt={product.name} className="h-full w-full object-contain pointer-events-none" />
+              </div>
+              
+              <div className={`absolute bottom-3 right-3 flex items-center gap-1.5 rounded-lg bg-black/65 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-md pointer-events-none transition-opacity duration-200 ${isZoomed ? 'opacity-0' : 'opacity-85'}`}>
+                <ZoomIn size={14} /> Hover to zoom
+              </div>
+            </div>
             {images.length > 1 && (
               <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
                 {images.map((image, index) => (
@@ -190,25 +219,25 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
 
                 if (quantityInCart > 0) {
                   return (
-                    <div className="flex h-11 min-w-[210px] flex-1 items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1.5">
+                    <div className="flex h-[56px] md:h-[60px] min-w-[210px] flex-1 items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-2 shadow-xs">
                       <button
                         type="button"
                         onClick={() => updateQuantity(product.id, quantityInCart - 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-sm hover:bg-[#F1F5F9] transition-colors"
+                        className="flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-xs hover:bg-[#F1F5F9] active:scale-95 transition-all"
                         aria-label={`Decrease quantity of ${product.name}`}
                       >
-                        <Minus size={16} className="stroke-[2.5]" />
+                        <Minus size={18} className="stroke-[2.5]" />
                       </button>
-                      <span className="font-['Outfit'] font-bold text-base text-[#0F172A] px-3 select-none">
+                      <span className="font-['Outfit'] font-bold text-base md:text-[17px] text-[#0F172A] px-3 select-none">
                         {quantityInCart} in cart
                       </span>
                       <button
                         type="button"
                         onClick={() => updateQuantity(product.id, quantityInCart + 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-sm hover:bg-[#9A3412] transition-colors"
+                        className="flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-xs hover:bg-[#9A3412] active:scale-95 transition-all"
                         aria-label={`Increase quantity of ${product.name}`}
                       >
-                        <Plus size={16} className="stroke-[2.5]" />
+                        <Plus size={18} className="stroke-[2.5]" />
                       </button>
                     </div>
                   );
@@ -234,6 +263,18 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
               >
                 Request Quote
               </Button>
+            </div>
+
+            {/* Direct purchase & delivery guarantees */}
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-6 border-t border-[#E2E8F0]">
+              <div className="flex items-center gap-2.5 text-xs text-[#475569]">
+                <Truck size={17} className="text-[#C2410C] shrink-0" />
+                <span>Doorstep delivery across all pin codes in India</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-xs text-[#475569]">
+                <Shield size={17} className="text-[#16A34A] shrink-0" />
+                <span>1-Year factory warranty & spare parts support</span>
+              </div>
             </div>
 
             <div className="mt-12">

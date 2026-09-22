@@ -15,14 +15,11 @@ export default function AboutPage({ onNavigate }: AboutPageProps) {
         <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
           <div className="grid items-center gap-12 lg:grid-cols-12">
             <div className="lg:col-span-7">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#C2410C]">
-                About KitchenBots India
-              </span>
-              <h1 className="mt-3 font-['Outfit'] text-[36px] font-bold leading-[1.08] text-[#111827] sm:text-[46px] lg:text-[54px]">
-                Engineering heavy-duty cooking equipment for commercial kitchens.
+              <h1 className="font-['Outfit'] text-[36px] font-bold leading-[1.08] text-[#111827] sm:text-[46px] lg:text-[54px]">
+                Engineering heavy-duty cooking equipment for culinary enthusiasts and commercial kitchens.
               </h1>
               <p className="mt-6 font-['DM_Sans'] text-[17px] leading-relaxed text-[#475569] sm:text-[19px]">
-                KitchenBots India Pvt. Ltd. manufactures commercial BBQ grills, rocket stoves, and automated cooking hardware built for demanding food service environments across India.
+                KitchenBots India Pvt. Ltd. manufactures precision BBQ grills, rocket stoves, and automated cooking hardware built for outdoor cooks, pitmasters, and demanding foodservice environments across India.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button
