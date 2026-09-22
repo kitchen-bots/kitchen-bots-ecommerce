@@ -3,12 +3,17 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": "^22.12.0"
+  },
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build",
     "build": "vite build",
+    "deploy": "npm run build && wrangler deploy",
+    "deploy:dry-run": "npm run build && wrangler deploy --dry-run",
     "lint": "eslint .",
     "preview": "vite preview",
     "upload:r2": "node scripts/upload-to-r2.mjs"
@@ -90,6 +95,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "wrangler": "^4.136.1"
   }
 }
