@@ -1,4 +1,4 @@
-import { ArrowRight, ShoppingCart } from 'lucide-react';
+import { ArrowRight, Minus, Plus, ShoppingCart } from 'lucide-react';
 import { useCart } from '../hooks/use-cart';
 import { useToast } from '../hooks/use-toast';
 import { PRODUCTS } from '../data/products';
@@ -19,7 +19,7 @@ const formatPrice = (price: number) => new Intl.NumberFormat('en-IN', {
 }).format(price);
 
 export default function ProductFleetSection({ onBrowse, onProductClick, onCartOpen }: ProductFleetSectionProps) {
-  const { addToCart } = useCart();
+  const { addToCart, items, updateQuantity } = useCart();
   const { showToast } = useToast();
 
   return (
@@ -40,33 +40,69 @@ export default function ProductFleetSection({ onBrowse, onProductClick, onCartOp
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURED_PRODUCTS.map(product => (
-            <article key={product.id} className="group flex flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-md">
-              <button
-                className="aspect-square overflow-hidden bg-[#F8FAFC] p-8 text-center"
-                onClick={() => onProductClick?.(product.id)}
-                aria-label={`View ${product.name}`}
-              >
-                <img src={product.image} alt={product.name} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
-              </button>
-              <div className="flex flex-1 flex-col p-6">
-                <button className="text-left" onClick={() => onProductClick?.(product.id)}>
-                  <h3 className="font-['Outfit'] text-[18px] font-bold leading-snug text-[#111827] hover:text-kb-tertiary">{product.name}</h3>
-                </button>
-                <p className="mt-2.5 line-clamp-2 font-['DM_Sans'] text-sm leading-relaxed text-[#64748B]">{product.description}</p>
-                <div className="mt-5 font-['Outfit'] text-[20px] font-bold text-[#111827]">{formatPrice(product.price)}</div>
-                <Button
-                  className="mt-6 w-full rounded-xl font-semibold"
-                  onClick={() => {
-                    addToCart({ id: product.id, name: product.name, price: product.price, image: product.image });
-                    showToast(`${product.name} added to cart`, 'View cart', () => onCartOpen?.());
-                  }}
+          {FEATURED_PRODUCTS.map(product => {
+            const cartItem = items.find(item => item.id === product.id);
+            const quantityInCart = cartItem?.quantity ?? 0;
+
+            return (
+              <article key={product.id} className="group flex flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-md">
+                <button
+                  className="aspect-square overflow-hidden bg-[#F8FAFC] p-8 text-center"
+                  onClick={() => onProductClick?.(product.id)}
+                  aria-label={`View ${product.name}`}
                 >
-                  <ShoppingCart size={17} className="mr-1.5" /> Add to cart
-                </Button>
-              </div>
-            </article>
-          ))}
+                  <img src={product.image} alt={product.name} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
+                </button>
+                <div className="flex flex-1 flex-col p-6">
+                  <button className="text-left" onClick={() => onProductClick?.(product.id)}>
+                    <h3 className="font-['Outfit'] text-[18px] font-bold leading-snug text-[#111827] hover:text-kb-tertiary">{product.name}</h3>
+                  </button>
+                  <p className="mt-2.5 line-clamp-2 font-['DM_Sans'] text-sm leading-relaxed text-[#64748B]">{product.description}</p>
+                  <div className="mt-5 font-['Outfit'] text-[20px] font-bold text-[#111827]">{formatPrice(product.price)}</div>
+
+                  {quantityInCart > 0 ? (
+                    <div className="mt-6 flex h-10 w-full items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateQuantity(product.id, quantityInCart - 1);
+                        }}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-sm hover:bg-[#F1F5F9] transition-colors"
+                        aria-label={`Decrease quantity of ${product.name}`}
+                      >
+                        <Minus size={14} className="stroke-[2.5]" />
+                      </button>
+                      <span className="font-['Outfit'] font-bold text-sm text-[#0F172A] select-none">
+                        {quantityInCart} in cart
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateQuantity(product.id, quantityInCart + 1);
+                        }}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-sm hover:bg-[#9A3412] transition-colors"
+                        aria-label={`Increase quantity of ${product.name}`}
+                      >
+                        <Plus size={14} className="stroke-[2.5]" />
+                      </button>
+                    </div>
+                  ) : (
+                    <Button
+                      className="mt-6 w-full rounded-xl font-semibold"
+                      onClick={() => {
+                        addToCart({ id: product.id, name: product.name, price: product.price, image: product.image });
+                        showToast(`${product.name} added to cart`, 'View cart', () => onCartOpen?.());
+                      }}
+                    >
+                      <ShoppingCart size={17} className="mr-1.5" /> Add to cart
+                    </Button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

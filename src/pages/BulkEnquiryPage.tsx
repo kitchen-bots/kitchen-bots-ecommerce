@@ -54,6 +54,21 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
       });
 
       setSubmittedRef(response.reference);
+      try {
+        const itemSummaries = items.map(item => `${item.name} (${item.quantity}x)`);
+        const newRecord = {
+          reference: response.reference,
+          date: new Date().toISOString().split('T')[0],
+          name: formData.name,
+          company: formData.company || 'Commercial Client',
+          items: itemSummaries.length > 0 ? itemSummaries : ['Custom Equipment Consultation'],
+          status: 'Under Engineering Review',
+        };
+        const prev = JSON.parse(localStorage.getItem('kb_enquiries') || '[]');
+        localStorage.setItem('kb_enquiries', JSON.stringify([newRecord, ...prev]));
+      } catch {
+        // Ignore storage exceptions
+      }
       clearCart();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to submit enquiry. Please try again.';

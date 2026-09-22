@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, Check, Heart, Share2, ShoppingCart, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Check, Heart, Minus, Plus, Share2, ShoppingCart, AlertCircle, RefreshCw } from 'lucide-react';
 import { PRODUCTS, getProductById } from '../data/products';
 import type { Page } from '../App';
 import type { Product } from '../types/product';
@@ -33,7 +33,7 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
   const [activeImage, setActiveImage] = useState(0);
   const [tab, setTab] = useState<Tab>('Description');
   const [added, setAdded] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart, items, updateQuantity } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { showToast } = useToast();
 
@@ -184,9 +184,42 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
             </ul>
 
             <div className="mt-9 flex flex-wrap gap-3">
-              <Button size="lg" className="min-w-[210px] flex-1 rounded-xl font-semibold" onClick={addProduct}>
-                {added ? <><Check size={20} className="mr-1.5" /> Added to cart</> : <><ShoppingCart size={20} className="mr-1.5" /> Add to cart</>}
-              </Button>
+              {(() => {
+                const cartItem = items.find(item => item.id === product.id);
+                const quantityInCart = cartItem?.quantity ?? 0;
+
+                if (quantityInCart > 0) {
+                  return (
+                    <div className="flex h-11 min-w-[210px] flex-1 items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1.5">
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(product.id, quantityInCart - 1)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-sm hover:bg-[#F1F5F9] transition-colors"
+                        aria-label={`Decrease quantity of ${product.name}`}
+                      >
+                        <Minus size={16} className="stroke-[2.5]" />
+                      </button>
+                      <span className="font-['Outfit'] font-bold text-base text-[#0F172A] px-3 select-none">
+                        {quantityInCart} in cart
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(product.id, quantityInCart + 1)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-sm hover:bg-[#9A3412] transition-colors"
+                        aria-label={`Increase quantity of ${product.name}`}
+                      >
+                        <Plus size={16} className="stroke-[2.5]" />
+                      </button>
+                    </div>
+                  );
+                }
+
+                return (
+                  <Button size="lg" className="min-w-[210px] flex-1 rounded-xl font-semibold" onClick={addProduct}>
+                    {added ? <><Check size={20} className="mr-1.5" /> Added to cart</> : <><ShoppingCart size={20} className="mr-1.5" /> Add to cart</>}
+                  </Button>
+                );
+              })()}
               <Button
                 size="lg"
                 variant="outline"

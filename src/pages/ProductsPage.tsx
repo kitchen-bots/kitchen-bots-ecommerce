@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRight, ChevronRight, LayoutGrid, List, Search, ShoppingCart, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowRight, ChevronRight, LayoutGrid, List, Minus, Plus, Search, ShoppingCart, AlertCircle, RefreshCw } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import type { Page } from '../App';
 import type { Product, ProductCategory } from '../types/product';
@@ -38,7 +38,7 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { addToCart } = useCart();
+  const { addToCart, items, updateQuantity } = useCart();
   const { showToast } = useToast();
 
   const loadProducts = useCallback(async () => {
@@ -162,48 +162,83 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
             </div>
           ) : (
             <div className={view === 'grid' ? 'grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3' : 'grid gap-5'}>
-              {filteredProducts.map(product => (
-                <article
-                  key={product.id}
-                  className={view === 'grid'
-                    ? 'group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-md'
-                    : 'group grid overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-md md:grid-cols-[280px_1fr]'}
-                >
-                  <button
-                    onClick={() => onProductClick(product.id)}
-                    className={view === 'grid' ? 'aspect-square overflow-hidden bg-[#F8FAFC] p-8 text-center' : 'min-h-[240px] overflow-hidden bg-[#F8FAFC] p-8 text-center'}
-                    aria-label={`View ${product.name}`}
+              {filteredProducts.map(product => {
+                const cartItem = items.find(item => item.id === product.id);
+                const quantityInCart = cartItem?.quantity ?? 0;
+
+                return (
+                  <article
+                    key={product.id}
+                    className={view === 'grid'
+                      ? 'group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-md'
+                      : 'group grid overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-md md:grid-cols-[280px_1fr]'}
                   >
-                    <ProductImage src={product.image} alt={product.name} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
-                  </button>
-
-                  <div className="flex min-w-0 flex-1 flex-col p-6 sm:p-7">
-                    <button className="text-left" onClick={() => onProductClick(product.id)}>
-                      <h2 className="font-['Outfit'] text-[20px] font-bold leading-tight text-[#111827] hover:text-kb-tertiary">{product.name}</h2>
+                    <button
+                      onClick={() => onProductClick(product.id)}
+                      className={view === 'grid' ? 'aspect-square overflow-hidden bg-[#F8FAFC] p-8 text-center' : 'min-h-[240px] overflow-hidden bg-[#F8FAFC] p-8 text-center'}
+                      aria-label={`View ${product.name}`}
+                    >
+                      <ProductImage src={product.image} alt={product.name} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
                     </button>
-                    <p className="mt-2.5 font-['DM_Sans'] text-[14px] leading-relaxed text-[#64748B]">{product.description}</p>
-                    <ul className="mt-4 grid gap-2 font-['DM_Sans'] text-[13px] text-[#64748B] sm:grid-cols-2">
-                      {product.features.slice(0, 4).map(feature => <li key={feature}>• {feature}</li>)}
-                    </ul>
-                    <div className="mt-5 font-['Outfit'] text-[22px] font-bold text-[#111827]">{formatPrice(product.price)}</div>
 
-                    <div className="mt-auto flex flex-wrap gap-3 pt-6">
-                      <Button
-                        className="min-w-[140px] flex-1 rounded-xl font-semibold"
-                        onClick={() => {
-                          addToCart({ id: product.id, name: product.name, price: product.price, image: product.image });
-                          showToast(`${product.name} added to cart`, 'View cart', () => onCartOpen?.());
-                        }}
-                      >
-                        <ShoppingCart size={17} className="mr-1.5" /> Add to cart
-                      </Button>
-                      <Button variant="outline" className="min-w-[120px] flex-1 rounded-xl border-[#CBD5E1] font-semibold text-[#111827] hover:bg-[#F8FAFC]" onClick={() => onProductClick(product.id)}>
-                        View details <ArrowRight size={17} className="ml-1" />
-                      </Button>
+                    <div className="flex min-w-0 flex-1 flex-col p-6 sm:p-7">
+                      <button className="text-left" onClick={() => onProductClick(product.id)}>
+                        <h2 className="font-['Outfit'] text-[20px] font-bold leading-tight text-[#111827] hover:text-kb-tertiary">{product.name}</h2>
+                      </button>
+                      <p className="mt-2.5 font-['DM_Sans'] text-[14px] leading-relaxed text-[#64748B]">{product.description}</p>
+                      <ul className="mt-4 grid gap-2 font-['DM_Sans'] text-[13px] text-[#64748B] sm:grid-cols-2">
+                        {product.features.slice(0, 4).map(feature => <li key={feature}>• {feature}</li>)}
+                      </ul>
+                      <div className="mt-5 font-['Outfit'] text-[22px] font-bold text-[#111827]">{formatPrice(product.price)}</div>
+
+                      <div className="mt-auto flex flex-wrap gap-3 pt-6">
+                        {quantityInCart > 0 ? (
+                          <div className="flex h-10 min-w-[140px] flex-1 items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(product.id, quantityInCart - 1);
+                              }}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-sm hover:bg-[#F1F5F9] transition-colors"
+                              aria-label={`Decrease quantity of ${product.name}`}
+                            >
+                              <Minus size={14} className="stroke-[2.5]" />
+                            </button>
+                            <span className="font-['Outfit'] font-bold text-sm text-[#0F172A] select-none">
+                              {quantityInCart} in cart
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(product.id, quantityInCart + 1);
+                              }}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-sm hover:bg-[#9A3412] transition-colors"
+                              aria-label={`Increase quantity of ${product.name}`}
+                            >
+                              <Plus size={14} className="stroke-[2.5]" />
+                            </button>
+                          </div>
+                        ) : (
+                          <Button
+                            className="min-w-[140px] flex-1 rounded-xl font-semibold"
+                            onClick={() => {
+                              addToCart({ id: product.id, name: product.name, price: product.price, image: product.image });
+                              showToast(`${product.name} added to cart`, 'View cart', () => onCartOpen?.());
+                            }}
+                          >
+                            <ShoppingCart size={17} className="mr-1.5" /> Add to cart
+                          </Button>
+                        )}
+                        <Button variant="outline" className="min-w-[120px] flex-1 rounded-xl border-[#CBD5E1] font-semibold text-[#111827] hover:bg-[#F8FAFC]" onClick={() => onProductClick(product.id)}>
+                          View details <ArrowRight size={17} className="ml-1" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           )}
 

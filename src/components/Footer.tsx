@@ -17,14 +17,16 @@ export default function Footer({ onNavigate }: FooterProps) {
           <div className="lg:col-span-4">
             <button
               onClick={() => onNavigate?.('home')}
-              className="mb-5 block text-left focus:outline-none"
+              className="mb-6 inline-block text-left focus:outline-none group"
               aria-label="KitchenBots home"
             >
-              <img
-                src="/images/kitchen-bots-white.png"
-                alt="KitchenBots"
-                className="h-10 w-auto object-contain"
-              />
+              <div className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2.5 shadow-sm transition-transform duration-200 group-hover:scale-[1.02]">
+                <img
+                  src="/images/kitchenbots-logo.svg"
+                  alt="KitchenBots"
+                  className="h-8 md:h-9 w-auto object-contain"
+                />
+              </div>
             </button>
             <p className="max-w-sm text-sm leading-relaxed text-[#94A3B8]">
               Commercial manufacturing of heavy-duty grills, rocket stoves, and automated cooking hardware engineered for high-volume foodservice operations.

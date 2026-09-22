@@ -21,6 +21,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [query, setQuery] = useState('');
   const { totalItems } = useCart();
   const productMenu = useRef<HTMLDivElement>(null);
@@ -28,6 +29,15 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   const searchButton = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (searchOpen) searchInput.current?.focus();
@@ -92,10 +102,18 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   };
 
   return (
-    <header className="sticky top-0 z-50 h-20 border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm">
-      <div className="mx-auto flex h-full max-w-[1440px] 2xl:max-w-[1480px] items-center justify-between gap-6 px-6 lg:px-12 2xl:px-16">
+    <header className={`sticky top-0 z-50 transition-all duration-300 ease-out ${
+      isScrolled 
+        ? 'py-2.5 sm:py-3 px-3 sm:px-6' 
+        : 'py-0 px-0'
+    }`}>
+      <div className={`mx-auto flex items-center justify-between gap-6 transition-all duration-300 ease-out ${
+        isScrolled
+          ? 'h-16 max-w-[1440px] 2xl:max-w-[1480px] rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_10px_35px_rgba(0,0,0,0.06)] px-5 sm:px-8'
+          : 'h-20 w-full border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm px-6 lg:px-12 2xl:px-16'
+      }`}>
         <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-kb-tertiary">
-          <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-11 md:h-12 w-auto object-contain" />
+          <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className={`w-auto object-contain transition-all duration-300 ${isScrolled ? 'h-9 md:h-10' : 'h-11 md:h-12'}`} />
         </button>
 
         <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
@@ -228,7 +246,17 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             <Search size={20} />
           </Button>
           <Button asChild variant="ghost" className="hidden rounded-xl sm:flex text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]">
-            <a href={ACCOUNT_URL}><User size={18} /> My Account</a>
+            <a 
+              href={ACCOUNT_URL}
+              onClick={(e) => {
+                if (ACCOUNT_URL === '/login') {
+                  e.preventDefault();
+                  navigate('login');
+                }
+              }}
+            >
+              <User size={18} /> My Account
+            </a>
           </Button>
           <Button 
             variant="ghost" 
@@ -336,6 +364,12 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             <div className="mt-4 border-t border-[#F1F5F9] pt-4">
               <a 
                 href={ACCOUNT_URL}
+                onClick={(e) => {
+                  if (ACCOUNT_URL === '/login') {
+                    e.preventDefault();
+                    navigate('login');
+                  }
+                }}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#CBD5E1] py-3 text-sm font-bold text-[#111827] hover:bg-[#F8FAFC]"
               >
                 <User size={18} /> My Account

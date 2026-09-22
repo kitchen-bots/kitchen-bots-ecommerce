@@ -156,18 +156,21 @@ export default function CapabilitiesPage({ onNavigate }: CapabilitiesPageProps) 
       {/* CTA SECTION */}
       <section className="pb-20 lg:pb-28">
         <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
-          <div className="rounded-2xl bg-[#112329] p-10 md:p-16 text-center text-white shadow-xl">
-            <h2 className="font-['Outfit'] text-[28px] font-bold leading-tight sm:text-[38px]">
+          <div className="rounded-3xl border border-[#334155]/80 bg-[#0F172A] p-10 md:p-16 text-center text-white shadow-2xl relative overflow-hidden">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-lg bg-[#EA580C]/15 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#F97316] border border-[#EA580C]/30">
+              Custom Engineering & Bulk Orders
+            </div>
+            <h2 className="font-['Outfit'] text-[28px] font-bold leading-tight sm:text-[38px] lg:text-[42px] text-white">
               Require custom dimensions or specialized equipment?
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl font-['DM_Sans'] text-[16px] text-white/75 sm:text-[18px]">
+            <p className="mx-auto mt-4 max-w-2xl font-['DM_Sans'] text-[16px] text-[#94A3B8] sm:text-[18px] leading-relaxed">
               Speak directly with our engineering team to review kitchen layouts, unit dimensions, and bulk manufacturing schedules.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Button
                 onClick={() => onNavigate?.('contact')}
                 size="lg"
-                className="rounded-xl px-8"
+                className="rounded-xl px-8 py-6 text-base font-semibold bg-[#C2410C] hover:bg-[#9A3412] text-white shadow-lg shadow-[#C2410C]/25 transition-all"
               >
                 Submit equipment enquiry
               </Button>
@@ -175,7 +178,7 @@ export default function CapabilitiesPage({ onNavigate }: CapabilitiesPageProps) 
                 onClick={() => onNavigate?.('bulk-enquiry')}
                 variant="outline"
                 size="lg"
-                className="rounded-xl px-8 border-white/30 text-white hover:bg-white/10"
+                className="rounded-xl px-8 py-6 text-base font-semibold bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm transition-all"
               >
                 Request bulk quotation
               </Button>
