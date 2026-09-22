@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { 
-  NotebookPen, 
-  Send, 
-  CheckCircle, 
-  Building2, 
+import {
+  NotebookPen,
+  Send,
+  CheckCircle,
+  Building2,
   MessageCircle,
   AlertCircle,
   Loader2
@@ -217,9 +217,9 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[14px] font-bold text-[#475569] ml-1 font-['Outfit']">Phone Number</label>
-                        <input 
-                          type="tel" 
-                          placeholder="+91 94907 01421" 
+                        <input
+                          type="tel"
+                          placeholder="+91 94907 01421"
                           disabled={isSubmitting}
                           className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
                           value={formData.phone}

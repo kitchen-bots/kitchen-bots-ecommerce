@@ -1,7 +1,7 @@
 # API Consumer Inventory: Storefront and Dashboard
 
-**Date:** 2026-09-22  
-**Status:** Canonical Baseline Inventory  
+**Date:** 2026-09-22
+**Status:** Canonical Baseline Inventory
 **Target Applications:**
 - Kitchen Bots Storefront (`kitchen-bots-ecommerce`)
 - Kitchen Bots Operations Dashboard (`kitchen-bots-dashboard`)
