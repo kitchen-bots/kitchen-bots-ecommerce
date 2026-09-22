@@ -42,6 +42,8 @@ This repository does not own:
 - [Phase 02: UI/UX Audit and Improvement](phases/02-ui-ux-audit-and-improvement.md)
 - [Phase 03: Catalog, Auth, Enquiry, and Order Integration](phases/03-commerce-integration.md)
 - [Phase 04: Storefront Hardening and Deployment](phases/04-hardening-and-deployment.md)
+- [Current Project Status](reports/PROJECT_STATUS_REPORT.md)
+- [Backend Status and Implementation Report](reports/BACKEND_STATUS_REPORT.md)
 
 ## Delivery Order
 
@@ -52,6 +54,16 @@ This repository does not own:
 | 02 | Evidence-based responsive and accessible UX | Phase 01; audit may start earlier |
 | 03 | Live catalog, Firebase Auth, enquiries, and orders | Dashboard API contracts available |
 | 04 | Production tests, performance, and deployment | Phases 01-03 |
+
+## Current Phase State
+
+| Phase | State | Next gate |
+|---|---|---|
+| 00 | Complete; PR #2 merged | Begin Phase 01 routing foundation |
+| 01 | Not started | Replace page-state routing and inventory existing primitives |
+| 02 | Started | Cart cleanup complete; complete route-by-route browser audit |
+| 03 | Blocked | Dashboard Worker contracts and endpoints |
+| 04 | Blocked | Completed functional integrations |
 
 ## Cross-Repository Contracts
 

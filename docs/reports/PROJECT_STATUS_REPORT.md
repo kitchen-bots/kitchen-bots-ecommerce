@@ -1,6 +1,6 @@
 # Kitchen Bots Project Status Report
 
-**Report date:** 21 September 2026
+**Report date:** 22 September 2026
 **Scope:** E-commerce storefront, dashboard boundary, current integrations, and remaining implementation
 
 ## 1. Current repository structure
@@ -31,6 +31,8 @@ The storefront no longer contains the embedded dashboard or simulated checkout a
 - Removed unused chart and panel dependencies from the storefront.
 - Added Node 22 configuration, type checking, tests, build checks, and CI.
 - Documented ownership boundaries for Codex and Antigravity work.
+- Replaced the glass-heavy cart with a restrained, accessible quote-cart layout.
+- Added bounded quantity controls, safe configuration display, responsive order summary, and accurate quote wording.
 
 ## 3. Current storefront functionality
 
@@ -63,7 +65,6 @@ The storefront contains:
 - Bulk enquiries are not submitted to a production backend.
 - Editable content is not connected to a CMS.
 - No payment system has been selected or implemented.
-- The interrupted Antigravity cart-page draft remains uncommitted and is not considered completed work.
 
 ## 5. Verification completed
 
@@ -83,5 +84,8 @@ Completed commits:
 
 - `8b5e58a refactor: separate storefront from dashboard`
 - `3a6279e docs: define Codex and Antigravity ownership`
+- `563c504 fix: clean up cart quote experience`
+
+Storefront boundary work merged through upstream pull request #2. Cart and phase-status updates are proposed in upstream pull request #3.
 
 The backend status and implementation plan are documented in `BACKEND_STATUS_REPORT.md` and its PDF export.

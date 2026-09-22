@@ -10,6 +10,12 @@
 
 ---
 
+## Status
+
+**Blocked by Phases 01-03. Not started.**
+
+Current CI verifies clean install, type checking, lint, unit tests, build, and high-severity production audit. Preview deployment, browser matrix, accessibility evidence, performance budgets, security headers, monitoring, and rollback verification remain unimplemented.
+
 ### Task 1: Configure deployments
 
 1. Deploy preview builds from pull requests without production write credentials.

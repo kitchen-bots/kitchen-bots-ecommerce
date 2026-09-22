@@ -25,5 +25,13 @@ Antigravity must not change backend contracts, routing, package files, shared st
 
 ## Current split
 
-- Codex: Phase 00 repository boundary, fake-commerce removal, toolchain, backend audit.
-- Antigravity: `src/pages/CartPage.tsx` visual cleanup only.
+- Codex: phase audit, plan corrections, routing foundation, tests, integration review, and PR ownership.
+- Antigravity: completed `src/pages/CartPage.tsx` visual cleanup in an isolated worktree.
+- Shared gate: Antigravity returns a diff without committing. Codex rejects out-of-scope files, reviews behavior, runs checks, and integrates only approved work.
+
+## Parallel work rule
+
+- Assign files with no overlap.
+- Codex must not edit `src/pages/CartPage.tsx` while Antigravity owns it.
+- Antigravity must not edit `src/App.tsx`, routes, shared state, package files, docs, backend code, or configuration.
+- Use a new Antigravity project rooted at its worktree. Do not reuse the main repository project because that previously wrote into the wrong worktree.
