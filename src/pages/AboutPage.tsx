@@ -1,6 +1,7 @@
 import { type Page } from '../App';
-import { MapPin, Phone, Mail, Clock, Linkedin } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, ArrowRight, Flame, Shield, Wrench, Factory } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { getMediaUrl } from '../lib/cdn';
 
 interface AboutPageProps {
   onNavigate?: (page: Page) => void;
@@ -8,198 +9,228 @@ interface AboutPageProps {
 
 export default function AboutPage({ onNavigate }: AboutPageProps) {
   return (
-    <div className="bg-white min-h-screen pt-20">
+    <div className="min-h-screen bg-[#F8FAFC] pt-20">
       {/* 1. HERO SECTION */}
-      <section className="relative w-full min-h-[320px] lg:h-[400px] bg-[#EFF3EF] flex flex-col lg:flex-row overflow-hidden">
-        {/* CONTENT AREA */}
-        <div className="w-full lg:w-1/2 h-full flex flex-col justify-center px-6 md:px-[80px] py-12 md:py-20 z-10">
-          <h1 className="text-[32px] sm:text-[40px] font-bold text-[#111827] leading-tight">
-            Innovators in
-          </h1>
-          <h1 className="text-[32px] sm:text-[40px] font-bold text-[#111827] leading-tight">
-            Smart Kitchen Technology
-          </h1>
-          <p className="text-[15px] text-gray-500 mt-3 font-medium">
-            Redefining the Future of Commercial Kitchens
-          </p>
-          <Button 
-            onClick={() => onNavigate?.('contact')}
-            variant="accent"
-            size="sm"
-            className="mt-5 w-[140px]"
-          >
-            Contact Us
-          </Button>
-        </div>
-        {/* IMAGE AREA (Desktop Only) */}
-        <div className="absolute right-0 top-0 w-1/2 h-full z-0 hidden lg:block">
-          <img 
-            src="/images/redesign/capabilities-hero.png" 
-            alt="AI Robot Kitchen" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#EFF3EF] via-transparent to-transparent" />
-        </div>
-      </section>
-
-      {/* 2. ABOUT US SECTION */}
-      <section className="bg-white py-12 md:py-20 px-6 md:px-[80px] flex justify-center border-b border-gray-100">
-        <div className="max-w-[1000px] w-full">
-          <h2 className="text-[24px] font-bold text-[#111827] mb-6 font-['Outfit']">About Us – Innovating the Future of Kitchen Technology</h2>
-          <div className="text-[14px] text-[#374151] leading-[1.7] space-y-5 font-['DM_Sans']">
-            <p>
-              Welcome to KitchenBots, your trusted partner in cutting-edge kitchen technology solutions. We specialize in designing and manufacturing innovative, high-quality kitchen equipment and kitchen waste management systems for diverse sectors.
-            </p>
-            <p>
-              Our mission is to <span className="font-bold text-kb-tertiary">revive</span> the <span className="font-bold text-kb-tertiary">kitchen</span> industry through advanced automation, intelligent engineering, and smart technology, enabling safer, more efficient, and future-ready kitchens.
-            </p>
-            <p>
-              At KitchenBots, we don't just build equipment — we engineer smart kitchen ecosystems that combine performance, reliability, and innovation.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. COMPANY OVERVIEW SECTION */}
-      <section className="bg-white py-12 md:py-20 px-6 md:px-[80px]">
-        <div className="container mx-auto flex flex-col lg:flex-row justify-between gap-12">
-          {/* LEFT 55% */}
-          <div className="lg:w-[55%]">
-            <h2 className="text-[20px] font-bold text-[#111827] mb-4 font-['Outfit']">Company Overview – Revolutionizing Kitchens Across Segments</h2>
-            <p className="text-[14px] text-[#374151] leading-[1.7] mb-4 font-['DM_Sans']">
-              KitchenBots India Pvt. Ltd. is a technology-driven kitchen equipment company operating across three core segments:
-            </p>
-            <ul className="text-[14px] text-[#374151] leading-[1.7] space-y-2 mb-6 ml-4 list-disc pl-2 marker:text-gray-400 font-['DM_Sans']">
-              <li>Retail / Domestic Kitchen Equipment</li>
-              <li>Commercial Kitchen Equipment</li>
-              <li>Kitchen Waste Management Solutions</li>
-            </ul>
-            <p className="text-[14px] text-[#374151] leading-[1.7] font-['DM_Sans']">
-              We bring together deep expertise in mechanical engineering, electronics, and programming to deliver state-of-the-art, customized solutions tailored to modern kitchens. We combine innovation, quality, and durability to ensure total customer satisfaction.
-            </p>
-          </div>
-
-          {/* RIGHT 40% Vision & Mission Box */}
-          <div className="lg:w-[40%] bg-[#F9FAFB] border border-[#E5E7EB] rounded-[12px] p-[24px]">
-            <h3 className="text-[16px] font-bold text-[#111827] mb-6 font-['Outfit']">Vision & Mission</h3>
-            <div className="mb-6">
-              <h4 className="text-[13px] font-bold text-[#111827] mb-2 font-['Outfit']">Vision</h4>
-              <p className="text-[13px] text-gray-500 leading-relaxed font-medium font-['DM_Sans']">
-                To become a leading kitchen technology company in India, empowering kitchens worldwide through innovation and sustainable solutions.
+      <section className="border-b border-[#E2E8F0] bg-white py-14 lg:py-20">
+        <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
+          <div className="grid items-center gap-12 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#C2410C]">
+                About KitchenBots India
+              </span>
+              <h1 className="mt-3 font-['Outfit'] text-[36px] font-bold leading-[1.08] text-[#111827] sm:text-[46px] lg:text-[54px]">
+                Engineering heavy-duty cooking equipment for commercial kitchens.
+              </h1>
+              <p className="mt-6 font-['DM_Sans'] text-[17px] leading-relaxed text-[#475569] sm:text-[19px]">
+                KitchenBots India Pvt. Ltd. manufactures commercial BBQ grills, rocket stoves, and automated cooking hardware built for demanding food service environments across India.
               </p>
-            </div>
-            <div>
-              <h4 className="text-[13px] font-bold text-[#111827] mb-2 font-['Outfit']">Mission</h4>
-              <ul className="text-[13px] text-gray-500 leading-relaxed list-disc pl-4 space-y-1 marker:text-gray-400 font-medium ml-1 font-['DM_Sans']">
-                <li className="pl-1">To deliver high-quality, durable, and intelligent kitchen equipment designed with a focus on performance.</li>
-                <li className="pl-1">To push the boundaries of technology and innovation.</li>
-                <li className="pl-1">To foster a culture of integrity, excellence, and customer satisfaction.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. MEET OUR TEAM & CONTACT GRID */}
-      <section className="bg-white py-12 md:py-20 px-6 md:px-[80px]">
-        <div className="container mx-auto">
-          {/* Main Layout containing Team Area and Right Sidebar */}
-          <div className="flex flex-col lg:flex-row gap-12">
-            
-            {/* LEFT AREA: TEAM SECITON */}
-            <div className="lg:flex-1">
-              <h2 className="text-[22px] font-bold text-[#111827] mb-[20px]">Meet Our Team</h2>
-              {/* 4 Column Team Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-[16px]">
-                
-                {/* Team 1 */}
-                <div className="flex flex-col items-start">
-                  <div className="w-[120px] h-[120px] rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                    <img src="/images/redesign/team-1.png" alt="Dinakar Patel" className="w-full h-full object-cover" />
-                  </div>
-                  <h4 className="text-[14px] font-bold text-[#111827] mt-[12px]">Dinakar Patel</h4>
-                  <p className="text-[12px] text-gray-500 mt-[4px]">Founder & CEO</p>
-                  <div className="w-[32px] h-[32px] bg-[#0077B5] rounded-md flex items-center justify-center mt-[12px] cursor-pointer hover:bg-[#005E93] transition-colors">
-                    <Linkedin size={16} className="text-white fill-current" />
-                  </div>
-                </div>
-
-                {/* Team 2 */}
-                <div className="flex flex-col items-start">
-                  <div className="w-[120px] h-[120px] rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                    <img src="/images/redesign/team-2.png" alt="Ravi Kumar" className="w-full h-full object-cover" />
-                  </div>
-                  <h4 className="text-[14px] font-bold text-[#111827] mt-[12px]">Ravi Kumar</h4>
-                  <p className="text-[12px] text-gray-500 mt-[4px]">Head of Engineering</p>
-                  <div className="w-[32px] h-[32px] bg-[#0077B5] rounded-md flex items-center justify-center mt-[12px] cursor-pointer hover:bg-[#005E93] transition-colors">
-                    <Linkedin size={16} className="text-white fill-current" />
-                  </div>
-                </div>
-
-                {/* Team 3 */}
-                <div className="flex flex-col items-start">
-                  <div className="w-[120px] h-[120px] rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                    <img src="/images/redesign/team-3.png" alt="Anita Mehta" className="w-full h-full object-cover" />
-                  </div>
-                  <h4 className="text-[14px] font-bold text-[#111827] mt-[12px]">Anita Mehta</h4>
-                  <p className="text-[12px] text-gray-500 mt-[4px]">Operations Manager</p>
-                  <div className="w-[32px] h-[32px] bg-[#0077B5] rounded-md flex items-center justify-center mt-[12px] cursor-pointer hover:bg-[#005E93] transition-colors">
-                    <Linkedin size={16} className="text-white fill-current" />
-                  </div>
-                </div>
-
-                {/* Team 4 */}
-                <div className="flex flex-col items-start">
-                  <div className="w-[120px] h-[120px] rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                    <img src="/images/redesign/team-4.png" alt="Vijay Sharma" className="w-full h-full object-cover" />
-                  </div>
-                  <h4 className="text-[14px] font-bold text-[#111827] mt-[12px]">Vijay Sharma</h4>
-                  <p className="text-[12px] text-gray-500 mt-[4px]">Marketing Head</p>
-                  <div className="w-[32px] h-[32px] bg-[#0077B5] rounded-md flex items-center justify-center mt-[12px] cursor-pointer hover:bg-[#005E93] transition-colors">
-                    <Linkedin size={16} className="text-white fill-current" />
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* RIGHT AREA: GET IN TOUCH SIDEBAR */}
-            <div className="lg:w-[300px] flex-shrink-0 mt-[66px]">
-              <div className="bg-[#F9FAFB] rounded-[12px] p-[20px] shadow-sm border border-gray-100">
-                <h3 className="text-[16px] font-bold text-[#111827] mb-[20px] font-['Outfit']">Get In Touch</h3>
-                <div className="space-y-[16px]">
-                  <div className="flex items-start gap-[12px]">
-                    <MapPin size={16} className="text-[#111827] mt-1 flex-shrink-0" />
-                    <span className="text-[14px] text-[#374151]">Madhapur, Hyderabad, India</span>
-                  </div>
-                  <div className="flex items-start gap-[12px]">
-                    <Phone size={16} className="text-[#111827] mt-1 flex-shrink-0" />
-                    <span className="text-[14px] text-[#374151]">+91 94907 01421</span>
-                  </div>
-                  <div className="flex items-start gap-[12px]">
-                    <Clock size={16} className="text-[#111827] mt-1 flex-shrink-0" />
-                    <span className="text-[14px] text-[#374151]">Monday – Saturday, 9:00 AM- 6:00 PM</span>
-                  </div>
-                  <div className="flex items-start gap-[12px]">
-                    <Mail size={16} className="text-[#111827] mt-1 flex-shrink-0" />
-                    <span className="text-[14px] text-[#374151]">info@kitchenbots.in</span>
-                  </div>
-                </div>
-                <Button 
-                  variant="accent"
-                  size="sm"
-                  className="w-full mt-[16px]"
-                  onClick={() => onNavigate?.('contact')}
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Button
+                  onClick={() => onNavigate?.('products')}
+                  size="lg"
+                  className="rounded-xl px-7"
                 >
-                  Contact Us
+                  Browse equipment <ArrowRight size={18} className="ml-1" />
+                </Button>
+                <Button
+                  onClick={() => onNavigate?.('capabilities')}
+                  variant="outline"
+                  size="lg"
+                  className="rounded-xl px-7 border-[#CBD5E1]"
+                >
+                  Manufacturing capabilities
                 </Button>
               </div>
             </div>
 
+            <div className="lg:col-span-5">
+              <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[#F1F5F9] shadow-md">
+                <img
+                  src={getMediaUrl('/images/redesign/capabilities-hero.png')}
+                  alt="KitchenBots commercial cooking hardware"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* 2. WHAT WE MANUFACTURE */}
+      <section className="py-16 lg:py-24">
+        <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
+          <div className="mb-12 max-w-3xl">
+            <h2 className="font-['Outfit'] text-[30px] font-bold text-[#111827] sm:text-[38px]">
+              What we manufacture
+            </h2>
+            <p className="mt-3 font-['DM_Sans'] text-[16px] text-[#64748B]">
+              Purpose-built cooking systems engineered from heavy-gauge stainless steel for restaurants, caterers, and commercial food operators.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm">
+              <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF7ED] text-[#C2410C]">
+                <Flame size={24} />
+              </div>
+              <h3 className="font-['Outfit'] text-[20px] font-bold text-[#111827]">
+                Commercial BBQ Grills
+              </h3>
+              <p className="mt-3 font-['DM_Sans'] text-[15px] leading-relaxed text-[#64748B]">
+                Santa Maria height-adjustable grills, automated multi-skewer rotisseries, and heavy-duty charcoal pits designed for high-capacity culinary shifts.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm">
+              <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF7ED] text-[#C2410C]">
+                <Factory size={24} />
+              </div>
+              <h3 className="font-['Outfit'] text-[20px] font-bold text-[#111827]">
+                High-Efficiency Rocket Stoves
+              </h3>
+              <p className="mt-3 font-['DM_Sans'] text-[15px] leading-relaxed text-[#64748B]">
+                Precision insulated combustion channels that concentrate heat directly on cookware while significantly cutting solid fuel consumption.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm">
+              <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF7ED] text-[#C2410C]">
+                <Shield size={24} />
+              </div>
+              <h3 className="font-['Outfit'] text-[20px] font-bold text-[#111827]">
+                Collapsible & Modular Systems
+              </h3>
+              <p className="mt-3 font-['DM_Sans'] text-[15px] leading-relaxed text-[#64748B]">
+                Heavy-duty portable BBQs and compact stoves designed for event catering and outdoor food pop-ups with tool-free assembly.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. OPERATORS SERVED & MANUFACTURING PHILOSOPHY */}
+      <section className="border-y border-[#E2E8F0] bg-white py-16 lg:py-24">
+        <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
+          <div className="grid gap-12 lg:grid-cols-2">
+            <div>
+              <h2 className="font-['Outfit'] text-[28px] font-bold text-[#111827] sm:text-[36px]">
+                Built for demanding food service operations
+              </h2>
+              <p className="mt-4 font-['DM_Sans'] text-[16px] leading-relaxed text-[#475569]">
+                Our equipment is designed around the real mechanical stresses of commercial culinary prep: intense heat cycles, heavy cookware weights, and continuous multi-hour shifts.
+              </p>
+
+              <div className="mt-8 space-y-4">
+                <div className="flex gap-4">
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#C2410C]" />
+                  <div>
+                    <h4 className="font-['Outfit'] text-[16px] font-bold text-[#111827]">Commercial Restaurants & Dhabas</h4>
+                    <p className="font-['DM_Sans'] text-[14px] text-[#64748B]">Reliable open-fire and automated turning equipment built for rapid table turns.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#C2410C]" />
+                  <div>
+                    <h4 className="font-['Outfit'] text-[16px] font-bold text-[#111827]">Live-Fire & Event Caterers</h4>
+                    <p className="font-['DM_Sans'] text-[14px] text-[#64748B]">Transport-ready collapsible equipment with verified structural load ratings.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#C2410C]" />
+                  <div>
+                    <h4 className="font-['Outfit'] text-[16px] font-bold text-[#111827]">Outdoor & Cloud Kitchens</h4>
+                    <p className="font-['DM_Sans'] text-[14px] text-[#64748B]">Fuel-efficient rocket stoves and griddles engineered for consistent thermal output.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-8 lg:p-10">
+              <div>
+                <div className="mb-4 inline-flex items-center gap-2 text-[#C2410C]">
+                  <Wrench size={22} />
+                  <span className="font-['Outfit'] text-sm font-bold uppercase tracking-wider">Manufacturing Standards</span>
+                </div>
+                <h3 className="font-['Outfit'] text-[24px] font-bold text-[#111827]">
+                  Precision fabrication & rigorous tolerances
+                </h3>
+                <p className="mt-4 font-['DM_Sans'] text-[15px] leading-relaxed text-[#64748B]">
+                  We utilize commercial grade stainless steel, reinforced joint welds, and thermal protection barriers to ensure every piece of equipment operates safely and reliably under high load.
+                </p>
+              </div>
+
+              <div className="mt-8 border-t border-[#E2E8F0] pt-6">
+                <Button
+                  onClick={() => onNavigate?.('capabilities')}
+                  variant="outline"
+                  className="rounded-xl border-[#CBD5E1]"
+                >
+                  Review technical capabilities <ArrowRight size={16} className="ml-1" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. CONTACT & OPERATIONS INFO */}
+      <section className="py-16 lg:py-24">
+        <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
+          <div className="grid gap-10 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <h2 className="font-['Outfit'] text-[28px] font-bold text-[#111827] sm:text-[34px]">
+                Work directly with our manufacturing team
+              </h2>
+              <p className="mt-3 font-['DM_Sans'] text-[16px] leading-relaxed text-[#64748B]">
+                Whether you need standard catalog units or custom kitchen equipment dimensions, our sales engineers are available to review your operational requirements.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Button
+                  onClick={() => onNavigate?.('contact')}
+                  size="lg"
+                  className="rounded-xl px-8"
+                >
+                  Contact sales team
+                </Button>
+                <Button
+                  onClick={() => onNavigate?.('bulk-enquiry')}
+                  variant="outline"
+                  size="lg"
+                  className="rounded-xl px-8 border-[#CBD5E1]"
+                >
+                  Submit bulk enquiry
+                </Button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5">
+              <div className="rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm">
+                <h3 className="font-['Outfit'] text-[18px] font-bold text-[#111827]">Verified Company Details</h3>
+                <div className="mt-6 space-y-4 font-['DM_Sans'] text-[14px]">
+                  <div className="flex items-center gap-3 text-[#475569]">
+                    <Phone size={18} className="shrink-0 text-[#C2410C]" />
+                    <a href="tel:+919490701421" className="hover:text-[#111827] font-semibold">+91 94907 01421</a>
+                  </div>
+                  <div className="flex items-center gap-3 text-[#475569]">
+                    <Mail size={18} className="shrink-0 text-[#C2410C]" />
+                    <a href="mailto:info@kitchenbots.in" className="hover:text-[#111827] font-semibold">info@kitchenbots.in</a>
+                  </div>
+                  <div className="flex items-center gap-3 text-[#475569]">
+                    <MapPin size={18} className="shrink-0 text-[#C2410C]" />
+                    <span>Hyderabad, Telangana, India</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[#475569]">
+                    <Clock size={18} className="shrink-0 text-[#C2410C]" />
+                    <span>Monday to Saturday, 9:00 AM – 6:00 PM</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

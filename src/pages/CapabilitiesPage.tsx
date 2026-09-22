@@ -1,6 +1,7 @@
 import { type Page } from '../App';
-import { Settings, Bot, Cpu, Recycle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Settings, Flame, RotateCw, Box, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { getMediaUrl } from '../lib/cdn';
 
 interface CapabilitiesPageProps {
   onNavigate?: (page: Page) => void;
@@ -10,94 +11,92 @@ export default function CapabilitiesPage({ onNavigate }: CapabilitiesPageProps) 
   const capabilities = [
     {
       icon: Settings,
-      title: 'Mechanical Engineering Excellence',
-      color: 'bg-kb-tertiary',
-      description: 'We specialize in designing and manufacturing high-performance kitchen automation equipment with precision engineering.',
-      features: [
-        'Precision mechanical design and manufacturing.',
-        'Heavy-duty & reliable industrial grade machinery.',
-        'Custom solutions tailored to specific commercial needs.'
-      ]
+      title: 'Mechanical Design & Heavy Fabrication',
+      description: 'We engineer commercial cooking equipment using heavy-gauge 304 stainless steel, reinforced framing, and precision welds designed to withstand high-volume restaurant service.',
+      specs: [
+        'Heavy-gauge stainless steel construction',
+        'Reinforced framing and thermal expansion joints',
+        'Precision laser-cut grates and fireboxes',
+      ],
+      image: getMediaUrl('/images/redesign/cap-1.png'),
     },
     {
-      icon: Bot,
-      title: 'Advanced Automation & Robotics',
-      color: 'bg-kb-primary',
-      description: 'KitchenBots integrates state-of-the-art automation and robotics to transform kitchen productivity and safety.',
-      features: [
-        'AI-driven robotics for automated cooking tasks.',
-        'Seamless integration for unmanned kitchen operations.',
-        'Programmable cooking solutions for consistency.'
-      ]
+      icon: Flame,
+      title: 'Thermal Dynamics & Airflow Geometry',
+      description: 'Our rocket stoves and open-fire cooking units utilize controlled draft geometry to extract maximum heat value from charcoal and solid biomass, reducing fuel consumption.',
+      specs: [
+        'Targeted combustion chambers for high efficiency',
+        'Calibrated oxygen intake channels',
+        'Even heat diffusion across cooking surfaces',
+      ],
+      image: getMediaUrl('/images/redesign/cap-2.png'),
     },
     {
-      icon: Cpu,
-      title: 'Electronics & Smart Control Systems',
-      color: 'bg-[#1E2329]',
-      description: 'We develop intelligent electronic control systems that ensure the seamless operation of complex kitchen ecosystems.',
-      features: [
-        'Advanced temperature and thermal process control.',
-        'IoT platforms for connected and smart kitchens.',
-        'Precision sensors for real-time performance monitoring.'
-      ]
+      icon: RotateCw,
+      title: 'Automated Turning & Rotisserie Systems',
+      description: 'KitchenBots integrates continuous motor-driven mechanisms for even roasting and turning, reducing operator oversight during busy kitchen shifts.',
+      specs: [
+        'High-torque geared rotisserie drives',
+        'Balanced multi-skewer turning assemblies',
+        'Thermal-shielded motor housings',
+      ],
+      image: getMediaUrl('/images/redesign/cap-3.png'),
     },
     {
-      icon: Recycle,
-      title: 'Sustainable Waste Management',
-      color: 'bg-kb-primary',
-      description: 'Innovation meets sustainability. We provide eco-friendly solutions for the modern, responsible kitchen.',
-      features: [
-        'Advanced grease traps designed for zero-clogging.',
-        'Efficient food waste composting systems.',
-        'Organic waste decomposers for eco-friendly handling.'
-      ]
-    }
+      icon: Box,
+      title: 'Modular & Transport-Ready Engineering',
+      description: 'Designed for commercial caterers and outdoor food operators, our collapsible BBQ units offer quick assembly and breakdown without sacrificing structural rigidity.',
+      specs: [
+        'Interlocking tool-free frame joints',
+        'Compact transport footprints with carry cases',
+        'Tested weight capacities for high-volume batches',
+      ],
+      image: getMediaUrl('/images/redesign/cap-4.png'),
+    },
   ];
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen pt-20">
+    <div className="min-h-screen bg-[#F8FAFC] pt-20">
       {/* HERO SECTION */}
-      <section className="relative py-12 md:py-20 overflow-hidden bg-white">
-        <div className="container mx-auto px-6 lg:px-[80px]">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="border-b border-[#E2E8F0] bg-white py-12 lg:py-20">
+        <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
             <div className="max-w-2xl">
-              <span className="inline-block px-4 py-1.5 bg-[#F0FDF4] text-kb-primary text-[12px] font-bold uppercase tracking-widest rounded-full mb-6 font-['Outfit']">
-                Technical Mastery
+              <span className="text-xs font-bold uppercase tracking-wider text-[#C2410C]">
+                Engineering & Manufacturing
               </span>
-              <h1 className="text-[36px] sm:text-[48px] md:text-[64px] font-bold text-[#111827] leading-[1.1] mb-6 font-['Outfit']">
-                Our Engineering <span className="text-kb-tertiary">Capabilities</span>
+              <h1 className="mt-3 font-['Outfit'] text-[38px] font-bold leading-[1.08] text-[#111827] sm:text-[48px] lg:text-[56px]">
+                Commercial Kitchen <span className="text-kb-tertiary">Capabilities</span>
               </h1>
-              <p className="text-[18px] text-[#475569] leading-relaxed mb-8 font-['DM_Sans']">
-                At KitchenBots, our capabilities span the full spectrum of kitchen technology innovation. We combine mechanical engineering, electronics, and AI to design intelligent kitchen solutions.
+              <p className="mt-5 font-['DM_Sans'] text-[17px] leading-relaxed text-[#475569] sm:text-[18px]">
+                KitchenBots designs and manufactures heavy-duty cooking hardware, solid-fuel combustion systems, and automated grilling equipment for commercial hospitality and food service operations.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Button 
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Button
                   onClick={() => onNavigate?.('contact')}
-                  variant="accent"
                   size="lg"
+                  className="rounded-xl px-7"
                 >
-                  Contact Our Engineers <ArrowRight size={20} />
+                  Contact engineering team <ArrowRight size={18} className="ml-1" />
+                </Button>
+                <Button
+                  onClick={() => onNavigate?.('products')}
+                  variant="outline"
+                  size="lg"
+                  className="rounded-xl px-7 border-[#CBD5E1]"
+                >
+                  Explore equipment
                 </Button>
               </div>
             </div>
+
             <div className="relative">
-              <div className="aspect-[4/3] rounded-[48px] overflow-hidden shadow-2xl">
-                <img 
-                  src="/images/redesign/capabilities-hero.png" 
-                  alt="Industrial Kitchen Technology" 
-                  className="w-full h-full object-cover"
+              <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[#F1F5F9] shadow-lg">
+                <img
+                  src={getMediaUrl('/images/redesign/capabilities-hero.png')}
+                  alt="KitchenBots commercial equipment manufacturing"
+                  className="h-full w-full object-cover"
                 />
-              </div>
-              <div className="absolute -bottom-8 -left-8 bg-white p-8 rounded-[32px] shadow-xl border border-[#F1F5F9] hidden md:block">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#F0FDF4] rounded-2xl flex items-center justify-center text-kb-primary">
-                    <CheckCircle2 size={28} />
-                  </div>
-                  <div>
-                    <div className="text-[18px] font-bold text-[#111827] font-['Outfit']">ISO Certified</div>
-                    <div className="text-[13px] text-[#64748B] font-['DM_Sans']">Manufacturing Standards</div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -105,83 +104,82 @@ export default function CapabilitiesPage({ onNavigate }: CapabilitiesPageProps) 
       </section>
 
       {/* CORE CAPABILITIES GRID */}
-      <section className="py-12 md:py-20 container mx-auto px-6 lg:px-[80px]">
-        <div className="text-center mb-16">
-          <h2 className="text-[36px] font-bold text-[#111827] mb-4 font-['Outfit']">Innovating Every Component</h2>
-          <p className="text-[16px] text-[#64748B] max-w-2xl mx-auto font-['DM_Sans']">
-            We bring together multiple disciplines to create a cohesive ecosystem of smart kitchen equipment.
-          </p>
-        </div>
+      <section className="py-16 lg:py-24">
+        <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
+          <div className="mb-14 max-w-3xl">
+            <h2 className="font-['Outfit'] text-[32px] font-bold text-[#111827] sm:text-[40px]">
+              Manufacturing and engineering disciplines
+            </h2>
+            <p className="mt-3 font-['DM_Sans'] text-[16px] text-[#64748B]">
+              Every unit is built from verified commercial specifications for high reliability in active kitchen environments.
+            </p>
+          </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {capabilities.map((cap, idx) => (
-            <div key={idx} className="bg-white p-10 rounded-[40px] border border-[#F1F5F9] shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.06)] transition-all duration-500 group">
-              <div className={`w-16 h-16 ${cap.color} rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-                <cap.icon size={32} />
-              </div>
-              <h3 className="text-[24px] font-bold text-[#111827] mb-4 font-['Outfit'] group-hover:text-kb-tertiary transition-colors">{cap.title}</h3>
-              <p className="text-[15px] text-[#64748B] leading-relaxed mb-8 font-['DM_Sans']">
-                {cap.description}
-              </p>
-              <ul className="space-y-4">
-                {cap.features.map((feature, fIdx) => (
-                  <li key={fIdx} className="flex items-start gap-3">
-                    <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-kb-primary shrink-0" />
-                    <span className="text-[14px] text-[#475569] font-medium font-['DM_Sans']">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* TECHNICAL SHOWCASE */}
-      <section className="py-12 md:py-20 bg-white">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
-          <div className="aspect-[3/2] rounded-[32px] overflow-hidden">
-            <img src="/images/redesign/cap-1.png" alt="Engineering" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
-          </div>
-          <div className="aspect-[3/2] rounded-[32px] overflow-hidden">
-            <img src="/images/redesign/cap-2.png" alt="Automation" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
-          </div>
-          <div className="aspect-[3/2] rounded-[32px] overflow-hidden">
-            <img src="/images/redesign/cap-3.png" alt="Robotics" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
-          </div>
-          <div className="aspect-[3/2] rounded-[32px] overflow-hidden">
-            <img src="/images/redesign/cap-4.png" alt="Sustainability" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
+          <div className="grid gap-8 md:grid-cols-2">
+            {capabilities.map((cap) => {
+              const Icon = cap.icon;
+              return (
+                <article key={cap.title} className="flex flex-col overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm transition-shadow hover:shadow-md">
+                  <div className="aspect-[16/9] w-full overflow-hidden bg-[#F1F5F9]">
+                    <img
+                      src={cap.image}
+                      alt={cap.title}
+                      className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col p-8">
+                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#FFF7ED] text-[#C2410C]">
+                      <Icon size={24} />
+                    </div>
+                    <h3 className="font-['Outfit'] text-[22px] font-bold text-[#111827]">
+                      {cap.title}
+                    </h3>
+                    <p className="mt-3 font-['DM_Sans'] text-[15px] leading-relaxed text-[#64748B]">
+                      {cap.description}
+                    </p>
+                    <ul className="mt-6 space-y-2 border-t border-[#F1F5F9] pt-6 font-['DM_Sans'] text-[14px] text-[#475569]">
+                      {cap.specs.map((spec, sIdx) => (
+                        <li key={sIdx} className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#C2410C]" />
+                          <span>{spec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* CTA SECTION */}
-      <section className="py-12 md:py-20 container mx-auto px-6 lg:px-[80px]">
-        <div className="bg-[#1E2329] rounded-[48px] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-kb-tertiary opacity-10 blur-[100px]" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-kb-primary opacity-10 blur-[100px]" />
-          
-          <h2 className="text-[28px] sm:text-[32px] md:text-[48px] font-bold text-white mb-6 font-['Outfit'] leading-tight">
-            Ready to Build the Future of Your Kitchen?
-          </h2>
-          <p className="text-white/60 text-[18px] max-w-2xl mx-auto mb-10 font-['DM_Sans']">
-            Consult with our engineering team today for custom solutions tailored to your unique requirements.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Button 
-              onClick={() => onNavigate?.('contact')}
-              variant="accent"
-              size="lg"
-            >
-              Start Your Project
-            </Button>
-            <Button 
-              onClick={() => onNavigate?.('contact')}
-              variant="outline"
-              size="lg"
-              className="bg-white/10 text-white hover:bg-white/20 border-white/10 backdrop-blur-sm"
-            >
-              Learn More
-            </Button>
+      <section className="pb-20 lg:pb-28">
+        <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
+          <div className="rounded-2xl bg-[#112329] p-10 md:p-16 text-center text-white shadow-xl">
+            <h2 className="font-['Outfit'] text-[28px] font-bold leading-tight sm:text-[38px]">
+              Require custom dimensions or specialized equipment?
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl font-['DM_Sans'] text-[16px] text-white/75 sm:text-[18px]">
+              Speak directly with our engineering team to review kitchen layouts, unit dimensions, and bulk manufacturing schedules.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <Button
+                onClick={() => onNavigate?.('contact')}
+                size="lg"
+                className="rounded-xl px-8"
+              >
+                Submit equipment enquiry
+              </Button>
+              <Button
+                onClick={() => onNavigate?.('bulk-enquiry')}
+                variant="outline"
+                size="lg"
+                className="rounded-xl px-8 border-white/30 text-white hover:bg-white/10"
+              >
+                Request bulk quotation
+              </Button>
+            </div>
           </div>
         </div>
       </section>
