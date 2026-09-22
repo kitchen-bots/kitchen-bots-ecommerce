@@ -130,9 +130,14 @@ function App() {
           <ProductDetailPage
             productId={selectedProductId}
             onBack={() => navigateTo('products')}
+            onNavigate={navigateTo}
           />
         ) : (
-          <ProductsPage onProductClick={(id) => navigateTo('product-detail', id)} onCartOpen={() => setIsCartOpen(true)} />
+          <ProductsPage
+            onProductClick={(id) => navigateTo('product-detail', id)}
+            onCartOpen={() => setIsCartOpen(true)}
+            onNavigate={navigateTo}
+          />
         );
       case 'contact':
         return <ContactPage />;

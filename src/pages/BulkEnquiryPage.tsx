@@ -1,19 +1,24 @@
 import { useState } from 'react';
 import { 
   NotebookPen, 
-  Send,
-  CheckCircle,
-  Building2,
-  MessageCircle
+  Send, 
+  CheckCircle, 
+  Building2, 
+  MessageCircle,
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import type { Page } from '../App';
 import { Button } from '../components/ui/button';
+import { submitEnquiry } from '../lib/api';
+import { useCart } from '../hooks/use-cart';
 
 interface BulkEnquiryPageProps {
   onNavigate: (page: Page) => void;
 }
 
 export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
+  const { items, clearCart } = useCart();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,17 +27,39 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
     city: '',
     requirements: ''
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedRef, setSubmittedRef] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    // Build mailto link and open in mail client
-    const subject = encodeURIComponent('KitchenBots Bulk Enquiry – ' + formData.name);
-    const body = encodeURIComponent(
-      `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nCompany: ${formData.company || 'N/A'}\nCity: ${formData.city || 'N/A'}\n\nRequirements:\n${formData.requirements}`
-    );
-    window.location.href = `mailto:kitchenbots.sales@gmail.com?subject=${subject}&body=${body}`;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    const enquiryItems = items.map((item) => ({
+      productId: item.id,
+      quantity: item.quantity,
+    }));
+
+    try {
+      const response = await submitEnquiry({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        company: formData.company || undefined,
+        city: formData.city || undefined,
+        message: formData.requirements,
+        items: enquiryItems,
+      });
+
+      setSubmittedRef(response.reference);
+      clearCart();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to submit enquiry. Please try again.';
+      setErrorMessage(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -112,17 +139,23 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
           {/* RIGHT: Form */}
           <div className="lg:col-span-7">
             <div className="bg-white rounded-[32px] p-8 md:p-12 border border-[#F1F5F9] shadow-[0_20px_50px_rgba(0,0,0,0.04)]">
-              {isSubmitted ? (
+              {submittedRef ? (
                 <div className="text-center py-20">
                   <div className="w-20 h-20 bg-[#F0FDF4] rounded-full flex items-center justify-center mx-auto mb-6">
                     <CheckCircle className="text-kb-primary" size={40} />
                   </div>
-                  <h3 className="text-[24px] font-bold text-[#111827] mb-3 font-['Outfit']">Enquiry Received!</h3>
-                  <p className="text-[#64748B] font-['DM_Sans'] mb-8">We've sent your requirements to our sales team. You'll hear from us shortly.</p>
+                  <h3 className="text-[24px] font-bold text-[#111827] mb-2 font-['Outfit']">Enquiry Received</h3>
+                  <p className="text-kb-primary font-bold text-[18px] mb-3 font-['Outfit']">Reference: {submittedRef}</p>
+                  <p className="text-[#64748B] font-['DM_Sans'] mb-8 max-w-md mx-auto">
+                    We have received your requirements and assigned them to our sales engineering team. A formal quote will be delivered to your email within 24 hours.
+                  </p>
                   <Button 
-                    variant="link"
-                    onClick={() => setIsSubmitted(false)}
-                    className="text-kb-tertiary font-bold p-0"
+                    variant="outline"
+                    onClick={() => {
+                      setSubmittedRef(null);
+                      setFormData({ name: '', email: '', phone: '', company: '', city: '', requirements: '' });
+                    }}
+                    className="font-bold"
                   >
                     Submit another enquiry
                   </Button>
@@ -133,8 +166,25 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                     <div className="w-10 h-10 bg-kb-tertiary rounded-xl flex items-center justify-center text-white">
                       <NotebookPen size={20} />
                     </div>
-                    <h3 className="text-[22px] font-bold text-[#111827] font-['Outfit']">Submit Requirements</h3>
+                    <div>
+                      <h3 className="text-[22px] font-bold text-[#111827] font-['Outfit']">Submit Requirements</h3>
+                      {items.length > 0 && (
+                        <p className="text-xs text-[#64748B] font-['DM_Sans'] mt-0.5">
+                          {items.length} {items.length === 1 ? 'cart item' : 'cart items'} will be included with your quote request.
+                        </p>
+                      )}
+                    </div>
                   </div>
+
+                  {errorMessage && (
+                    <div className="mb-6 p-4 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl flex items-start gap-3 text-[#991B1B]">
+                      <AlertCircle className="shrink-0 mt-0.5" size={18} />
+                      <div className="text-sm font-['DM_Sans']">
+                        <p className="font-semibold mb-1">Submission Failed</p>
+                        <p>{errorMessage}</p>
+                      </div>
+                    </div>
+                  )}
 
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
@@ -144,7 +194,8 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                           type="text" 
                           placeholder="e.g. Rahul Sharma" 
                           required
-                          className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans']"
+                          disabled={isSubmitting}
+                          className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
                         />
@@ -155,7 +206,8 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                           type="email" 
                           placeholder="rahul@hotel.com" 
                           required
-                          className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans']"
+                          disabled={isSubmitting}
+                          className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
                         />
@@ -167,8 +219,9 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                         <label className="text-[14px] font-bold text-[#475569] ml-1 font-['Outfit']">Phone Number</label>
                         <input 
                           type="tel" 
-                          placeholder="+91 XXXXX XXXXX" 
-                          className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans']"
+                          placeholder="+91 94907 01421" 
+                          disabled={isSubmitting}
+                          className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         />
@@ -178,7 +231,8 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                         <input 
                           type="text" 
                           placeholder="Restaurant or Hotel name" 
-                          className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans']"
+                          disabled={isSubmitting}
+                          className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
                           value={formData.company}
                           onChange={(e) => setFormData({...formData, company: e.target.value})}
                         />
@@ -190,7 +244,8 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                       <input 
                         type="text" 
                         placeholder="e.g. Mumbai, Maharashtra" 
-                        className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans']"
+                        disabled={isSubmitting}
+                        className="w-full h-[52px] px-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] disabled:opacity-50"
                         value={formData.city}
                         onChange={(e) => setFormData({...formData, city: e.target.value})}
                       />
@@ -200,8 +255,9 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                       <label className="text-[14px] font-bold text-[#475569] ml-1 font-['Outfit']">Specific Requirements *</label>
                       <textarea 
                         required
-                        placeholder="Mention products, quantities, and custom specifications..."
-                        className="w-full h-[140px] p-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] resize-none"
+                        disabled={isSubmitting}
+                        placeholder="Mention products, quantities, and custom specifications (at least 10 characters)..."
+                        className="w-full h-[140px] p-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] resize-none disabled:opacity-50"
                         value={formData.requirements}
                         onChange={(e) => setFormData({...formData, requirements: e.target.value})}
                       />
@@ -211,14 +267,24 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                       type="submit"
                       variant="accent"
                       size="lg"
+                      disabled={isSubmitting}
                       className="w-full h-[60px] gap-3"
                     >
-                      <Send size={20} />
-                      Submit Enquiry
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="animate-spin" size={20} />
+                          Submitting Enquiry...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={20} />
+                          Submit Enquiry
+                        </>
+                      )}
                     </Button>
                     
                     <p className="text-center text-[13px] text-[#94A3B8] font-['DM_Sans']">
-                      By submitting, you agree to our <Button type="button" variant="link" className="p-0 h-auto text-[13px] text-[#94A3B8] hover:text-[#475569] underline">Privacy Policy</Button>.
+                      By submitting, you agree to our Privacy Policy.
                     </p>
                   </form>
                 </>

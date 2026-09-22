@@ -1,12 +1,13 @@
-import { useMemo, useState } from 'react';
-import { ArrowRight, ChevronRight, LayoutGrid, List, Search, ShoppingCart } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ArrowRight, ChevronRight, LayoutGrid, List, Search, ShoppingCart, AlertCircle, RefreshCw } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import type { Page } from '../App';
-import type { ProductCategory } from '../types/product';
+import type { Product, ProductCategory } from '../types/product';
 import { useCart } from '../hooks/use-cart';
 import { useToast } from '../hooks/use-toast';
 import { Button } from '../components/ui/button';
 import ProductImage from '../components/ProductImage';
+import { fetchCatalogProducts } from '../lib/api';
 
 interface ProductsPageProps {
   onProductClick: (id: string) => void;
@@ -33,17 +34,39 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
   );
   const [searchQuery, setSearchQuery] = useState(params.get('q') ?? '');
   const [view, setView] = useState<ViewMode>('grid');
+  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const { addToCart } = useCart();
   const { showToast } = useToast();
 
+  const loadProducts = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const items = await fetchCatalogProducts();
+      setProducts(items);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load catalog products.';
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
   const filteredProducts = useMemo(() => {
     const terms = searchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    return PRODUCTS.filter(product => {
+    return products.filter(product => {
       const searchable = [product.name, product.description, product.category, ...product.features].join(' ').toLowerCase();
       return (activeCategory === 'All' || product.category === activeCategory)
         && terms.every(term => searchable.includes(term));
     });
-  }, [activeCategory, searchQuery]);
+  }, [products, activeCategory, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] pt-20">
@@ -107,53 +130,82 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
 
       <section className="section-padding">
         <div className="container mx-auto px-6 lg:px-[80px]">
-          <p className="mb-6 text-sm text-[#64748B]" aria-live="polite">{filteredProducts.length} products</p>
-          <div className={view === 'grid' ? 'grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-5'}>
-            {filteredProducts.map(product => (
-              <article
-                key={product.id}
-                className={view === 'grid'
-                  ? 'group flex h-full flex-col overflow-hidden rounded-3xl border border-[#F1F5F9] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.03)]'
-                  : 'group grid overflow-hidden rounded-2xl border border-[#F1F5F9] bg-white shadow-sm md:grid-cols-[280px_1fr]'}
-              >
-                <button
-                  onClick={() => onProductClick(product.id)}
-                  className={view === 'grid' ? 'aspect-square overflow-hidden bg-[#F8FAFC] p-10' : 'min-h-[240px] overflow-hidden bg-[#F8FAFC] p-8'}
-                  aria-label={`View ${product.name}`}
-                >
-                  <ProductImage src={product.image} alt={product.name} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
-                </button>
+          {error && (
+            <div className="mb-8 flex items-center justify-between rounded-2xl border border-[#FCA5A5] bg-[#FEF2F2] p-4 text-[#991B1B]">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={20} className="shrink-0" />
+                <p className="text-sm font-['DM_Sans']">{error}</p>
+              </div>
+              <Button size="sm" variant="outline" className="gap-2 shrink-0 font-bold" onClick={loadProducts}>
+                <RefreshCw size={14} /> Retry
+              </Button>
+            </div>
+          )}
 
-                <div className="flex min-w-0 flex-1 flex-col p-7">
-                  <button className="text-left" onClick={() => onProductClick(product.id)}>
-                    <h2 className="font-['Outfit'] text-[22px] font-bold leading-tight text-[#111827] hover:text-kb-tertiary">{product.name}</h2>
-                  </button>
-                  <p className="mt-3 text-[14px] leading-relaxed text-[#64748B]">{product.description}</p>
-                  <ul className="mt-5 grid gap-2 text-[13px] text-[#64748B] sm:grid-cols-2">
-                    {product.features.slice(0, 4).map(feature => <li key={feature}>• {feature}</li>)}
-                  </ul>
-                  <div className="mt-6 font-['Outfit'] text-[24px] font-bold text-[#111827]">{formatPrice(product.price)}</div>
+          <p className="mb-6 text-sm text-[#64748B]" aria-live="polite">
+            {isLoading ? 'Loading products...' : `${filteredProducts.length} products`}
+          </p>
 
-                  <div className="mt-auto flex flex-wrap gap-3 pt-6">
-                    <Button
-                      className="min-w-[150px] flex-1 rounded-md"
-                      onClick={() => {
-                        addToCart({ id: product.id, name: product.name, price: product.price, image: product.image });
-                        showToast(`${product.name} added to cart`, 'View cart', () => onCartOpen?.());
-                      }}
-                    >
-                      <ShoppingCart size={18} /> Add to cart
-                    </Button>
-                    <Button variant="outline" className="min-w-[130px] flex-1 rounded-md" onClick={() => onProductClick(product.id)}>
-                      View details <ArrowRight size={18} />
-                    </Button>
-                  </div>
+          {isLoading ? (
+            <div className={view === 'grid' ? 'grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-5'}>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="animate-pulse rounded-3xl border border-[#F1F5F9] bg-white p-6 shadow-sm">
+                  <div className="aspect-square w-full rounded-2xl bg-[#F1F5F9] mb-6" />
+                  <div className="h-6 w-3/4 rounded bg-[#F1F5F9] mb-3" />
+                  <div className="h-4 w-full rounded bg-[#F1F5F9] mb-2" />
+                  <div className="h-4 w-2/3 rounded bg-[#F1F5F9] mb-6" />
+                  <div className="h-8 w-1/3 rounded bg-[#F1F5F9]" />
                 </div>
-              </article>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className={view === 'grid' ? 'grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3' : 'grid gap-5'}>
+              {filteredProducts.map(product => (
+                <article
+                  key={product.id}
+                  className={view === 'grid'
+                    ? 'group flex h-full flex-col overflow-hidden rounded-3xl border border-[#F1F5F9] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.03)]'
+                    : 'group grid overflow-hidden rounded-2xl border border-[#F1F5F9] bg-white shadow-sm md:grid-cols-[280px_1fr]'}
+                >
+                  <button
+                    onClick={() => onProductClick(product.id)}
+                    className={view === 'grid' ? 'aspect-square overflow-hidden bg-[#F8FAFC] p-10' : 'min-h-[240px] overflow-hidden bg-[#F8FAFC] p-8'}
+                    aria-label={`View ${product.name}`}
+                  >
+                    <ProductImage src={product.image} alt={product.name} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
+                  </button>
 
-          {filteredProducts.length === 0 && (
+                  <div className="flex min-w-0 flex-1 flex-col p-7">
+                    <button className="text-left" onClick={() => onProductClick(product.id)}>
+                      <h2 className="font-['Outfit'] text-[22px] font-bold leading-tight text-[#111827] hover:text-kb-tertiary">{product.name}</h2>
+                    </button>
+                    <p className="mt-3 text-[14px] leading-relaxed text-[#64748B]">{product.description}</p>
+                    <ul className="mt-5 grid gap-2 text-[13px] text-[#64748B] sm:grid-cols-2">
+                      {product.features.slice(0, 4).map(feature => <li key={feature}>• {feature}</li>)}
+                    </ul>
+                    <div className="mt-6 font-['Outfit'] text-[24px] font-bold text-[#111827]">{formatPrice(product.price)}</div>
+
+                    <div className="mt-auto flex flex-wrap gap-3 pt-6">
+                      <Button
+                        className="min-w-[150px] flex-1 rounded-md"
+                        onClick={() => {
+                          addToCart({ id: product.id, name: product.name, price: product.price, image: product.image });
+                          showToast(`${product.name} added to cart`, 'View cart', () => onCartOpen?.());
+                        }}
+                      >
+                        <ShoppingCart size={18} /> Add to cart
+                      </Button>
+                      <Button variant="outline" className="min-w-[130px] flex-1 rounded-md" onClick={() => onProductClick(product.id)}>
+                        View details <ArrowRight size={18} />
+                      </Button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {!isLoading && filteredProducts.length === 0 && (
             <div className="py-28 text-center">
               <Search size={36} className="mx-auto mb-5 text-[#CBD5E1]" />
               <h2 className="font-['Outfit'] text-[24px] font-bold text-[#111827]">No matching products</h2>

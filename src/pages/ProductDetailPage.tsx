@@ -1,16 +1,20 @@
-import { useState } from 'react';
-import { ArrowLeft, Check, Heart, Share2, ShoppingCart } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { ArrowLeft, Check, Heart, Share2, ShoppingCart, AlertCircle, RefreshCw } from 'lucide-react';
 import { PRODUCTS, getProductById } from '../data/products';
+import type { Page } from '../App';
+import type { Product } from '../types/product';
 import { useCart } from '../hooks/use-cart';
 import { useWishlist } from '../hooks/use-wishlist';
 import { useToast } from '../hooks/use-toast';
 import { Button } from '../components/ui/button';
 import ProductImage from '../components/ProductImage';
 import { cn } from '../lib/utils';
+import { fetchCatalogProduct } from '../lib/api';
 
 interface ProductDetailPageProps {
   productId: string;
   onBack: () => void;
+  onNavigate?: (page: Page) => void;
 }
 
 type Tab = 'Description' | 'Specifications' | 'Usage' | 'Warranty';
@@ -21,14 +25,58 @@ const formatPrice = (price: number) => new Intl.NumberFormat('en-IN', {
   maximumFractionDigits: 0,
 }).format(price);
 
-export default function ProductDetailPage({ productId, onBack }: ProductDetailPageProps) {
-  const product = getProductById(productId);
+export default function ProductDetailPage({ productId, onBack, onNavigate }: ProductDetailPageProps) {
+  const [product, setProduct] = useState<Product | null>(() => getProductById(productId) || null);
+  const [isLoading, setIsLoading] = useState(!product);
+  const [error, setError] = useState<string | null>(null);
+
   const [activeImage, setActiveImage] = useState(0);
   const [tab, setTab] = useState<Tab>('Description');
   const [added, setAdded] = useState(false);
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { showToast } = useToast();
+
+  const loadProduct = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const item = await fetchCatalogProduct(productId);
+      if (item) {
+        setProduct(item);
+      } else if (!product) {
+        setProduct(null);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to load product details.';
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [productId, product]);
+
+  useEffect(() => {
+    loadProduct();
+  }, [loadProduct]);
+
+  if (isLoading && !product) {
+    return (
+      <section className="min-h-screen bg-[#F8FAFC] pb-24 pt-28">
+        <div className="container mx-auto px-6 lg:px-[80px]">
+          <div className="animate-pulse grid gap-12 lg:grid-cols-2">
+            <div className="aspect-square bg-[#E2E8F0] rounded-3xl" />
+            <div className="space-y-6 pt-4">
+              <div className="h-10 bg-[#E2E8F0] rounded w-3/4" />
+              <div className="h-5 bg-[#E2E8F0] rounded w-full" />
+              <div className="h-5 bg-[#E2E8F0] rounded w-2/3" />
+              <div className="h-12 bg-[#E2E8F0] rounded w-1/3 mt-8" />
+              <div className="h-12 bg-[#E2E8F0] rounded w-full mt-6" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (!product) {
     return (
@@ -64,6 +112,18 @@ export default function ProductDetailPage({ productId, onBack }: ProductDetailPa
   return (
     <section className="min-h-screen overflow-x-hidden bg-[#F8FAFC] pb-24 pt-28">
       <div className="container mx-auto px-6 lg:px-[80px]">
+        {error && (
+          <div className="mb-6 flex items-center justify-between rounded-xl border border-[#FCA5A5] bg-[#FEF2F2] p-4 text-[#991B1B]">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={20} className="shrink-0" />
+              <p className="text-sm font-['DM_Sans']">{error}</p>
+            </div>
+            <Button size="sm" variant="outline" className="gap-2 shrink-0 font-bold" onClick={loadProduct}>
+              <RefreshCw size={14} /> Retry
+            </Button>
+          </div>
+        )}
+
         <div className="mb-10 flex items-center justify-between gap-4">
           <Button variant="ghost" className="rounded-md px-0 hover:bg-transparent" onClick={onBack}>
             <ArrowLeft size={18} /> Back to products
@@ -127,8 +187,19 @@ export default function ProductDetailPage({ productId, onBack }: ProductDetailPa
               <Button size="lg" className="min-w-[210px] flex-1 rounded-md" onClick={addProduct}>
                 {added ? <><Check size={20} /> Added to cart</> : <><ShoppingCart size={20} /> Add to cart</>}
               </Button>
-              <Button size="lg" variant="outline" className="min-w-[180px] flex-1 rounded-md" onClick={() => window.location.href = `mailto:info@kitchenbots.in?subject=${encodeURIComponent(`Product enquiry: ${product.name}`)}`}>
-                Ask about product
+              <Button
+                size="lg"
+                variant="outline"
+                className="min-w-[180px] flex-1 rounded-md"
+                onClick={() => {
+                  if (onNavigate) {
+                    onNavigate('bulk-enquiry');
+                  } else {
+                    window.location.href = '/bulk-enquiry';
+                  }
+                }}
+              >
+                Request Quote
               </Button>
             </div>
 

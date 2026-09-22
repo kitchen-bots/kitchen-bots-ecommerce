@@ -40,6 +40,7 @@ export interface Product {
   durability?: string;
   videoPath?: string;
   sequenceFrameCount?: number;
+  slug?: string;
 }
 
 export interface CartItem {
