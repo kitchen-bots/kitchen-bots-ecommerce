@@ -168,7 +168,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-[#64748B] shrink-0">Delivery to</span>
-                  <span className="text-[#0F172A] text-right">{confirmedOrder.address}, {confirmedOrder.city}, {confirmedOrder.state} — {confirmedOrder.pincode}</span>
+                  <span className="text-[#0F172A] text-right">{confirmedOrder.address}, {confirmedOrder.city}, {confirmedOrder.state} - {confirmedOrder.pincode}</span>
                 </div>
                 <div className="pt-2 border-t border-[#E2E8F0]">
                   <div className="flex justify-between font-semibold">

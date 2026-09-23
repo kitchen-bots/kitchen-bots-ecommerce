@@ -138,7 +138,7 @@ export default function FAQSection() {
             className="text-[#6B7280] text-[16px] md:text-[18px] leading-[1.6]"
             style={{ fontFamily: 'DM Sans, sans-serif' }}
           >
-            From first-time buyers to wholesale customers — answers to what we hear most.
+            From first-time buyers to wholesale customers - answers to what we hear most.
           </p>
         </div>
 

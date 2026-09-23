@@ -368,7 +368,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                       </p>
                       <p className="mt-1 font-['DM_Sans'] text-sm text-[#475569]">
                         <span className="font-semibold text-[#0F172A]">Delivery to:</span>{' '}
-                        {ord.city}, {ord.state} — {ord.pincode}
+                        {ord.city}, {ord.state} - {ord.pincode}
                       </p>
                       <p className="mt-1 font-['Outfit'] text-sm font-bold text-[#0F172A]">
                         ₹{ord.total?.toLocaleString('en-IN')}

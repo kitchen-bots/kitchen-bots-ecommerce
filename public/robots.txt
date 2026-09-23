@@ -1,0 +1,6 @@
+# https://kitchenbots.in robots.txt
+User-agent: *
+Allow: /
+Disallow: /forgot-password
+
+Sitemap: https://kitchenbots.in/sitemap.xml

@@ -8,7 +8,7 @@ interface ContactBannerProps {
 
 export default function ContactBanner({ onNavigate }: ContactBannerProps) {
   const phone = '+91 9490701421';
-  const email = 'kitchenbots.sales@gmail.com';
+  const email = 'info@kitchenbots.in';
 
   return (
     <section className="bg-[#F3F4F6] w-full border-y border-[#E5E7EB] z-10">

@@ -8,7 +8,7 @@
  *   2. Replace your measurement IDs in the snippet
  *   3. This module will automatically detect and call window.gtag / window.fbq
  *
- * All functions are safe to call even before the scripts load — they
+ * All functions are safe to call even before the scripts load - they
  * short-circuit gracefully when trackers are absent.
  */
 

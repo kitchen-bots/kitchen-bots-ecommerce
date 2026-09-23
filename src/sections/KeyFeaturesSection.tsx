@@ -61,7 +61,7 @@ export default function KeyFeaturesSection({ onNavigate }: KeyFeaturesSectionPro
               style={{ fontFamily: 'DM Sans, sans-serif' }}
             >
               We manufacture commercial kitchen equipment built for real Indian business conditions. 
-              From street food stalls to hotel kitchens — our products are steel-built, 
+              From street food stalls to hotel kitchens - our products are steel-built, 
               GST-ready, and backed by real human support.
             </p>
 

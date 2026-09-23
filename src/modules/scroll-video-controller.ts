@@ -16,7 +16,7 @@ interface ScrollVideoOptions {
 }
 
 interface ScrollVideoState {
-    /** Current (interpolated) frame index — use this to render */
+    /** Current (interpolated) frame index - use this to render */
     frame: number;
     /** Whether the element is currently in the viewport */
     isVisible: boolean;

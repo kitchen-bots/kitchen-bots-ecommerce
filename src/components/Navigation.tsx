@@ -113,7 +113,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
 
   return (
     <header className="sticky top-0 z-50 relative">
-      {/* Outer padding shell — only padding transitions, no height change */}
+      {/* Outer padding shell - only padding transitions, no height change */}
       <div
         style={{
           padding: isScrolled ? '10px 12px' : '0px',

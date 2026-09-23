@@ -20,7 +20,7 @@ const engineeringPillars = [
         title: 'Heat-Resistant Coating',
         headline: 'Rated to 1000°C',
         description:
-            'External surfaces are treated with a two-stage heat-resistant ceramic coating that resists peeling, discolouration, and corrosion up to 1000°C. Internal surfaces are seasoned using our thermal cycling process — eliminating the need for paint in combustion zones and creating a naturally non-reactive cooking environment.',
+            'External surfaces are treated with a two-stage heat-resistant ceramic coating that resists peeling, discolouration, and corrosion up to 1000°C. Internal surfaces are seasoned using our thermal cycling process - eliminating the need for paint in combustion zones and creating a naturally non-reactive cooking environment.',
         spec: '1000°C rated ceramic coating • Zero paint on cooking surfaces',
         color: '#156331',
     },
@@ -29,7 +29,7 @@ const engineeringPillars = [
         title: 'Engineered Airflow Design',
         headline: 'Combustion by Design',
         description:
-            'Airflow is not an afterthought — it\'s the primary thermal engineering variable in every KitchenBots product. Adjustable primary air vents, secondary combustion pathways, and strategically positioned ash pans work together to maximise burn efficiency and give the cook precise temperature control.',
+            'Airflow is not an afterthought - it\'s the primary thermal engineering variable in every KitchenBots product. Adjustable primary air vents, secondary combustion pathways, and strategically positioned ash pans work together to maximise burn efficiency and give the cook precise temperature control.',
         spec: '40% fuel savings vs. standard grills • Adjustable primary + secondary air',
         color: '#0B351B',
     },
@@ -38,7 +38,7 @@ const engineeringPillars = [
         title: 'Structural Rigidity Testing',
         headline: 'Stress-Tested Before You Cook',
         description:
-            'Every new model undergoes a 200-hour accelerated thermal cycling protocol — 500 heating-and-cooling cycles between ambient temperature and maximum operating temperature. Physical load testing applies 3× the expected cooking weight. Only units that pass every cycle enter production.',
+            'Every new model undergoes a 200-hour accelerated thermal cycling protocol - 500 heating-and-cooling cycles between ambient temperature and maximum operating temperature. Physical load testing applies 3× the expected cooking weight. Only units that pass every cycle enter production.',
         spec: '500 thermal cycles • 3× load testing • Pre-production QC',
         color: '#7ECC89',
     },
@@ -47,7 +47,7 @@ const engineeringPillars = [
         title: 'Modular Serviceability',
         headline: 'Engineered for Decades of Use',
         description:
-            'A grill that can\'t be serviced ends up in landfill. Every KitchenBots component — grates, hinge pins, motor assemblies, skewers, drip pans — is individually catalogued, stocked, and available for order. We guarantee parts availability for a minimum of 10 years from product launch.',
+            'A grill that can\'t be serviced ends up in landfill. Every KitchenBots component - grates, hinge pins, motor assemblies, skewers, drip pans - is individually catalogued, stocked, and available for order. We guarantee parts availability for a minimum of 10 years from product launch.',
         spec: '10-year parts guarantee • All components individually serviceable',
         color: '#4A4A4A',
     },
