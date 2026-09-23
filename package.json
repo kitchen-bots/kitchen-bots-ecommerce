@@ -11,7 +11,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "upload:r2": "node scripts/upload-to-r2.mjs"
+    "upload:r2": "node scripts/upload-to-r2.mjs",
+    "sync:catalog": "node scripts/sync-catalog.mjs",
+    "sync:catalog:check": "node scripts/sync-catalog.mjs --check"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
