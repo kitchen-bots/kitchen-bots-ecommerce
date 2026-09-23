@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Phone, Mail, Clock, MapPin, Send, CheckCircle, MessageCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import TurnstileWidget from '../components/TurnstileWidget';
 import { submitEnquiry } from '../lib/api';
 
 const CONTACT_CHANNELS = [
@@ -46,6 +47,7 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,10 +63,12 @@ export default function ContactPage() {
         city: formData.city.trim() || undefined,
         message: formData.message.trim(),
         items: [],
+        turnstileToken: turnstileToken || undefined,
       });
 
       setSubmittedRef(response.reference);
       setFormData({ name: '', email: '', phone: '', company: '', city: '', message: '' });
+      setTurnstileToken('');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to submit enquiry. Please try again.';
       setErrorMessage(message);
@@ -304,6 +308,13 @@ export default function ContactPage() {
                         rows={4}
                         placeholder="Detail equipment types, sizes, custom fabrication needs, or delivery timelines..."
                         className="w-full rounded-xl border border-[#CBD5E1] p-4 text-sm outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] disabled:opacity-50 resize-y"
+                      />
+                    </div>
+
+                    <div className="py-1">
+                      <TurnstileWidget
+                        onVerify={(token) => setTurnstileToken(token)}
+                        onExpire={() => setTurnstileToken('')}
                       />
                     </div>
 

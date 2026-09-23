@@ -1,7 +1,7 @@
 import { PRODUCTS, getProductById } from '../data/products';
 import type { Product, ProductCategory } from '../types/product';
-
-export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+export const DEFAULT_API_BASE_URL = 'https://kitchen-bots-api.workofcharan.workers.dev';
+export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
 
 export interface ApiProduct {
   id: string;
