@@ -3,7 +3,7 @@
  * Automatically prefixes relative media paths with VITE_CDN_URL if defined.
  * Falls back to local root paths if VITE_CDN_URL is not provided.
  */
-const CDN_URL = (import.meta.env.VITE_CDN_URL || '').replace(/\/$/, '');
+const CDN_URL = (import.meta.env.VITE_CDN_URL || 'https://pub-a4b0711cb441484fbb54bc792d2312b5.r2.dev').replace(/\/$/, '');
 
 export function getMediaUrl(path: string | undefined | null): string {
   if (!path) return '';
