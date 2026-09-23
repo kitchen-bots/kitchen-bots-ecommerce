@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ChevronDown, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { useCart } from '../hooks/use-cart';
 import { PRODUCTS } from '../data/products';
-import { getPortalUrl } from '../lib/portal';
 import type { Page } from '../App';
 import { Button } from './ui/button';
+import { useAuth } from '../context/AuthContext';
 
 interface NavigationProps {
   currentPage: Page;
@@ -15,18 +15,20 @@ interface NavigationProps {
 }
 
 const CATEGORIES = ['All', ...new Set(PRODUCTS.map(product => product.category))];
-const ACCOUNT_URL = getPortalUrl(import.meta.env.VITE_PORTAL_URL);
 
 export default function Navigation({ currentPage, onNavigate, onCartClick, onCatalog }: NavigationProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { totalItems } = useCart();
+  const { user, logout } = useAuth();
   const productMenu = useRef<HTMLDivElement>(null);
   const productButton = useRef<HTMLButtonElement>(null);
   const searchButton = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
+  const userMenu = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (searchOpen) searchInput.current?.focus();
@@ -42,6 +44,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   useEffect(() => {
     const close = (event: PointerEvent) => {
       if (!productMenu.current?.contains(event.target as Node)) setProductsOpen(false);
+      if (!userMenu.current?.contains(event.target as Node)) setUserMenuOpen(false);
     };
     document.addEventListener('pointerdown', close);
     return () => document.removeEventListener('pointerdown', close);
@@ -51,6 +54,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
     setMobileOpen(false);
     setProductsOpen(false);
     setSearchOpen(false);
+    setUserMenuOpen(false);
     onNavigate(page);
   };
 
@@ -68,8 +72,15 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
     onCatalog(query);
   };
 
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    setMobileOpen(false);
+    navigate('home');
+  };
+
   return (
-    <header className="sticky top-0 z-50 h-20 border-b border-[#F1F5F9] bg-white shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 h-20 border-b border-[#F1F5F9] bg-white shadow-sm w-full">
       <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between gap-6 px-6 lg:px-[80px]">
         <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0">
           <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-12 w-auto object-contain" />
@@ -141,9 +152,49 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
           >
             <Search size={20} />
           </Button>
-          <Button asChild variant="ghost" className="hidden rounded-lg sm:flex">
-            <a href={ACCOUNT_URL}><User size={18} /> My Account</a>
-          </Button>
+
+          {/* Desktop: Account / User Menu */}
+          {user ? (
+            <div ref={userMenu} className="relative hidden sm:block">
+              <Button
+                variant="ghost"
+                className="rounded-lg flex items-center gap-2"
+                onClick={() => setUserMenuOpen(o => !o)}
+                aria-expanded={userMenuOpen}
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#C2410C] text-white text-xs font-bold uppercase shrink-0">
+                  {user.name.charAt(0)}
+                </span>
+                <span className="max-w-[100px] truncate text-sm font-semibold text-[#334155]">{user.name}</span>
+                <ChevronDown size={14} className="text-[#94A3B8]" />
+              </Button>
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-52 border border-[#E2E8F0] bg-white shadow-xl rounded-lg p-1 z-50">
+                  <div className="px-3 py-2 border-b border-[#F1F5F9] mb-1">
+                    <p className="text-xs font-bold text-[#111827] truncate">{user.name}</p>
+                    <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-semibold text-[#DC2626] hover:bg-[#FEF2F2] transition-colors"
+                  >
+                    <LogOut size={15} />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Button asChild variant="ghost" className="hidden rounded-lg sm:flex">
+              <a
+                href="#login"
+                onClick={(e) => { e.preventDefault(); navigate('login'); }}
+              >
+                <User size={18} /> Login
+              </a>
+            </Button>
+          )}
+
           <Button variant="ghost" size="icon" className="relative rounded-lg" onClick={onCartClick} aria-label={`Open cart, ${totalItems} items`}>
             <ShoppingBag size={20} />
             {totalItems > 0 && <span className="absolute -right-1 -top-1 min-w-4 rounded-sm bg-[#C2410C] px-1 text-[10px] text-white">{totalItems}</span>}
@@ -177,6 +228,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
         </div>
       )}
 
+      {/* Mobile Drawer */}
       <div className={`fixed inset-0 z-[60] lg:hidden ${mobileOpen ? '' : 'pointer-events-none'}`}>
         <button className={`absolute inset-0 bg-[#0F172A]/40 transition-opacity ${mobileOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setMobileOpen(false)} aria-label="Close navigation" />
         <div className={`absolute bottom-0 right-0 top-0 w-[min(88%,360px)] bg-white transition-transform duration-200 ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -184,6 +236,20 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-10 w-auto" />
             <Button variant="ghost" size="icon" className="rounded-lg" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X /></Button>
           </div>
+
+          {/* Mobile user badge */}
+          {user && (
+            <div className="mx-4 mt-4 mb-1 flex items-center gap-3 rounded-xl bg-[#FFF7ED] px-4 py-3 border border-[#FED7AA]">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C2410C] text-white text-sm font-bold uppercase">
+                {user.name.charAt(0)}
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[#111827] truncate">{user.name}</p>
+                <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
+              </div>
+            </div>
+          )}
+
           <nav className="flex flex-col gap-1 p-4" aria-label="Mobile navigation">
             <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('home')}>Home</Button>
             <p className="mt-3 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#64748B]">Products</p>
@@ -195,9 +261,24 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             <Button variant="ghost" className="mt-3 justify-start rounded-md" onClick={() => navigate('capabilities')}>Capabilities</Button>
             <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('about')}>About</Button>
             <Button variant="ghost" className="justify-start rounded-md" onClick={() => navigate('contact')}>Contact</Button>
-            <Button asChild variant="outline" className="mt-4 rounded-md">
-              <a href={ACCOUNT_URL}><User size={18} /> My Account</a>
-            </Button>
+
+            <div className="mt-4 border-t border-[#F1F5F9] pt-4">
+              {user ? (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start rounded-md text-[#DC2626] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                  onClick={handleLogout}
+                >
+                  <LogOut size={16} className="mr-2" /> Logout
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="w-full rounded-md">
+                  <a href="#login" onClick={(e) => { e.preventDefault(); navigate('login'); }}>
+                    <User size={18} className="mr-2" /> Login / Sign Up
+                  </a>
+                </Button>
+              )}
+            </div>
           </nav>
         </div>
       </div>

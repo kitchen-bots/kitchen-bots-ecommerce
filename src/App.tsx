@@ -19,6 +19,7 @@ import MobileStickyCart from './components/MobileStickyCart';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { AuthProvider } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import WishlistPage from './pages/WishlistPage';
@@ -172,9 +173,10 @@ function App() {
       <SEOHead {...(currentPage === 'product-detail' && selectedProductId && getProductById(selectedProductId)
         ? { ...getProductSEO(getProductById(selectedProductId)!), canonical: `/product-detail?id=${encodeURIComponent(selectedProductId)}` }
         : PAGE_SEO[currentPage] ?? PAGE_SEO['home'])} />
-      <ToastProvider>
-        <WishlistProvider>
-          <CartProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <WishlistProvider>
+            <CartProvider>
             <div className="min-h-screen bg-white">
               <Navigation
                 currentPage={currentPage}
@@ -183,7 +185,7 @@ function App() {
                 onCartClick={() => setIsCartOpen(true)}
               />
               
-              <main>
+              <main className="pt-20">
                 {renderPage()}
               </main>
 
@@ -222,9 +224,10 @@ function App() {
                 </svg>
               </a>
             </div>
-          </CartProvider>
-        </WishlistProvider>
-      </ToastProvider>
+            </CartProvider>
+          </WishlistProvider>
+        </ToastProvider>
+      </AuthProvider>
     </>
   );
 }
