@@ -11,10 +11,10 @@ export default function Footer({ onNavigate }: FooterProps) {
   return (
     <footer className="border-t border-[#1E293B] bg-[#0F172A] text-white font-['DM_Sans']">
       <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16 py-14 lg:py-16">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-12">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-10">
           
           {/* Brand & Overview */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-3">
             <button
               onClick={() => onNavigate?.('home')}
               className="mb-6 inline-block text-left focus:outline-none group"
@@ -93,7 +93,7 @@ export default function Footer({ onNavigate }: FooterProps) {
           </div>
 
           {/* Company & Support */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <h3 className="font-['Outfit'] text-sm font-bold uppercase tracking-wider text-white">
               Company
             </h3>

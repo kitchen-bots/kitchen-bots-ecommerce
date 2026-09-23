@@ -51,6 +51,16 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   }, [mobileOpen]);
 
   useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
       if (!productMenu.current?.contains(event.target as Node)) {
         setProductsOpen(false);
@@ -75,7 +85,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     closeTimeoutRef.current = setTimeout(() => {
       setProductsOpen(false);
-    }, 200);
+    }, 150);
   };
 
   const navigate = (page: Page) => {
