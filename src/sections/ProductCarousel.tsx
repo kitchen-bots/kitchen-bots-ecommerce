@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import ProductImage from '../components/ProductImage';
 import { useCart } from '../modules/cart-system';
 import { PRODUCTS } from '../data/products';
 
@@ -201,17 +202,11 @@ export default function ProductCarousel({ onProductClick }: ProductCarouselProps
 
                     {/* Product Image */}
                     <div className="relative h-64 flex items-center justify-center p-6">
-                      <img
+                      <ProductImage
                         src={product.image}
                         alt={`${product.name} - Premium BBQ Grill`}
                         loading="lazy"
-                        decoding="async"
-                        width={300}
-                        height={300}
                         className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-xl"
-                        style={{
-                          filter: 'drop-shadow(0 15px 25px rgba(0,0,0,0.1))',
-                        }}
                       />
                     </div>
 

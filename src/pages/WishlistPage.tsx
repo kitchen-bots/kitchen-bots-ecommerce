@@ -5,6 +5,7 @@ import type { Page } from '../App';
 import { useCart } from '../hooks/use-cart';
 import { useToast } from '../hooks/use-toast';
 import { Button } from '../components/ui/button';
+import ProductImage from '../components/ProductImage';
 
 interface WishlistPageProps {
   onProductClick: (id: string) => void;
@@ -63,9 +64,9 @@ export default function WishlistPage({ onProductClick, onNavigate }: WishlistPag
                     className="relative aspect-[4/3] bg-[#F8FAFC] cursor-pointer overflow-hidden p-8 flex items-center justify-center"
                     onClick={() => onProductClick(product.id)}
                   >
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
+                    <ProductImage
+                      src={product.image}
+                      alt={product.name}
                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
                     />
                     <Button 
