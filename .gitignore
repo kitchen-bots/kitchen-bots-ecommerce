@@ -18,6 +18,8 @@ build/
 # Cloudflare / Vercel / Firebase caches
 .vercel/
 .firebase/
+.wrangler/
+.dev.vars*
 
 # OS and Editor artifacts
 .DS_Store
