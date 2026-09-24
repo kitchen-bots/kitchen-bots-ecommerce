@@ -3,6 +3,7 @@ import { useCart } from '../hooks/use-cart';
 import { useToast } from '../hooks/use-toast';
 import { PRODUCTS } from '../data/products';
 import { Button } from '../components/ui/button';
+import ProductImage from '../components/ProductImage';
 
 interface ProductFleetSectionProps {
   onBrowse?: () => void;
@@ -51,7 +52,7 @@ export default function ProductFleetSection({ onBrowse, onProductClick, onCartOp
                   onClick={() => onProductClick?.(product.id)}
                   aria-label={`View ${product.name}`}
                 >
-                  <img src={product.image} alt={product.name} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
+                  <ProductImage src={product.image} alt={product.name} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
                 </button>
                 <div className="flex flex-1 flex-col p-6">
                   <button className="text-left" onClick={() => onProductClick?.(product.id)}>
