@@ -2,6 +2,7 @@ import { X, Plus, Minus, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { useCart } from '../hooks/use-cart';
 import type { Page } from '../App';
 import { Button } from './ui/button';
+import ProductImage from './ProductImage';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -76,7 +77,7 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
                   className="flex gap-6 p-6 bg-white border border-[#F1F5F9] rounded-[32px] group hover:shadow-premium transition-all duration-300"
                 >
                   <div className="w-24 h-24 bg-[#F8FAFC] rounded-2xl flex items-center justify-center p-4 shrink-0 overflow-hidden">
-                    <img
+                    <ProductImage
                       src={item.image}
                       alt={item.name}
                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"

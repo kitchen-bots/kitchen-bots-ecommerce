@@ -1,4 +1,5 @@
 import { PRODUCTS, getProductById } from '../data/products';
+import { getMediaUrl } from './cdn';
 import type { Product, ProductCategory } from '../types/product';
 export const DEFAULT_API_BASE_URL = '';
 export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
@@ -69,10 +70,11 @@ export function categoryIdToName(categoryId: string): ProductCategory {
 
 export function toStorefrontProduct(apiProduct: ApiProduct): Product {
   const local = getProductById(apiProduct.id) || PRODUCTS.find((p) => p.slug === apiProduct.slug);
-  const images = apiProduct.imageUrls && apiProduct.imageUrls.length > 0
+  const rawImages = apiProduct.imageUrls && apiProduct.imageUrls.length > 0
     ? apiProduct.imageUrls
     : (local?.images || []);
-  const primaryImage = images[0] || local?.image || '';
+  const images = rawImages.map(img => getMediaUrl(img));
+  const primaryImage = images[0] || (local?.image ? getMediaUrl(local.image) : '');
   const priceRupees =
     apiProduct.pricePaise !== null && apiProduct.pricePaise !== undefined
       ? Math.round(apiProduct.pricePaise / 100)
