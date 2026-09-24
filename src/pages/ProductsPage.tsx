@@ -51,8 +51,11 @@ const formatPrice = (price: number) => new Intl.NumberFormat('en-IN', {
 export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }: ProductsPageProps) {
   const params = new URLSearchParams(window.location.search);
   const requestedCategory = params.get('category');
+
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>(
-    CATEGORIES.includes(requestedCategory as CategoryFilter) ? requestedCategory as CategoryFilter : 'All',
+    requestedCategory && (CATEGORIES as string[]).includes(requestedCategory)
+      ? (requestedCategory as CategoryFilter)
+      : 'All'
   );
   const [searchQuery, setSearchQuery] = useState(params.get('q') ?? '');
   const [view, setView] = useState<ViewMode>('grid');
@@ -104,7 +107,7 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
-      {/* Unified Header & Catalog Controls (Seamless, no gap below navbar) */}
+      {/* Header & Catalog Controls */}
       <section className="border-b border-[#E2E8F0] bg-white pb-8 pt-6 sm:pt-8">
         <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
           <nav className="mb-4 flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-[#94A3B8]" aria-label="Breadcrumb">
@@ -153,7 +156,7 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
                     onClick={() => setActiveCategory(category)}
                     aria-pressed={activeCategory === category}
                   >
-                    {category === 'All' ? 'All products (12)' : category}
+                    {category === 'All' ? 'All products' : category}
                   </button>
                 ))}
               </div>
@@ -175,7 +178,7 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
       </section>
 
       {/* Product List Content */}
-      <section className="section-padding">
+      <section className="section-padding py-10">
         <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
           {error && (
             <div className="mb-8 flex items-center justify-between rounded-xl border border-[#FCA5A5] bg-[#FEF2F2] p-4 text-[#991B1B]">
@@ -243,7 +246,7 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
                       <div className="absolute top-4 left-4 z-10 flex flex-wrap gap-1.5">
                         {product.sequenceId && (
                           <span className="flex items-center gap-1 rounded-lg bg-black/75 px-2 py-1 text-[11px] font-bold text-white shadow-xs backdrop-blur-md">
-                            <RotateCw size={11} className="text-[#FDBA74] animate-spin-slow" /> 360° 3D
+                            <RotateCw size={11} className="text-[#FDBA74]" /> 360° 3D
                           </span>
                         )}
                         {product.video && (

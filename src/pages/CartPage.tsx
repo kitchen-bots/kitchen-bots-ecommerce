@@ -1,9 +1,25 @@
 import React, { useState } from 'react';
 import { useCart } from '../hooks/use-cart';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle, MapPin, Phone, User, ChevronDown, ChevronUp } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import {
+  Trash2,
+  Plus,
+  Minus,
+  ShoppingBag,
+  ArrowRight,
+  CheckCircle,
+  AlertCircle,
+  MapPin,
+  Phone,
+  User,
+  ChevronDown,
+  ChevronUp,
+  Loader2
+} from 'lucide-react';
 import type { Page } from '../App';
 import { Button } from '../components/ui/button';
 import ProductImage from '../components/ProductImage';
+import { apiClient } from '../lib/api-client';
 
 interface CartPageProps {
   onNavigate: (page: Page) => void;
@@ -33,10 +49,6 @@ interface PlacedOrder {
   status: string;
 }
 
-/**
- * Safely renders configuration values as React content based on runtime type.
- * Prevents errors when objects, arrays, booleans, or nullish values are present.
- */
 function renderConfigValue(value: unknown): React.ReactNode {
   if (value === null || value === undefined) {
     return '';
@@ -66,11 +78,15 @@ function generateOrderRef(): string {
 
 export default function CartPage({ onNavigate }: CartPageProps) {
   const { items, removeFromCart, updateQuantity, clearCart, totalPrice, totalItems } = useCart();
+  const { user } = useAuth();
   const [showCheckout, setShowCheckout] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<PlacedOrder | null>(null);
   const [formErrors, setFormErrors] = useState<Partial<CheckoutForm>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [form, setForm] = useState<CheckoutForm>({
-    name: '',
+    name: user?.displayName || '',
     phone: '',
     address: '',
     city: '',
@@ -99,12 +115,16 @@ export default function CartPage({ onNavigate }: CartPageProps) {
     return Object.keys(errors).length === 0;
   };
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    const reference = generateOrderRef();
     const order: PlacedOrder = {
-      reference: generateOrderRef(),
+      reference,
       date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
       name: form.name.trim(),
       phone: form.phone.trim(),
@@ -117,7 +137,45 @@ export default function CartPage({ onNavigate }: CartPageProps) {
       status: 'Order Confirmed',
     };
 
-    // Persist to localStorage so Customer Portal can show it
+    if (user) {
+      try {
+        const idempotencyKey = `ord-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        const response = await apiClient<{ id?: string; referenceNumber?: string }>('/v1/orders', {
+          method: 'POST',
+          requireAuth: true,
+          headers: {
+            'Idempotency-Key': idempotencyKey,
+          },
+          body: JSON.stringify({
+            items: items.map(i => ({
+              productId: i.id,
+              quantity: i.quantity,
+              price: i.price,
+              name: i.name,
+              configuration: i.configuration,
+            })),
+            delivery: {
+              name: form.name.trim(),
+              phone: form.phone.trim(),
+              address: form.address.trim(),
+              city: form.city.trim(),
+              state: form.state.trim(),
+              pincode: form.pincode.trim(),
+              notes: form.notes.trim() || undefined,
+            },
+            totalItems,
+            estimatedTotal: totalPrice,
+          }),
+        });
+        if (response?.referenceNumber || response?.id) {
+          order.reference = response.referenceNumber || response.id || reference;
+        }
+      } catch (err) {
+        console.warn('Backend order submission warning:', err);
+      }
+    }
+
+    // Persist to localStorage so Customer Portal can display it
     try {
       const existing = localStorage.getItem('kb_orders');
       const orders: PlacedOrder[] = existing ? JSON.parse(existing) : [];
@@ -130,9 +188,10 @@ export default function CartPage({ onNavigate }: CartPageProps) {
     clearCart();
     setConfirmedOrder(order);
     setShowCheckout(false);
+    setIsSubmitting(false);
   };
 
-  // ─── Order Confirmed Screen ───────────────────────────────────────────────
+  // Order Confirmed Screen
   if (confirmedOrder) {
     return (
       <main className="min-h-screen bg-[#FAFAFA] pt-20">
@@ -182,7 +241,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
               <div className="space-y-2">
                 <Button
                   onClick={() => onNavigate('login')}
-                  className="w-full rounded-xl font-bold bg-kb-primary hover:bg-[#145e2e] text-white"
+                  className="w-full rounded-xl font-bold bg-[#C2410C] hover:bg-[#9A3412] text-white"
                   size="lg"
                 >
                   Track Order in My Account
@@ -202,13 +261,13 @@ export default function CartPage({ onNavigate }: CartPageProps) {
     );
   }
 
-  // ─── Empty Cart ───────────────────────────────────────────────────────────
+  // Empty Cart
   if (items.length === 0) {
     return (
       <main className="min-h-screen bg-[#FAFAFA] pt-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="max-w-lg mx-auto bg-white border border-[#E2E8F0] rounded-xl p-8 sm:p-12 text-center shadow-xs">
-            <div className="w-16 h-16 bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl flex items-center justify-center mx-auto mb-5 text-kb-primary">
+            <div className="w-16 h-16 bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl flex items-center justify-center mx-auto mb-5 text-[#16A34A]">
               <ShoppingBag className="w-8 h-8" aria-hidden="true" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] font-['Outfit'] mb-2">
@@ -219,9 +278,9 @@ export default function CartPage({ onNavigate }: CartPageProps) {
             </p>
             <Button
               onClick={() => onNavigate('products')}
-              variant="secondary"
+              variant="default"
               size="lg"
-              className="w-full sm:w-auto bg-kb-primary hover:bg-[#145e2e] text-white focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:ring-offset-2"
+              className="w-full sm:w-auto bg-[#C2410C] hover:bg-[#9A3412] text-white rounded-xl font-bold"
             >
               Browse Products
             </Button>
@@ -231,7 +290,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
     );
   }
 
-  // ─── Cart with items ──────────────────────────────────────────────────────
+  // Cart with items
   return (
     <main className="min-h-screen bg-[#FAFAFA] pt-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -240,7 +299,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
           <button
             type="button"
             onClick={() => onNavigate('home')}
-            className="hover:text-[#111827] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary rounded px-1.5 py-2 min-h-[44px] inline-flex items-center"
+            className="hover:text-[#111827] transition-colors focus:outline-none rounded px-1.5 py-2 min-h-[44px] inline-flex items-center"
           >
             Home
           </button>
@@ -248,7 +307,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
           <button
             type="button"
             onClick={() => onNavigate('products')}
-            className="hover:text-[#111827] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary rounded px-1.5 py-2 min-h-[44px] inline-flex items-center"
+            className="hover:text-[#111827] transition-colors focus:outline-none rounded px-1.5 py-2 min-h-[44px] inline-flex items-center"
           >
             Products
           </button>
@@ -272,6 +331,13 @@ export default function CartPage({ onNavigate }: CartPageProps) {
             {totalItems} {totalItems === 1 ? 'item' : 'items'}
           </span>
         </header>
+
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl text-xs text-[#DC2626] flex items-center gap-2 font-['DM_Sans']">
+            <AlertCircle size={16} className="shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -318,7 +384,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                         </div>
                       </div>
 
-                      {/* Product Configuration Display (if supported) */}
+                      {/* Product Configuration Display */}
                       {hasConfig && item.configuration && (
                         <div className="mt-2 text-xs text-[#64748B] space-y-1 bg-[#F8FAFC] border border-[#F1F5F9] rounded-md p-2.5">
                           <span className="font-semibold text-[#475569] uppercase tracking-wider text-[10px]">
@@ -346,7 +412,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                             onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                             disabled={item.quantity <= 1}
                             aria-label={`Decrease quantity of ${item.name}`}
-                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:z-10 disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
+                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
                           >
                             <Minus className="w-4 h-4" aria-hidden="true" />
                           </button>
@@ -361,7 +427,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                             onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                             disabled={item.quantity >= 999}
                             aria-label={`Increase quantity of ${item.name}`}
-                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:z-10 disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
+                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
                           >
                             <Plus className="w-4 h-4" aria-hidden="true" />
                           </button>
@@ -374,7 +440,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                         size="sm"
                         onClick={() => removeFromCart(item.id)}
                         aria-label={`Remove ${item.name} from cart`}
-                        className="text-[#64748B] hover:text-[#DC2626] hover:bg-[#FEF2F2] min-h-[44px] px-3 text-xs font-medium gap-1.5 focus-visible:ring-2 focus-visible:ring-[#DC2626] focus-visible:ring-offset-2"
+                        className="text-[#64748B] hover:text-[#DC2626] hover:bg-[#FEF2F2] min-h-[44px] px-3 text-xs font-medium gap-1.5"
                       >
                         <Trash2 className="w-4 h-4" aria-hidden="true" />
                         <span>Remove</span>
@@ -430,7 +496,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                 <Button
                   onClick={() => setShowCheckout(true)}
                   size="lg"
-                  className="w-full text-base font-bold flex items-center justify-center gap-2 bg-kb-primary hover:bg-[#145e2e] text-white focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:ring-offset-2"
+                  className="w-full text-base font-bold flex items-center justify-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white rounded-xl"
                 >
                   Place Direct Order
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -440,7 +506,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                   onClick={() => onNavigate('bulk-enquiry')}
                   variant="outline"
                   size="default"
-                  className="w-full text-sm font-medium border-[#CBD5E1] focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:ring-offset-2"
+                  className="w-full text-sm font-medium border-[#CBD5E1] rounded-xl"
                 >
                   Request Commercial Quote
                 </Button>
@@ -449,7 +515,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
           </aside>
         </div>
 
-        {/* ─── Direct Checkout Panel ─────────────────────────────────────────── */}
+        {/* Direct Checkout Panel Modal */}
         {showCheckout && (
           <div
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 p-4"
@@ -463,7 +529,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                 <div>
                   <h2 className="font-['Outfit'] text-xl font-bold text-[#111827]">Delivery Details</h2>
                   <p className="text-xs text-[#64748B] font-['DM_Sans'] mt-0.5">
-                    No payment required now. We will contact you to confirm.
+                    No advance payment required. We will contact you to confirm delivery.
                   </p>
                 </div>
                 <button
@@ -638,10 +704,20 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full font-bold rounded-xl bg-kb-primary hover:bg-[#145e2e] text-white"
+                    disabled={isSubmitting}
+                    className="w-full font-bold rounded-xl bg-[#C2410C] hover:bg-[#9A3412] text-white"
                   >
-                    Confirm Order
-                    <ChevronUp className="w-4 h-4 ml-1" />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="animate-spin mr-2" size={18} />
+                        Confirming Order...
+                      </>
+                    ) : (
+                      <>
+                        Confirm Order
+                        <ChevronUp className="w-4 h-4 ml-1" />
+                      </>
+                    )}
                   </Button>
                 </div>
               </form>
