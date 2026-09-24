@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ChevronDown, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { useCart } from '../hooks/use-cart';
 import { PRODUCTS } from '../data/products';
-import { getPortalUrl } from '../lib/portal';
 import type { Page } from '../App';
 import { Button } from './ui/button';
+import { useAuth } from '../context/AuthContext';
 
 interface NavigationProps {
   currentPage: Page;
@@ -15,19 +15,21 @@ interface NavigationProps {
 }
 
 const CATEGORIES = ['All', ...new Set(PRODUCTS.map(product => product.category))];
-const ACCOUNT_URL = getPortalUrl(import.meta.env.VITE_PORTAL_URL);
 
 export default function Navigation({ currentPage, onNavigate, onCartClick, onCatalog }: NavigationProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { totalItems } = useCart();
+  const { user, logout } = useAuth();
   const productMenu = useRef<HTMLDivElement>(null);
   const productButton = useRef<HTMLButtonElement>(null);
   const searchButton = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
+  const userMenu = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -65,6 +67,9 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
       if (!productMenu.current?.contains(event.target as Node)) {
         setProductsOpen(false);
       }
+      if (!userMenu.current?.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
     };
     document.addEventListener('pointerdown', handlePointerDown);
     return () => {
@@ -93,6 +98,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
     setMobileOpen(false);
     setProductsOpen(false);
     setSearchOpen(false);
+    setUserMenuOpen(false);
     onNavigate(page);
   };
 
@@ -111,6 +117,13 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
     onCatalog(query);
   };
 
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    setMobileOpen(false);
+    navigate('home');
+  };
+
   return (
     <header className="sticky top-0 z-50 relative">
       {/* Outer padding shell - only padding transitions, no height change */}
@@ -120,189 +133,219 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
           transition: 'padding 500ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-      <div
-        className={`mx-auto flex items-center justify-between gap-6 ${
-          isScrolled
-            ? 'max-w-[1440px] 2xl:max-w-[1480px] h-16 rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_10px_35px_rgba(0,0,0,0.06)] px-5 sm:px-8'
-            : 'h-20 w-full border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm px-6 lg:px-12 2xl:px-16'
-        }`}
-        style={{
-          transitionProperty: 'height, max-width, background-color, border-color, box-shadow, border-radius, padding',
-          transitionDuration: '500ms',
-          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-      >
-        <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-kb-tertiary">
-          <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className={`w-auto object-contain transition-all duration-300 ${isScrolled ? 'h-9 md:h-10' : 'h-11 md:h-12'}`} />
-        </button>
-
-        <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
-          <button 
-            className="nav-link" 
-            aria-current={currentPage === 'home' ? 'page' : undefined} 
-            onClick={() => navigate('home')}
-          >
-            Home
+        <div
+          className={`mx-auto flex items-center justify-between gap-6 ${
+            isScrolled
+              ? 'max-w-[1440px] 2xl:max-w-[1480px] h-16 rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_10px_35px_rgba(0,0,0,0.06)] px-5 sm:px-8'
+              : 'h-20 w-full border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm px-6 lg:px-12 2xl:px-16'
+          }`}
+          style={{
+            transitionProperty: 'height, max-width, background-color, border-color, box-shadow, border-radius, padding',
+            transitionDuration: '500ms',
+            transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        >
+          <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-kb-tertiary">
+            <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className={`w-auto object-contain transition-all duration-300 ${isScrolled ? 'h-9 md:h-10' : 'h-11 md:h-12'}`} />
           </button>
 
-          <div
-            ref={productMenu}
-            className="relative"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onFocus={handleMouseEnter}
-            onBlur={event => {
-              if (!event.currentTarget.contains(event.relatedTarget)) {
-                setProductsOpen(false);
-              }
-            }}
-            onKeyDown={event => {
-              if (event.key === 'Escape') {
-                setProductsOpen(false);
-                productButton.current?.focus();
-              }
-            }}
-          >
+          <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
             <button
-              ref={productButton}
-              className={`nav-link flex items-center gap-1.5 transition-colors ${productsOpen ? 'text-[#C2410C]' : ''}`}
-              aria-expanded={productsOpen}
-              aria-haspopup="menu"
-              aria-controls="product-menu"
-              onClick={() => {
-                if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-                setProductsOpen(open => !open);
-              }}
-              onKeyDown={event => {
-                if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  setProductsOpen(true);
-                  requestAnimationFrame(() => {
-                    productMenu.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus();
-                  });
-                }
-              }}
+              className="nav-link"
+              aria-current={currentPage === 'home' ? 'page' : undefined}
+              onClick={() => navigate('home')}
             >
-              Products <ChevronDown size={15} className={`transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`} />
+              Home
             </button>
 
-            {productsOpen && (
-              <div 
-                className="absolute left-0 top-full pt-2 z-50"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div 
-                  id="product-menu" 
-                  role="menu" 
-                  aria-label="Product categories"
-                  className="w-64 rounded-xl border border-[#E2E8F0] bg-white p-2 shadow-xl"
-                >
-                  <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Product categories</p>
-                  {CATEGORIES.map(category => (
-                    <button
-                      key={category}
-                      role="menuitem"
-                      tabIndex={0}
-                      className="block w-full rounded-lg px-3.5 py-2.5 text-left text-sm font-semibold text-[#334155] transition-colors hover:bg-[#FFF7ED] hover:text-[#C2410C] focus:bg-[#FFF7ED] focus:text-[#C2410C] focus-visible:outline-none"
-                      onClick={() => browse(category)}
-                      onKeyDown={event => {
-                        if (event.key === 'ArrowDown') {
-                          event.preventDefault();
-                          const next = (event.currentTarget.nextElementSibling as HTMLButtonElement);
-                          if (next && next.getAttribute('role') === 'menuitem') next.focus();
-                        } else if (event.key === 'ArrowUp') {
-                          event.preventDefault();
-                          const prev = (event.currentTarget.previousElementSibling as HTMLButtonElement);
-                          if (prev && prev.getAttribute('role') === 'menuitem') {
-                            prev.focus();
-                          } else {
-                            productButton.current?.focus();
-                          }
-                        }
-                      }}
-                    >
-                      {category === 'All' ? 'All products' : category}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <button 
-            className="nav-link" 
-            aria-current={currentPage === 'capabilities' ? 'page' : undefined} 
-            onClick={() => navigate('capabilities')}
-          >
-            Capabilities
-          </button>
-          <button 
-            className="nav-link" 
-            aria-current={currentPage === 'about' ? 'page' : undefined} 
-            onClick={() => navigate('about')}
-          >
-            About
-          </button>
-          <button 
-            className="nav-link" 
-            aria-current={currentPage === 'contact' ? 'page' : undefined} 
-            onClick={() => navigate('contact')}
-          >
-            Contact
-          </button>
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <Button
-            ref={searchButton}
-            variant="ghost"
-            size="icon"
-            className="rounded-xl text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]"
-            aria-label="Search products"
-            aria-expanded={searchOpen}
-            onClick={() => setSearchOpen(open => !open)}
-          >
-            <Search size={20} />
-          </Button>
-          <Button asChild variant="ghost" className="hidden rounded-xl sm:flex text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]">
-            <a 
-              href={ACCOUNT_URL}
-              onClick={(e) => {
-                if (ACCOUNT_URL === '/login') {
-                  e.preventDefault();
-                  navigate('login');
+            <div
+              ref={productMenu}
+              className="relative"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onFocus={handleMouseEnter}
+              onBlur={event => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                  setProductsOpen(false);
+                }
+              }}
+              onKeyDown={event => {
+                if (event.key === 'Escape') {
+                  setProductsOpen(false);
+                  productButton.current?.focus();
                 }
               }}
             >
-              <User size={18} /> My Account
-            </a>
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="relative rounded-xl text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]" 
-            onClick={onCartClick} 
-            aria-label={`Open cart, ${totalItems} items`}
-          >
-            <ShoppingBag size={20} />
-            {totalItems > 0 && (
-              <span className="absolute -right-1 -top-1 min-w-4 rounded-md bg-[#C2410C] px-1 text-[10px] font-bold text-white">
-                {totalItems}
-              </span>
+              <button
+                ref={productButton}
+                className={`nav-link flex items-center gap-1.5 transition-colors ${productsOpen ? 'text-[#C2410C]' : ''}`}
+                aria-expanded={productsOpen}
+                aria-haspopup="menu"
+                aria-controls="product-menu"
+                onClick={() => {
+                  if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+                  setProductsOpen(open => !open);
+                }}
+                onKeyDown={event => {
+                  if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setProductsOpen(true);
+                    requestAnimationFrame(() => {
+                      productMenu.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus();
+                    });
+                  }
+                }}
+              >
+                Products <ChevronDown size={15} className={`transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {productsOpen && (
+                <div
+                  className="absolute left-0 top-full pt-2 z-50"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <div
+                    id="product-menu"
+                    role="menu"
+                    aria-label="Product categories"
+                    className="w-64 rounded-xl border border-[#E2E8F0] bg-white p-2 shadow-xl"
+                  >
+                    <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Product categories</p>
+                    {CATEGORIES.map(category => (
+                      <button
+                        key={category}
+                        role="menuitem"
+                        tabIndex={0}
+                        className="block w-full rounded-lg px-3.5 py-2.5 text-left text-sm font-semibold text-[#334155] transition-colors hover:bg-[#FFF7ED] hover:text-[#C2410C] focus:bg-[#FFF7ED] focus:text-[#C2410C] focus-visible:outline-none"
+                        onClick={() => browse(category)}
+                        onKeyDown={event => {
+                          if (event.key === 'ArrowDown') {
+                            event.preventDefault();
+                            const next = (event.currentTarget.nextElementSibling as HTMLButtonElement);
+                            if (next && next.getAttribute('role') === 'menuitem') next.focus();
+                          } else if (event.key === 'ArrowUp') {
+                            event.preventDefault();
+                            const prev = (event.currentTarget.previousElementSibling as HTMLButtonElement);
+                            if (prev && prev.getAttribute('role') === 'menuitem') {
+                              prev.focus();
+                            } else {
+                              productButton.current?.focus();
+                            }
+                          }
+                        }}
+                      >
+                        {category === 'All' ? 'All products' : category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              className="nav-link"
+              aria-current={currentPage === 'capabilities' ? 'page' : undefined}
+              onClick={() => navigate('capabilities')}
+            >
+              Capabilities
+            </button>
+            <button
+              className="nav-link"
+              aria-current={currentPage === 'about' ? 'page' : undefined}
+              onClick={() => navigate('about')}
+            >
+              About
+            </button>
+            <button
+              className="nav-link"
+              aria-current={currentPage === 'contact' ? 'page' : undefined}
+              onClick={() => navigate('contact')}
+            >
+              Contact
+            </button>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <Button
+              ref={searchButton}
+              variant="ghost"
+              size="icon"
+              className="rounded-xl text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]"
+              aria-label="Search products"
+              aria-expanded={searchOpen}
+              onClick={() => setSearchOpen(open => !open)}
+            >
+              <Search size={20} />
+            </Button>
+
+            {/* Desktop: Account / User Menu */}
+            {user ? (
+              <div ref={userMenu} className="relative hidden sm:block">
+                <Button
+                  variant="ghost"
+                  className="rounded-xl flex items-center gap-2 text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]"
+                  onClick={() => setUserMenuOpen(o => !o)}
+                  aria-expanded={userMenuOpen}
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#C2410C] text-white text-xs font-bold uppercase shrink-0">
+                    {user.name.charAt(0)}
+                  </span>
+                  <span className="max-w-[100px] truncate text-sm font-semibold text-[#334155]">{user.name}</span>
+                  <ChevronDown size={14} className="text-[#94A3B8]" />
+                </Button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 border border-[#E2E8F0] bg-white shadow-xl rounded-xl p-1 z-50">
+                    <div className="px-3 py-2 border-b border-[#F1F5F9] mb-1">
+                      <p className="text-xs font-bold text-[#111827] truncate">{user.name}</p>
+                      <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold text-[#DC2626] hover:bg-[#FEF2F2] transition-colors"
+                    >
+                      <LogOut size={15} />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Button asChild variant="ghost" className="hidden rounded-xl sm:flex text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]">
+                <a
+                  href="#login"
+                  onClick={(e) => { e.preventDefault(); navigate('login'); }}
+                >
+                  <User size={18} /> Login
+                </a>
+              </Button>
             )}
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="rounded-xl lg:hidden text-[#334155] hover:text-[#111827]" 
-            onClick={() => setMobileOpen(true)} 
-            aria-label="Open navigation"
-          >
-            <Menu size={22} />
-          </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-xl text-[#334155] hover:text-[#111827] hover:bg-[#F1F5F9]"
+              onClick={onCartClick}
+              aria-label={`Open cart, ${totalItems} items`}
+            >
+              <ShoppingBag size={20} />
+              {totalItems > 0 && (
+                <span className="absolute -right-1 -top-1 min-w-4 rounded-md bg-[#C2410C] px-1 text-[10px] font-bold text-white">
+                  {totalItems}
+                </span>
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-xl lg:hidden text-[#334155] hover:text-[#111827]"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation"
+            >
+              <Menu size={22} />
+            </Button>
+          </div>
         </div>
-      </div>
       </div>
 
       {searchOpen && (
@@ -330,18 +373,32 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
 
       {/* Mobile Drawer */}
       <div className={`fixed inset-0 z-[60] lg:hidden ${mobileOpen ? '' : 'pointer-events-none'}`}>
-        <button 
-          className={`absolute inset-0 bg-[#0F172A]/40 transition-opacity duration-200 ${mobileOpen ? 'opacity-100' : 'opacity-0'}`} 
-          onClick={() => setMobileOpen(false)} 
-          aria-label="Close navigation" 
+        <button
+          className={`absolute inset-0 bg-[#0F172A]/40 transition-opacity duration-200 ${mobileOpen ? 'opacity-100' : 'opacity-0'}`}
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close navigation"
         />
         <div className={`absolute bottom-0 right-0 top-0 w-[min(88%,360px)] bg-white shadow-2xl transition-transform duration-200 ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="flex items-center justify-between border-b border-[#F1F5F9] p-5">
             <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-10 w-auto" />
             <Button variant="ghost" size="icon" className="rounded-xl text-[#64748B]" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X /></Button>
           </div>
+
+          {/* Mobile user badge */}
+          {user && (
+            <div className="mx-4 mt-4 mb-1 flex items-center gap-3 rounded-xl bg-[#FFF7ED] px-4 py-3 border border-[#FED7AA]">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C2410C] text-white text-sm font-bold uppercase">
+                {user.name.charAt(0)}
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[#111827] truncate">{user.name}</p>
+                <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
+              </div>
+            </div>
+          )}
+
           <nav className="flex flex-col gap-1 p-4 font-['DM_Sans']" aria-label="Mobile navigation">
-            <button 
+            <button
               className={`w-full rounded-xl px-4 py-3 text-left text-sm font-semibold transition-colors ${currentPage === 'home' ? 'bg-[#FFF7ED] text-[#C2410C]' : 'text-[#334155] hover:bg-[#F8FAFC]'}`}
               onClick={() => navigate('home')}
             >
@@ -362,19 +419,19 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             </div>
 
             <div className="border-t border-[#F1F5F9] pt-2">
-              <button 
+              <button
                 className={`w-full rounded-xl px-4 py-3 text-left text-sm font-semibold transition-colors ${currentPage === 'capabilities' ? 'bg-[#FFF7ED] text-[#C2410C]' : 'text-[#334155] hover:bg-[#F8FAFC]'}`}
                 onClick={() => navigate('capabilities')}
               >
                 Capabilities
               </button>
-              <button 
+              <button
                 className={`w-full rounded-xl px-4 py-3 text-left text-sm font-semibold transition-colors ${currentPage === 'about' ? 'bg-[#FFF7ED] text-[#C2410C]' : 'text-[#334155] hover:bg-[#F8FAFC]'}`}
                 onClick={() => navigate('about')}
               >
                 About
               </button>
-              <button 
+              <button
                 className={`w-full rounded-xl px-4 py-3 text-left text-sm font-semibold transition-colors ${currentPage === 'contact' ? 'bg-[#FFF7ED] text-[#C2410C]' : 'text-[#334155] hover:bg-[#F8FAFC]'}`}
                 onClick={() => navigate('contact')}
               >
@@ -383,18 +440,21 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             </div>
 
             <div className="mt-4 border-t border-[#F1F5F9] pt-4">
-              <a 
-                href={ACCOUNT_URL}
-                onClick={(e) => {
-                  if (ACCOUNT_URL === '/login') {
-                    e.preventDefault();
-                    navigate('login');
-                  }
-                }}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#CBD5E1] py-3 text-sm font-bold text-[#111827] hover:bg-[#F8FAFC]"
-              >
-                <User size={18} /> My Account
-              </a>
+              {user ? (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start rounded-xl text-[#DC2626] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                  onClick={handleLogout}
+                >
+                  <LogOut size={16} className="mr-2" /> Logout
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="w-full rounded-xl">
+                  <a href="#login" onClick={(e) => { e.preventDefault(); navigate('login'); }}>
+                    <User size={18} className="mr-2" /> Login / Sign Up
+                  </a>
+                </Button>
+              )}
             </div>
           </nav>
         </div>
@@ -402,4 +462,3 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
     </header>
   );
 }
-

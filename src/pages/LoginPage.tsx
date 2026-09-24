@@ -18,6 +18,7 @@ import {
 import { Button } from '../components/ui/button';
 import { useToast } from '../hooks/use-toast';
 import type { Page } from '../App';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginPageProps {
   onNavigate: (page: Page) => void;
@@ -54,6 +55,7 @@ interface StoredOrder {
 
 export default function LoginPage({ onNavigate }: LoginPageProps) {
   const { showToast } = useToast();
+  const { login, logout } = useAuth();
   const [showLoginPass, setShowLoginPass] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
 
@@ -61,7 +63,15 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => {
     try {
       const stored = localStorage.getItem('kb_user');
-      return stored ? JSON.parse(stored) : null;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return {
+          name: parsed.name || 'Customer',
+          email: parsed.email || '',
+          company: parsed.company || 'Direct Customer',
+        };
+      }
+      return null;
     } catch {
       return null;
     }
@@ -109,11 +119,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       company: 'Direct Customer',
     };
 
-    try {
-      localStorage.setItem('kb_user', JSON.stringify(account));
-    } catch {
-      // Ignore storage errors
-    }
+    login(account.email, account.name);
     setCurrentUser(account);
     showToast(`Welcome back, ${account.name}!`);
   };
@@ -126,21 +132,13 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       company: signupCompany.trim() || 'Direct Customer',
     };
 
-    try {
-      localStorage.setItem('kb_user', JSON.stringify(account));
-    } catch {
-      // Ignore storage errors
-    }
+    login(account.email, account.name);
     setCurrentUser(account);
     showToast(`Account created for ${account.name}!`);
   };
 
   const handleSignOut = () => {
-    try {
-      localStorage.removeItem('kb_user');
-    } catch {
-      // Ignore storage errors
-    }
+    logout();
     setCurrentUser(null);
     showToast('Signed out successfully');
   };
@@ -151,11 +149,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       email: 'operations@commercialkitchens.in',
       company: 'AeroBake Commercial Facilities',
     };
-    try {
-      localStorage.setItem('kb_user', JSON.stringify(demoAccount));
-    } catch {
-      // Ignore storage errors
-    }
+    login(demoAccount.email, demoAccount.name);
     setCurrentUser(demoAccount);
     showToast('Signed in with Demo Engineering Account');
   };
