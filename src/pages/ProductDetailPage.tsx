@@ -266,7 +266,7 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
                     : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#F8FAFC]'
                 }`}
               >
-                <Camera size={16} /> Photos & Angles ({images.length})
+                <Camera size={16} /> Photos &amp; Angles ({images.length})
               </button>
 
               {product.sequenceId && (
@@ -415,7 +415,7 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
               {product.heatResistance && (
                 <div className="rounded-xl border border-[#E2E8F0] bg-white p-3 shadow-xs">
                   <span className="block text-[11px] font-bold uppercase text-[#94A3B8]">Thermal Rating</span>
-                  <span className="mt-0.5 font-bold text-[#0F172A] block flex items-center gap-1">
+                  <span className="mt-0.5 font-bold text-[#0F172A] flex items-center gap-1">
                     <Flame size={14} className="text-[#C2410C]" /> {product.heatResistance}
                   </span>
                 </div>
@@ -436,7 +436,7 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
 
             {/* Key Features List */}
             <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
-              {product.features.map(feature => (
+              {product.features?.map(feature => (
                 <li key={feature} className="flex items-start gap-2 font-['DM_Sans'] text-xs sm:text-sm font-medium text-[#334155]">
                   <Check size={16} className="mt-0.5 shrink-0 text-[#C2410C]" /> {feature}
                 </li>
