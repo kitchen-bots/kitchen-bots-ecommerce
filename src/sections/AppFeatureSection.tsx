@@ -145,7 +145,7 @@ export default function AppFeatureSection({ onNavigate }: AppFeatureSectionProps
                 >
                   <div className="w-56 h-72 bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E0EAE0]"
                     style={{ boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)' }}>
-                    {/* Card Top  — gradient */}
+                    {/* Card Top  - gradient */}
                     <div className={`h-36 bg-gradient-to-br ${item.gradient} flex items-center justify-center relative`}>
                       <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
                         <Icon className="w-8 h-8 text-white" aria-hidden="true" />
@@ -185,7 +185,7 @@ export default function AppFeatureSection({ onNavigate }: AppFeatureSectionProps
 
             <p className="animate-item text-lg text-[#4A4A4A]/80 leading-relaxed mb-8">
               Experience the difference of precision manufacturing. Our BBQ grills and rocket stoves
-              are built to deliver exceptional thermal performance — designed for passionate home cooks
+              are built to deliver exceptional thermal performance - designed for passionate home cooks
               and demanding commercial environments alike.
             </p>
 

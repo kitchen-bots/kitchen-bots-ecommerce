@@ -22,13 +22,13 @@ export const FAQS: FAQ[] = [
         category: 'assembly',
         question: 'How long does it take to set up a KitchenBots grill?',
         answer:
-            'Most of our collapsible and suitcase models set up in under 60 seconds with no tools required. The interlocking panel system creates a rigid structure instantly. Our Rocket Stoves require only placing the grate on top of the stove body — about 10 seconds. The Santa Maria and Automatic BBQ require a one-time 15–20 minute setup using the included wrench and hardware.',
+            'Most of our collapsible and suitcase models set up in under 60 seconds with no tools required. The interlocking panel system creates a rigid structure instantly. Our Rocket Stoves require only placing the grate on top of the stove body - about 10 seconds. The Santa Maria and Automatic BBQ require a one-time 15–20 minute setup using the included wrench and hardware.',
     },
     {
         category: 'assembly',
         question: 'Do KitchenBots grills come pre-assembled?',
         answer:
-            'Our Collapsible BBQ and Suitcase BBQ models come 100% pre-assembled — you simply unfold and begin cooking. The Santa Maria Grill and Automatic BBQ require a one-time assembly of the base frame, which takes approximately 20–30 minutes using the included hardware kit and illustrated manual.',
+            'Our Collapsible BBQ and Suitcase BBQ models come 100% pre-assembled - you simply unfold and begin cooking. The Santa Maria Grill and Automatic BBQ require a one-time assembly of the base frame, which takes approximately 20–30 minutes using the included hardware kit and illustrated manual.',
     },
     {
         category: 'assembly',
@@ -40,7 +40,7 @@ export const FAQS: FAQ[] = [
         category: 'assembly',
         question: 'Can I use KitchenBots grill in small spaces or on a balcony?',
         answer:
-            'Yes — our Suitcase BBQ Compact and single-burner Rocket Stoves are specifically designed for balcony use. However, always ensure adequate ventilation and keep a minimum clearance of 60cm from walls, railings, and overhead structures. Never use any charcoal grill in an enclosed or indoor space.',
+            'Yes - our Suitcase BBQ Compact and single-burner Rocket Stoves are specifically designed for balcony use. However, always ensure adequate ventilation and keep a minimum clearance of 60cm from walls, railings, and overhead structures. Never use any charcoal grill in an enclosed or indoor space.',
     },
 
     // FUEL
@@ -48,13 +48,13 @@ export const FAQS: FAQ[] = [
         category: 'fuel',
         question: 'What fuel can I use in a KitchenBots grill?',
         answer:
-            'Our BBQ grills are designed for natural lump charcoal and charcoal briquettes. The Rocket Stoves are optimised for small-diameter wood pieces (hardwood preferred) and dry biomass. We do not recommend using petroleum-based fire starters — use natural coconut shell fire starters instead. Never use accelerants.',
+            'Our BBQ grills are designed for natural lump charcoal and charcoal briquettes. The Rocket Stoves are optimised for small-diameter wood pieces (hardwood preferred) and dry biomass. We do not recommend using petroleum-based fire starters - use natural coconut shell fire starters instead. Never use accelerants.',
     },
     {
         category: 'fuel',
         question: 'How much charcoal do I need for a typical cook?',
         answer:
-            'For a standard 2-hour cook at medium heat (around 200–250°C), our collapsible BBQs use approximately 1–1.5kg of natural lump charcoal. The Rocket Stoves use even less — approximately 300–500g of dry hardwood per hour. Using a chimney starter reduces lighting time and overall charcoal consumption by up to 30%.',
+            'For a standard 2-hour cook at medium heat (around 200–250°C), our collapsible BBQs use approximately 1–1.5kg of natural lump charcoal. The Rocket Stoves use even less - approximately 300–500g of dry hardwood per hour. Using a chimney starter reduces lighting time and overall charcoal consumption by up to 30%.',
     },
     {
         category: 'fuel',
@@ -74,7 +74,7 @@ export const FAQS: FAQ[] = [
         category: 'cleaning',
         question: 'How do I clean a KitchenBots grill after use?',
         answer:
-            'Allow the grill to cool completely before cleaning. Remove the cooking grate and brush off food residue with a stiff steel bristle brush. Wipe the interior surfaces with a dry cloth to remove ash. For stubborn residue, use a solution of hot water and mild dish soap on the cooking grate only — never on the main body, as this can break down the heat coating. Allow all parts to air dry completely before storage.',
+            'Allow the grill to cool completely before cleaning. Remove the cooking grate and brush off food residue with a stiff steel bristle brush. Wipe the interior surfaces with a dry cloth to remove ash. For stubborn residue, use a solution of hot water and mild dish soap on the cooking grate only - never on the main body, as this can break down the heat coating. Allow all parts to air dry completely before storage.',
     },
     {
         category: 'cleaning',
@@ -86,13 +86,13 @@ export const FAQS: FAQ[] = [
         category: 'cleaning',
         question: 'My grill has developed surface rust. What should I do?',
         answer:
-            'Surface oxidation on mild steel is normal and does not affect performance. Remove rust with a wire brush or steel wool, then season the surface by applying a thin layer of cooking oil and heating the grill to 200°C for 15 minutes. This creates a protective oxide layer. For stainless steel components (Santa Maria, Automatic BBQ), use a stainless steel cleaner and a microfibre cloth — avoid steel wool, which can scratch.',
+            'Surface oxidation on mild steel is normal and does not affect performance. Remove rust with a wire brush or steel wool, then season the surface by applying a thin layer of cooking oil and heating the grill to 200°C for 15 minutes. This creates a protective oxide layer. For stainless steel components (Santa Maria, Automatic BBQ), use a stainless steel cleaner and a microfibre cloth - avoid steel wool, which can scratch.',
     },
     {
         category: 'cleaning',
         question: 'How should I store my KitchenBots grill?',
         answer:
-            'Store your grill in a cool, dry location — ideally indoors or under an outdoor cover. Before storage, ensure the grill is completely ash-free and the grate is lightly oiled. Our collapsible and suitcase models come with a carry bag or protective sleeve. Extended outdoor storage without a cover can lead to surface oxidation, particularly in coastal or high-humidity regions.',
+            'Store your grill in a cool, dry location - ideally indoors or under an outdoor cover. Before storage, ensure the grill is completely ash-free and the grate is lightly oiled. Our collapsible and suitcase models come with a carry bag or protective sleeve. Extended outdoor storage without a cover can lead to surface oxidation, particularly in coastal or high-humidity regions.',
     },
 
     // DELIVERY
@@ -100,7 +100,7 @@ export const FAQS: FAQ[] = [
         category: 'delivery',
         question: 'How long does delivery take?',
         answer:
-            'We deliver across India through our express logistics network. Typical timelines: Metro cities (Mumbai, Delhi, Bangalore, Chennai, Hyderabad, Kolkata) — 3–5 business days. Tier 2 cities — 4–7 business days. Remote and rural locations — 7–10 business days. You will receive a tracking link within 24 hours of dispatch.',
+            'We deliver across India through our express logistics network. Typical timelines: Metro cities (Mumbai, Delhi, Bangalore, Chennai, Hyderabad, Kolkata) - 3–5 business days. Tier 2 cities - 4–7 business days. Remote and rural locations - 7–10 business days. You will receive a tracking link within 24 hours of dispatch.',
     },
     {
         category: 'delivery',
@@ -118,7 +118,7 @@ export const FAQS: FAQ[] = [
         category: 'delivery',
         question: 'What happens if my product arrives damaged?',
         answer:
-            'If your product arrives with visible transit damage, do not sign for the delivery — return it to the courier immediately and contact us within 24 hours at support@kitchenbots.in. If damage is discovered after opening, photograph the damage and contact us within 48 hours of receipt. We will arrange a replacement shipment at no charge.',
+            'If your product arrives with visible transit damage, do not sign for the delivery - return it to the courier immediately and contact us within 24 hours at support@kitchenbots.in. If damage is discovered after opening, photograph the damage and contact us within 48 hours of receipt. We will arrange a replacement shipment at no charge.',
     },
 
     // WARRANTY
