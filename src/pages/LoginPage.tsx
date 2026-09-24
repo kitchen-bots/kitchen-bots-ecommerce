@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import type { Page } from '../App';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginPageProps {
   onNavigate: (page: Page) => void;
@@ -17,6 +18,16 @@ interface LoginPageProps {
 export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [showLoginPass, setShowLoginPass] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const { login } = useAuth();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    login(email.trim(), name.trim() || undefined);
+    onNavigate('home');
+  };
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-24">
@@ -77,13 +88,16 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             </div>
 
             {activeTab === 'login' ? (
-              <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+              <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
                   <label className="block text-[12px] font-bold text-[#64748B] uppercase tracking-widest font-['Outfit']">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={18} />
                     <input 
-                      type="email" 
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       placeholder="engineer@kitchenbots.in" 
                       className="w-full h-[56px] pl-12 pr-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl text-[15px] focus:outline-none focus:border-kb-tertiary focus:bg-white transition-all font-['DM_Sans']"
                     />
@@ -129,11 +143,14 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                 </Button>
               </form>
             ) : (
-              <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+              <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
                   <label className="block text-[12px] font-bold text-[#64748B] uppercase tracking-widest font-['Outfit']">Full Name</label>
                   <input 
-                    type="text" 
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="Vijay Sharma" 
                     className="w-full h-[56px] px-6 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl text-[15px] focus:outline-none focus:border-kb-primary focus:bg-white transition-all font-['DM_Sans']"
                   />
@@ -142,7 +159,10 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
                 <div className="space-y-2">
                   <label className="block text-[12px] font-bold text-[#64748B] uppercase tracking-widest font-['Outfit']">Company Email</label>
                   <input 
-                    type="email" 
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@company.com" 
                     className="w-full h-[56px] px-6 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl text-[15px] focus:outline-none focus:border-kb-primary focus:bg-white transition-all font-['DM_Sans']"
                   />
