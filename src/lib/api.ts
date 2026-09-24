@@ -67,25 +67,35 @@ export function categoryIdToName(categoryId: string): ProductCategory {
 }
 
 export function toStorefrontProduct(apiProduct: ApiProduct): Product {
-  const images = apiProduct.imageUrls || [];
-  const primaryImage = images[0] || '';
+  const local = getProductById(apiProduct.id) || PRODUCTS.find((p) => p.slug === apiProduct.slug);
+  const images = apiProduct.imageUrls && apiProduct.imageUrls.length > 0
+    ? apiProduct.imageUrls
+    : (local?.images || []);
+  const primaryImage = images[0] || local?.image || '';
   const priceRupees =
     apiProduct.pricePaise !== null && apiProduct.pricePaise !== undefined
       ? Math.round(apiProduct.pricePaise / 100)
-      : 0;
+      : (local?.price ?? 0);
 
   return {
+    ...(local || {}),
     id: apiProduct.id,
-    slug: apiProduct.slug,
-    name: apiProduct.name,
-    description: apiProduct.description,
+    slug: apiProduct.slug || local?.slug,
+    name: apiProduct.name || local?.name || '',
+    description: apiProduct.description || local?.description || '',
     price: priceRupees,
     image: primaryImage,
     images,
-    category: categoryIdToName(apiProduct.categoryId),
-    features: apiProduct.features || [],
-    specifications: apiProduct.specifications || {},
-    featured: false,
+    category: categoryIdToName(apiProduct.categoryId) || local?.category || 'Collapsible BBQ',
+    features: (apiProduct.features && apiProduct.features.length > 0) ? apiProduct.features : (local?.features || []),
+    specifications: Object.keys(apiProduct.specifications || {}).length > 0 ? apiProduct.specifications : (local?.specifications || {}),
+    video: local?.video,
+    videoPath: local?.videoPath,
+    sequenceId: local?.sequenceId,
+    sequenceFrameCount: local?.sequenceFrameCount,
+    has3D: local?.has3D,
+    hasVideo: local?.hasVideo,
+    featured: local?.featured ?? false,
   };
 }
 
