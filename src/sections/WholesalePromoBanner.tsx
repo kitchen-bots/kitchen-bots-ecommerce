@@ -31,7 +31,7 @@ export default function WholesalePromoBanner() {
             className="text-white/80 text-[15px] max-w-lg mb-6"
             style={{ fontFamily: 'DM Sans, sans-serif' }}
           >
-            Dealers, distributors and institutions — get exclusive pricing with GST invoice on bulk orders.
+            Dealers, distributors and institutions - get exclusive pricing with GST invoice on bulk orders.
           </p>
           
           <div className="flex flex-col md:flex-row items-center gap-4">

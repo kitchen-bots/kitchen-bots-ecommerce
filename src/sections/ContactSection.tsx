@@ -17,7 +17,7 @@ export default function ContactSection() {
     {
       icon: Mail,
       label: 'Send an Enquiry',
-      value: 'kitchenbots.sales@gmail.com',
+      value: 'info@kitchenbots.in',
       sub: 'Response within 24 hours',
     },
     {
@@ -66,7 +66,7 @@ export default function ContactSection() {
                 WhatsApp Now
               </a>
               <a
-                href="mailto:kitchenbots.sales@gmail.com"
+                href="mailto:info@kitchenbots.in"
                 className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border border-[#E5E7EB] text-[#1E2329] font-bold rounded-[6px] transition-all hover:bg-gray-50 text-[15px]"
                 style={{ fontFamily: 'DM Sans, sans-serif' }}
               >

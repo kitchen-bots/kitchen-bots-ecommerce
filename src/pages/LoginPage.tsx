@@ -1,22 +1,56 @@
 import { useState } from 'react';
-import { 
-  Eye, 
-  EyeOff, 
+import {
+  Eye,
+  EyeOff,
   ArrowRight,
   ShieldCheck,
   Mail,
   Lock,
   LogOut,
-  UserCheck,
-  AlertCircle
+  Clock,
+  Wrench,
+  PhoneCall,
+  User,
+  ShoppingBag,
+  FileText,
+  AlertCircle,
+  ExternalLink,
+  Loader2
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { useAuth } from '../context/AuthContext';
+import { useToast } from '../hooks/use-toast';
 import type { Page } from '../App';
+import { useAuth } from '../context/AuthContext';
+import { getPortalUrl } from '../lib/portal';
 
 interface LoginPageProps {
   onNavigate: (page: Page) => void;
 }
+
+interface StoredEnquiry {
+  reference: string;
+  date: string;
+  name: string;
+  company: string;
+  items: string[];
+  status: string;
+}
+
+interface StoredOrder {
+  reference: string;
+  date: string;
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  items: Array<{ name: string; quantity: number; price: number }>;
+  total: number;
+  status: string;
+}
+
+const ACCOUNT_URL = getPortalUrl(import.meta.env.VITE_PORTAL_URL);
 
 function formatAuthError(error: unknown): string {
   if (typeof error === 'object' && error !== null && 'code' in error) {
@@ -46,8 +80,10 @@ function formatAuthError(error: unknown): string {
 
 export default function LoginPage({ onNavigate }: LoginPageProps) {
   const { user, signIn, signUp, signOut, loading: isAuthLoading } = useAuth();
-  
+  const { showToast } = useToast();
+
   const [showLoginPass, setShowLoginPass] = useState(false);
+  const [showSignupPass, setShowSignupPass] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   
   // Login State
@@ -63,6 +99,26 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Load stored customer enquiries
+  const [enquiries] = useState<StoredEnquiry[]>(() => {
+    try {
+      const stored = localStorage.getItem('kb_enquiries');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Load placed direct orders
+  const [orders] = useState<StoredOrder[]>(() => {
+    try {
+      const stored = localStorage.getItem('kb_orders');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -70,6 +126,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
     try {
       await signIn(loginEmail.trim(), loginPassword);
+      showToast('Signed in successfully');
       onNavigate('home');
     } catch (err) {
       setErrorMessage(formatAuthError(err));
@@ -85,6 +142,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
 
     try {
       await signUp(signupEmail.trim(), signupPassword);
+      showToast('Account created successfully');
       onNavigate('home');
     } catch (err) {
       setErrorMessage(formatAuthError(err));
@@ -98,6 +156,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     setIsSubmitting(true);
     try {
       await signOut();
+      showToast('Signed out successfully');
     } catch (err) {
       setErrorMessage(formatAuthError(err));
     } finally {
@@ -105,248 +164,509 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-32 pb-24">
-      <div className="container mx-auto px-6">
-        <div className="max-w-[1000px] mx-auto bg-white rounded-[48px] shadow-[0_30px_80px_rgba(0,0,0,0.04)] border border-[#F1F5F9] overflow-hidden flex flex-col md:flex-row">
-          
-          {/* LEFT SIDE - BRANDING */}
-          <div className="w-full md:w-[45%] bg-[#1E2329] p-12 text-white relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-kb-tertiary opacity-10 blur-[100px]" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-kb-primary opacity-10 blur-[100px]" />
-            
-            <div className="relative z-10">
-              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-8 border border-white/10 backdrop-blur-md">
-                <ShieldCheck size={32} className="text-kb-tertiary" />
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-28 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#C2410C] mx-auto mb-4" />
+          <p className="text-sm font-medium text-[#64748B] font-['DM_Sans']">Verifying security session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is logged in, show the Customer Portal
+  if (user) {
+    const displayName = user.displayName || user.email?.split('@')[0] || 'Customer';
+
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-28">
+        <div className="mx-auto w-full max-w-[1200px] px-6 lg:px-12">
+          {/* Header Profile Bar */}
+          <div className="flex flex-col justify-between gap-6 rounded-2xl border border-[#E2E8F0] bg-white p-6 sm:p-8 shadow-sm md:flex-row md:items-center">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#0F172A] text-white">
+                <User size={26} className="text-[#C2410C]" />
               </div>
-              <h1 className="text-[36px] font-bold mb-6 font-['Outfit'] leading-tight text-white">
-                Customer Account <br /> Portal
-              </h1>
-              <p className="text-white/90 font-['DM_Sans'] leading-relaxed">
-                Log in to access your orders, saved equipment list, and submit authenticated requests.
-              </p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-['Outfit'] text-2xl font-bold text-[#0F172A]">{displayName}</h1>
+                  <span className="rounded-md bg-[#F0FDF4] px-2 py-0.5 text-xs font-bold text-[#16A34A] border border-[#DCFCE7]">
+                    Authenticated User
+                  </span>
+                </div>
+                <p className="mt-1 font-['DM_Sans'] text-sm text-[#64748B]">
+                  {user.email}
+                </p>
+              </div>
             </div>
 
-            <div className="relative z-10 pt-12 border-t border-white/10">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex -space-x-3">
-                  {[1,2,3].map(i => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[#1E2329] overflow-hidden">
-                      <img src={`/images/redesign/team-${i}.png`} alt="" className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-                <p className="text-[13px] text-white/80 font-['DM_Sans']">Joined by 500+ <br /> Industry Leaders</p>
-              </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button asChild variant="outline" className="rounded-xl border-[#CBD5E1] text-[#334155] hover:bg-[#F8FAFC]">
+                <a href={ACCOUNT_URL} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink size={16} className="mr-1.5 text-[#C2410C]" /> Dashboard Portal
+                </a>
+              </Button>
+              <Button
+                variant="outline"
+                className="rounded-xl border-[#CBD5E1] text-[#334155] hover:bg-[#F8FAFC]"
+                onClick={() => onNavigate('bulk-enquiry')}
+              >
+                <FileText size={16} className="mr-1.5 text-[#C2410C]" /> New Enquiry
+              </Button>
+              <Button
+                variant="ghost"
+                className="rounded-xl text-[#64748B] hover:text-[#DC2626] hover:bg-[#FEF2F2]"
+                disabled={isSubmitting}
+                onClick={handleSignOut}
+              >
+                <LogOut size={16} className="mr-1.5" /> Sign out
+              </Button>
             </div>
           </div>
 
-          {/* RIGHT SIDE - FORM OR LOGGED-IN CARD */}
-          <div className="w-full md:w-[55%] p-12 lg:p-20 flex flex-col justify-center">
-            {isAuthLoading ? (
-              <div className="text-center py-12">
-                <div className="w-8 h-8 border-4 border-kb-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-sm font-medium text-[#64748B]">Verifying session...</p>
+          {/* Quick Action Navigation */}
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <button
+              onClick={() => onNavigate('products')}
+              className="flex items-start gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 text-left transition-all hover:border-[#CBD5E1] hover:shadow-sm"
+            >
+              <div className="rounded-xl bg-[#FFF7ED] p-3 text-[#C2410C]">
+                <ShoppingBag size={22} />
               </div>
-            ) : user ? (
-              /* ALREADY AUTHENTICATED STATE */
-              <div className="space-y-6 text-center">
-                <div className="w-16 h-16 bg-[#F0FDF4] border border-[#DCFCE7] rounded-full flex items-center justify-center mx-auto text-kb-primary">
-                  <UserCheck size={32} />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold font-['Outfit'] text-[#111827]">
-                    Signed In
-                  </h2>
-                  <p className="text-sm text-[#64748B] mt-1 font-['DM_Sans']">
-                    Authenticated as <span className="font-semibold text-[#111827]">{user.email}</span>
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-['Outfit'] text-base font-bold text-[#0F172A]">Equipment Catalog</h3>
+                <p className="mt-1 font-['DM_Sans'] text-xs text-[#64748B]">Browse Santa Maria grills, rocket stoves & rotisseries.</p>
+              </div>
+            </button>
 
-                {errorMessage && (
-                  <div className="p-3 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl text-xs text-[#DC2626] flex items-center gap-2 text-left">
-                    <AlertCircle size={16} className="shrink-0" />
-                    <span>{errorMessage}</span>
+            <button
+              onClick={() => onNavigate('bulk-enquiry')}
+              className="flex items-start gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 text-left transition-all hover:border-[#CBD5E1] hover:shadow-sm"
+            >
+              <div className="rounded-xl bg-[#F0FDF4] p-3 text-[#16A34A]">
+                <FileText size={22} />
+              </div>
+              <div>
+                <h3 className="font-['Outfit'] text-base font-bold text-[#0F172A]">Request Quote</h3>
+                <p className="mt-1 font-['DM_Sans'] text-xs text-[#64748B]">Submit custom specifications and multi-unit requirements.</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => onNavigate('cart')}
+              className="flex items-start gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 text-left transition-all hover:border-[#CBD5E1] hover:shadow-sm"
+            >
+              <div className="rounded-xl bg-[#F8FAFC] p-3 text-[#0F172A] border border-[#E2E8F0]">
+                <Clock size={22} />
+              </div>
+              <div>
+                <h3 className="font-['Outfit'] text-base font-bold text-[#0F172A]">Current Cart</h3>
+                <p className="mt-1 font-['DM_Sans'] text-xs text-[#64748B]">Review selected hardware and finalize purchase order.</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => onNavigate('contact')}
+              className="flex items-start gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 text-left transition-all hover:border-[#CBD5E1] hover:shadow-sm"
+            >
+              <div className="rounded-xl bg-[#EFF6FF] p-3 text-[#2563EB]">
+                <Wrench size={22} />
+              </div>
+              <div>
+                <h3 className="font-['Outfit'] text-base font-bold text-[#0F172A]">Engineering Desk</h3>
+                <p className="mt-1 font-['DM_Sans'] text-xs text-[#64748B]">Speak with production engineers for custom sizing.</p>
+              </div>
+            </button>
+          </div>
+
+          {/* Machinery Enquiries & Tracking Section */}
+          <div className="mt-8 rounded-2xl border border-[#E2E8F0] bg-white p-6 sm:p-8 shadow-sm">
+            <div className="flex flex-col justify-between gap-4 border-b border-[#F1F5F9] pb-6 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="font-['Outfit'] text-xl font-bold text-[#0F172A]">Equipment Enquiries & Quotations</h2>
+                <p className="mt-1 font-['DM_Sans'] text-sm text-[#64748B]">
+                  Track production status, engineering reviews, and quotations submitted under this account.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start rounded-xl font-semibold sm:self-auto border-[#CBD5E1] hover:bg-[#F8FAFC]"
+                onClick={() => onNavigate('bulk-enquiry')}
+              >
+                Submit New Request
+              </Button>
+            </div>
+
+            {enquiries.length > 0 ? (
+              <div className="mt-6 space-y-4">
+                {enquiries.map((enq) => (
+                  <div
+                    key={enq.reference}
+                    className="flex flex-col justify-between gap-4 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-5 transition-all md:flex-row md:items-center"
+                  >
+                    <div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="font-mono text-sm font-bold text-[#0F172A]">{enq.reference}</span>
+                        <span className="rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-xs font-semibold text-[#92400E]">
+                          {enq.status || 'Under Engineering Review'}
+                        </span>
+                        <span className="text-xs text-[#94A3B8]">{enq.date}</span>
+                      </div>
+                      <p className="mt-2 font-['DM_Sans'] text-sm text-[#475569]">
+                        <span className="font-semibold text-[#0F172A]">Equipment:</span> {enq.items?.join(', ') || 'Custom Kitchen Equipment'}
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-lg border-[#CBD5E1] bg-white text-xs font-bold text-[#0F172A] hover:bg-[#F1F5F9]"
+                        onClick={() => onNavigate('contact')}
+                      >
+                        <PhoneCall size={14} className="mr-1.5 text-[#C2410C]" /> Contact Desk
+                      </Button>
+                    </div>
                   </div>
-                )}
-
-                <div className="pt-4 space-y-3">
-                  <Button 
-                    onClick={() => onNavigate('home')}
-                    size="lg"
-                    className="w-full flex items-center justify-center gap-2"
-                  >
-                    Return to Storefront <ArrowRight size={18} />
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={handleSignOut}
-                    disabled={isSubmitting}
-                    size="lg"
-                    className="w-full text-[#DC2626] hover:bg-[#FEF2F2] hover:text-[#DC2626] border-[#FCA5A5] flex items-center justify-center gap-2"
-                  >
-                    <LogOut size={18} />
-                    {isSubmitting ? 'Signing out...' : 'Sign Out'}
-                  </Button>
-                </div>
+                ))}
               </div>
             ) : (
-              /* AUTHENTICATION FORM (LOGIN / SIGNUP) */
-              <>
-                {/* TABS */}
-                <div className="flex gap-8 mb-8 border-b border-[#F1F5F9]">
-                  <Button 
-                    variant="ghost"
-                    onClick={() => { setActiveTab('login'); setErrorMessage(null); }}
-                    className={`h-auto pb-4 px-0 rounded-none bg-transparent hover:bg-transparent text-[14px] font-bold uppercase tracking-widest transition-all relative font-['Outfit'] ${activeTab === 'login' ? 'text-[#111827]' : 'text-[#94A3B8] hover:text-[#111827]'}`}
-                  >
-                    Login
-                    {activeTab === 'login' && <div className="absolute bottom-0 inset-x-0 h-1 bg-kb-tertiary rounded-full" />}
+              <div className="mt-6 rounded-xl border border-dashed border-[#CBD5E1] bg-[#FAFAFA] p-8 text-center sm:p-12">
+                <Clock size={36} className="mx-auto text-[#94A3B8]" />
+                <h3 className="mt-3 font-['Outfit'] text-lg font-bold text-[#0F172A]">No active equipment enquiries</h3>
+                <p className="mx-auto mt-2 max-w-md font-['DM_Sans'] text-sm text-[#64748B]">
+                  Submit a bulk enquiry or equipment consultation to track specifications, engineering review status, and manufacturing schedules here.
+                </p>
+                <div className="mt-6 flex justify-center gap-3">
+                  <Button className="rounded-xl font-semibold" onClick={() => onNavigate('bulk-enquiry')}>
+                    Request Bulk Quotation
                   </Button>
-                  <Button 
-                    variant="ghost"
-                    onClick={() => { setActiveTab('signup'); setErrorMessage(null); }}
-                    className={`h-auto pb-4 px-0 rounded-none bg-transparent hover:bg-transparent text-[14px] font-bold uppercase tracking-widest transition-all relative font-['Outfit'] ${activeTab === 'signup' ? 'text-[#111827]' : 'text-[#94A3B8] hover:text-[#111827]'}`}
-                  >
-                    Sign Up
-                    {activeTab === 'signup' && <div className="absolute bottom-0 inset-x-0 h-1 bg-kb-primary rounded-full" />}
+                  <Button variant="outline" className="rounded-xl border-[#CBD5E1] font-semibold" onClick={() => onNavigate('products')}>
+                    Browse Catalog
                   </Button>
                 </div>
-
-                {errorMessage && (
-                  <div className="mb-6 p-3.5 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl text-xs text-[#DC2626] flex items-center gap-2 font-['DM_Sans']">
-                    <AlertCircle size={16} className="shrink-0" />
-                    <span>{errorMessage}</span>
-                  </div>
-                )}
-
-                {activeTab === 'login' ? (
-                  <form onSubmit={handleLoginSubmit} className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="block text-[12px] font-bold text-[#64748B] uppercase tracking-widest font-['Outfit']">
-                        Email Address
-                      </label>
-                      <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={18} />
-                        <input 
-                          type="email" 
-                          required
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
-                          placeholder="customer@kitchenbots.in" 
-                          className="w-full h-[56px] pl-12 pr-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl text-[15px] focus:outline-none focus:border-kb-tertiary focus:bg-white transition-all font-['DM_Sans']"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <label className="block text-[12px] font-bold text-[#64748B] uppercase tracking-widest font-['Outfit']">
-                          Password
-                        </label>
-                        <Button 
-                          type="button"
-                          variant="link"
-                          onClick={() => onNavigate('forgot-password')}
-                          className="text-[12px] h-auto p-0 text-kb-tertiary hover:text-[#D18509] font-bold uppercase tracking-widest"
-                        >
-                          Forgot?
-                        </Button>
-                      </div>
-                      <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={18} />
-                        <input 
-                          type={showLoginPass ? 'text' : 'password'} 
-                          required
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          placeholder="••••••••" 
-                          className="w-full h-[56px] pl-12 pr-12 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl text-[15px] focus:outline-none focus:border-kb-tertiary focus:bg-white transition-all font-['DM_Sans']"
-                        />
-                        <Button 
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => setShowLoginPass(!showLoginPass)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#111827] hover:bg-[#F1F5F9]"
-                        >
-                          {showLoginPass ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </Button>
-                      </div>
-                    </div>
-
-                    <Button 
-                      type="submit"
-                      disabled={isSubmitting}
-                      size="lg"
-                      className="w-full mt-4 shadow-xl shadow-black/10 flex items-center justify-center gap-2"
-                    >
-                      {isSubmitting ? 'Signing in...' : 'Sign In'} <ArrowRight size={20} />
-                    </Button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleSignupSubmit} className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="block text-[12px] font-bold text-[#64748B] uppercase tracking-widest font-['Outfit']">
-                        Full Name
-                      </label>
-                      <input 
-                        type="text" 
-                        value={signupName}
-                        onChange={(e) => setSignupName(e.target.value)}
-                        placeholder="Vijay Sharma" 
-                        className="w-full h-[56px] px-6 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl text-[15px] focus:outline-none focus:border-kb-primary focus:bg-white transition-all font-['DM_Sans']"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-[12px] font-bold text-[#64748B] uppercase tracking-widest font-['Outfit']">
-                        Email Address
-                      </label>
-                      <input 
-                        type="email" 
-                        required
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
-                        placeholder="name@company.com" 
-                        className="w-full h-[56px] px-6 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl text-[15px] focus:outline-none focus:border-kb-primary focus:bg-white transition-all font-['DM_Sans']"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <label className="block text-[12px] font-bold text-[#64748B] uppercase tracking-widest font-['Outfit']">
-                        Create Password
-                      </label>
-                      <input 
-                        type="password" 
-                        required
-                        minLength={6}
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                        placeholder="••••••••" 
-                        className="w-full h-[56px] px-6 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl text-[15px] focus:outline-none focus:border-kb-primary focus:bg-white transition-all font-['DM_Sans']"
-                      />
-                    </div>
-
-                    <Button 
-                      type="submit"
-                      disabled={isSubmitting}
-                      variant="secondary"
-                      size="lg"
-                      className="w-full mt-4 shadow-xl shadow-kb-primary flex items-center justify-center gap-2"
-                    >
-                      {isSubmitting ? 'Creating account...' : 'Create Account'} <ArrowRight size={20} />
-                    </Button>
-                    
-                    <p className="text-[12px] text-[#94A3B8] text-center font-['DM_Sans'] pt-2">
-                      By joining, you agree to our <span className="text-[#111827] font-bold hover:underline cursor-pointer">Terms of Service</span>.
-                    </p>
-                  </form>
-                )}
-              </>
+              </div>
             )}
           </div>
 
+          {/* Direct Orders Tracking Section */}
+          <div className="mt-8 rounded-2xl border border-[#E2E8F0] bg-white p-6 sm:p-8 shadow-sm">
+            <div className="flex flex-col justify-between gap-4 border-b border-[#F1F5F9] pb-6 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="font-['Outfit'] text-xl font-bold text-[#0F172A]">Direct Orders</h2>
+                <p className="mt-1 font-['DM_Sans'] text-sm text-[#64748B]">
+                  Orders placed directly from your cart. We will contact you to confirm delivery.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start rounded-xl font-semibold sm:self-auto border-[#CBD5E1] hover:bg-[#F8FAFC]"
+                onClick={() => onNavigate('cart')}
+              >
+                Go to Cart
+              </Button>
+            </div>
+
+            {orders.length > 0 ? (
+              <div className="mt-6 space-y-4">
+                {orders.map((ord) => (
+                  <div
+                    key={ord.reference}
+                    className="flex flex-col justify-between gap-4 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-5 transition-all md:flex-row md:items-start"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="font-mono text-sm font-bold text-[#0F172A]">{ord.reference}</span>
+                        <span className="rounded-full bg-[#F0FDF4] px-2.5 py-0.5 text-xs font-semibold text-[#16A34A] border border-[#DCFCE7]">
+                          {ord.status || 'Order Confirmed'}
+                        </span>
+                        <span className="text-xs text-[#94A3B8]">{ord.date}</span>
+                      </div>
+                      <p className="mt-2 font-['DM_Sans'] text-sm text-[#475569]">
+                        <span className="font-semibold text-[#0F172A]">Items:</span>{' '}
+                        {ord.items?.map((i) => `${i.name} × ${i.quantity}`).join(', ')}
+                      </p>
+                      <p className="mt-1 font-['DM_Sans'] text-sm text-[#475569]">
+                        <span className="font-semibold text-[#0F172A]">Delivery to:</span>{' '}
+                        {ord.city}, {ord.state} - {ord.pincode}
+                      </p>
+                      <p className="mt-1 font-['Outfit'] text-sm font-bold text-[#0F172A]">
+                        ₹{ord.total?.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-lg border-[#CBD5E1] bg-white text-xs font-bold text-[#0F172A] hover:bg-[#F1F5F9]"
+                        onClick={() => onNavigate('contact')}
+                      >
+                        <PhoneCall size={14} className="mr-1.5 text-[#C2410C]" /> Contact Desk
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-6 rounded-xl border border-dashed border-[#CBD5E1] bg-[#FAFAFA] p-8 text-center sm:p-10">
+                <ShoppingBag size={32} className="mx-auto text-[#94A3B8]" />
+                <h3 className="mt-3 font-['Outfit'] text-base font-bold text-[#0F172A]">No direct orders yet</h3>
+                <p className="mx-auto mt-2 max-w-sm font-['DM_Sans'] text-sm text-[#64748B]">
+                  Add products to your cart and place a direct order to track them here.
+                </p>
+                <Button className="mt-5 rounded-xl font-semibold" onClick={() => onNavigate('products')}>
+                  Browse Products
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Warranty & Engineering Support Card */}
+          <div className="mt-8 rounded-2xl border border-[#E2E8F0] bg-white p-6 sm:p-8 shadow-sm">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 className="font-['Outfit'] text-lg font-bold text-[#0F172A]">Commercial Warranty & Technical Support</h3>
+                <p className="mt-1.5 max-w-2xl font-['DM_Sans'] text-sm text-[#64748B]">
+                  All KitchenBots commercial equipment includes our standard 1-year commercial warranty, parts replacement, and direct telephone support from Hyderabad fabrication engineers.
+                </p>
+                <p className="mt-3 font-['DM_Sans'] text-sm font-semibold text-[#0F172A]">
+                  Hotline: +91 94907 01421 • Email: info@kitchenbots.in
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="shrink-0 rounded-xl border-[#CBD5E1] font-semibold text-[#0F172A] hover:bg-[#F8FAFC]"
+                onClick={() => onNavigate('contact')}
+              >
+                <Wrench size={16} className="mr-1.5 text-[#C2410C]" /> Request Tech Support
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If not logged in, render minimal, premium Sign In / Create Account container
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-28">
+      <div className="mx-auto w-full max-w-[960px] px-6">
+        <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] md:grid md:grid-cols-[380px_1fr]">
+
+          {/* LEFT SIDE - BRANDING */}
+          <div className="flex flex-col justify-between bg-[#0F172A] p-8 text-white md:p-10">
+            <div>
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 border border-white/15">
+                <ShieldCheck size={24} className="text-[#C2410C]" />
+              </div>
+              <h1 className="font-['Outfit'] text-2xl font-bold leading-tight text-white md:text-3xl">
+                Customer & Commercial Orders Portal
+              </h1>
+              <p className="mt-4 font-['DM_Sans'] text-sm leading-relaxed text-slate-300">
+                Log in to access your orders, track custom equipment quotations, and coordinate directly with KitchenBots engineering.
+              </p>
+            </div>
+
+            <div className="mt-10 border-t border-white/10 pt-6">
+              <p className="font-['DM_Sans'] text-xs text-slate-400">
+                Direct commercial sales & tech support:
+              </p>
+              <p className="mt-1 font-['DM_Sans'] text-sm font-semibold text-white">
+                +91 94907 01421 • info@kitchenbots.in
+              </p>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE - FORM */}
+          <div className="p-8 sm:p-10 md:p-12">
+            {/* TABS */}
+            <div className="mb-8 flex gap-8 border-b border-[#F1F5F9]">
+              <button
+                type="button"
+                onClick={() => { setActiveTab('login'); setErrorMessage(null); }}
+                className={`relative pb-3 font-['Outfit'] text-sm font-bold uppercase tracking-wider transition-colors ${
+                  activeTab === 'login' ? 'text-[#0F172A]' : 'text-[#94A3B8] hover:text-[#0F172A]'
+                }`}
+              >
+                Sign In
+                {activeTab === 'login' && (
+                  <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#C2410C] rounded-full" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setActiveTab('signup'); setErrorMessage(null); }}
+                className={`relative pb-3 font-['Outfit'] text-sm font-bold uppercase tracking-wider transition-colors ${
+                  activeTab === 'signup' ? 'text-[#0F172A]' : 'text-[#94A3B8] hover:text-[#0F172A]'
+                }`}
+              >
+                Create Account
+                {activeTab === 'signup' && (
+                  <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#C2410C] rounded-full" />
+                )}
+              </button>
+            </div>
+
+            {errorMessage && (
+              <div className="mb-6 flex items-start gap-2.5 rounded-xl border border-[#FCA5A5] bg-[#FEF2F2] p-3.5 text-xs text-[#DC2626] font-['DM_Sans']">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            {activeTab === 'login' ? (
+              <form onSubmit={handleLoginSubmit} className="space-y-5">
+                <div className="space-y-1.5">
+                  <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={17} />
+                    <input
+                      type="email"
+                      required
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="name@organization.com"
+                      className="h-11 w-full rounded-xl border border-[#CBD5E1] bg-white pl-10 pr-4 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]">
+                      Password
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('forgot-password')}
+                      className="font-['DM_Sans'] text-xs font-semibold text-[#C2410C] hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={17} />
+                    <input
+                      type={showLoginPass ? 'text' : 'password'}
+                      required
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="h-11 w-full rounded-xl border border-[#CBD5E1] bg-white pl-10 pr-10 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPass(!showLoginPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A]"
+                      aria-label={showLoginPass ? 'Hide password' : 'Show password'}
+                    >
+                      {showLoginPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl font-semibold bg-[#C2410C] hover:bg-[#9A3412]"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing In...
+                    </>
+                  ) : (
+                    <>
+                      Sign In to Account <ArrowRight size={17} className="ml-1.5" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handleSignupSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={signupName}
+                    onChange={(e) => setSignupName(e.target.value)}
+                    placeholder="Vijay Sharma"
+                    className="h-11 w-full rounded-xl border border-[#CBD5E1] bg-white px-4 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={17} />
+                    <input
+                      type="email"
+                      required
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      placeholder="name@company.com"
+                      className="h-11 w-full rounded-xl border border-[#CBD5E1] bg-white pl-10 pr-4 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]">
+                    Create Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={17} />
+                    <input
+                      type={showSignupPass ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      placeholder="Minimum 6 characters"
+                      className="h-11 w-full rounded-xl border border-[#CBD5E1] bg-white pl-10 pr-10 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupPass(!showSignupPass)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A]"
+                      aria-label={showSignupPass ? 'Hide password' : 'Show password'}
+                    >
+                      {showSignupPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl font-semibold bg-[#C2410C] hover:bg-[#9A3412]"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      Create Account <ArrowRight size={17} className="ml-1.5" />
+                    </>
+                  )}
+                </Button>
+
+                <p className="pt-1 text-center font-['DM_Sans'] text-xs text-[#94A3B8]">
+                  By registering, you agree to our commercial warranty and privacy terms.
+                </p>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>

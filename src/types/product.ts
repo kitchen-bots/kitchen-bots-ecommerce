@@ -34,12 +34,19 @@ export interface Product {
   finish?: string;
   material?: string;
   dimensions?: string;
+  foldedDimensions?: string;
+  cookingArea?: string;
+  fuelType?: string;
   weight?: string;
   heatResistance?: string;
   cookingCapacity?: string;
   durability?: string;
   videoPath?: string;
+  sequenceId?: string;
   sequenceFrameCount?: number;
+  has3D?: boolean;
+  hasVideo?: boolean;
+  slug?: string;
 }
 
 export interface CartItem {

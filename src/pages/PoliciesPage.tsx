@@ -25,7 +25,7 @@ const policies: Record<TabId, { title: string; content: string[] }> = {
 
             '## Shipping Charges\n\nShipping is free on all orders above ₹2,000. Orders below ₹2,000 attract a flat shipping fee of ₹149, automatically calculated at checkout.',
 
-            '## Damaged in Transit\n\nIf your product arrives with visible transit damage:\n1. Do not accept the delivery — return to the courier immediately.\n2. Photograph all visible damage and contact us within 48 hours at kitchenbots.sales@gmail.com.\n3. We will arrange a replacement shipment at no additional cost.',
+            '## Damaged in Transit\n\nIf your product arrives with visible transit damage:\n1. Do not accept the delivery - return to the courier immediately.\n2. Photograph all visible damage and contact us within 48 hours at info@kitchenbots.in.\n3. We will arrange a replacement shipment at no additional cost.',
         ],
     },
     returns: {
@@ -33,27 +33,27 @@ const policies: Record<TabId, { title: string; content: string[] }> = {
         content: [
             '## 7-Day No-Questions Return\n\nKitchenBots offers a 7-day return window from the date of delivery. To be eligible for a return, the product must be unused, in its original condition, and in original packaging.',
 
-            '## How to Initiate a Return\n\n1. Email kitchenbots.sales@gmail.com with your order number and reason for return within 7 days of delivery.\n2. Our support team will confirm eligibility and provide a return shipping label.\n3. Pack the product securely in its original packaging.\n4. Drop off at the designated courier point or schedule a pickup.',
+            '## How to Initiate a Return\n\n1. Email info@kitchenbots.in with your order number and reason for return within 7 days of delivery.\n2. Our support team will confirm eligibility and provide a return shipping label.\n3. Pack the product securely in its original packaging.\n4. Drop off at the designated courier point or schedule a pickup.',
 
             '## Refund Processing\n\nOnce we receive and inspect the returned product, refunds are processed within 7 business days to the original payment method. UPI and bank transfer refunds typically appear within 3 business days. Credit card refunds may take 5–10 business days depending on your bank.',
 
-            '## Non-Returnable Items\n\nThe following are not eligible for standard returns:\n- Products that have been used (i.e., first fire has been completed)\n- Custom or made-to-order products\n- Products damaged by misuse, incorrect assembly, or use of non-recommended fuels\n- Products purchased from third-party platforms (Amazon, Flipkart, etc.) — contact the respective platform for their own return policy.',
+            '## Non-Returnable Items\n\nThe following are not eligible for standard returns:\n- Products that have been used (i.e., first fire has been completed)\n- Custom or made-to-order products\n- Products damaged by misuse, incorrect assembly, or use of non-recommended fuels\n- Products purchased from third-party platforms (Amazon, Flipkart, etc.) - contact the respective platform for their own return policy.',
 
-            '## Exchange Policy\n\nIf you received a wrong product or a product with a manufacturing defect, we will ship a replacement at no charge. Contact kitchenbots.sales@gmail.com within 48 hours of delivery with photographs.',
+            '## Exchange Policy\n\nIf you received a wrong product or a product with a manufacturing defect, we will ship a replacement at no charge. Contact info@kitchenbots.in within 48 hours of delivery with photographs.',
         ],
     },
     warranty: {
         title: 'Warranty Policy',
         content: [
-            '## Standard Warranty — 12 Months\n\nAll KitchenBots products carry a 12-month manufacturing defect warranty from the date of purchase. This covers:\n- Weld failures\n- Hinge pin breakage\n- Surface coating separation (on non-cooking surfaces)\n- Motor failures on Automatic BBQ models (within normal operating conditions)',
+            '## Standard Warranty - 12 Months\n\nAll KitchenBots products carry a 12-month manufacturing defect warranty from the date of purchase. This covers:\n- Weld failures\n- Hinge pin breakage\n- Surface coating separation (on non-cooking surfaces)\n- Motor failures on Automatic BBQ models (within normal operating conditions)',
 
             '## Extended Structural Warranty\n\nThe following products carry an extended 10-year structural frame warranty:\n- Rocket Stove 150MM\n- Santa Maria Grill (Medium and Large)\n\nThis covers the main structural frame only, and does not include grates, cooking surfaces, or mechanical components.',
 
-            '## Motor Warranty — Automatic BBQ\n\nThe Automatic BBQ motor assembly carries a 24-month warranty covering motor failure, gearbox malfunction, and circuit board defects under normal residential and commercial use.',
+            '## Motor Warranty - Automatic BBQ\n\nThe Automatic BBQ motor assembly carries a 24-month warranty covering motor failure, gearbox malfunction, and circuit board defects under normal residential and commercial use.',
 
             '## What the Warranty Does Not Cover\n\n- Normal surface oxidation (rust)\n- Cosmetic wear (heat discolouration)\n- Damage caused by incorrect fuel use (petroleum-based accelerants)\n- Damage caused by incorrect assembly\n- Accidental physical damage\n- Products purchased from unauthorised resellers',
 
-            '## Making a Warranty Claim\n\n1. Email kitchenbots.sales@gmail.com with your order number, purchase date, and photographs of the defect.\n2. Our warranty team will respond within 48 hours.\n3. Where replacement is required, we aim to ship the replacement before requesting return of the defective unit.',
+            '## Making a Warranty Claim\n\n1. Email info@kitchenbots.in with your order number, purchase date, and photographs of the defect.\n2. Our warranty team will respond within 48 hours.\n3. Where replacement is required, we aim to ship the replacement before requesting return of the defective unit.',
 
             '## Parts Availability Guarantee\n\nKitchenBots guarantees parts availability for a minimum of 10 years from the launch date of each product. This ensures that your grill can be serviced and maintained indefinitely rather than being discarded.',
         ],
@@ -87,11 +87,11 @@ const policies: Record<TabId, { title: string; content: string[] }> = {
 
             '## Cookies\n\nThe KitchenBots website uses essential cookies for session management and preference storage, and optional analytics cookies (Google Analytics, Meta Pixel). You can opt out of analytics cookies by declining in the cookie consent banner.',
 
-            '## Your Rights\n\nUnder the Information Technology (Amendment) Act, 2008, you have the right to:\n- Request access to the personal data we hold about you\n- Request correction of inaccurate data\n- Request deletion of your personal data\n- Withdraw consent to marketing communications at any time\n\nTo exercise any of these rights, contact kitchenbots.sales@gmail.com.',
+            '## Your Rights\n\nUnder the Information Technology (Amendment) Act, 2008, you have the right to:\n- Request access to the personal data we hold about you\n- Request correction of inaccurate data\n- Request deletion of your personal data\n- Withdraw consent to marketing communications at any time\n\nTo exercise any of these rights, contact info@kitchenbots.in.',
 
             '## Data Retention\n\nOrder and customer data is retained for 7 years for GST and accounting compliance. Marketing preference data is deleted upon unsubscription.',
 
-            '## Contact\n\nFor privacy queries: kitchenbots.sales@gmail.com',
+            '## Contact\n\nFor privacy queries: info@kitchenbots.in',
         ],
     },
 };

@@ -1,7 +1,7 @@
 /**
  * sequence-viewer.ts
  * Pure canvas rendering logic for 360° product viewers.
- * Decoupled from React — usable in any canvas context.
+ * Decoupled from React - usable in any canvas context.
  */
 
 /** Render a single frame onto a canvas, centered and aspect-fit. */

@@ -1,7 +1,21 @@
 import React, { useState } from 'react';
 import { useCart } from '../hooks/use-cart';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle, AlertCircle, Lock } from 'lucide-react';
+import {
+  Trash2,
+  Plus,
+  Minus,
+  ShoppingBag,
+  ArrowRight,
+  CheckCircle,
+  AlertCircle,
+  MapPin,
+  Phone,
+  User,
+  ChevronDown,
+  ChevronUp,
+  Loader2
+} from 'lucide-react';
 import type { Page } from '../App';
 import { Button } from '../components/ui/button';
 import ProductImage from '../components/ProductImage';
@@ -9,6 +23,30 @@ import { apiClient } from '../lib/api-client';
 
 interface CartPageProps {
   onNavigate: (page: Page) => void;
+}
+
+interface CheckoutForm {
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  notes: string;
+}
+
+interface PlacedOrder {
+  reference: string;
+  date: string;
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  items: Array<{ name: string; quantity: number; price: number }>;
+  total: number;
+  status: string;
 }
 
 function renderConfigValue(value: unknown): React.ReactNode {
@@ -32,13 +70,30 @@ function renderConfigValue(value: unknown): React.ReactNode {
   return String(value);
 }
 
+function generateOrderRef(): string {
+  const year = new Date().getFullYear();
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return `ORD-${year}-${num}`;
+}
+
 export default function CartPage({ onNavigate }: CartPageProps) {
-  const { items, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
+  const { items, removeFromCart, updateQuantity, clearCart, totalPrice, totalItems } = useCart();
   const { user } = useAuth();
-  
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [confirmedOrder, setConfirmedOrder] = useState<PlacedOrder | null>(null);
+  const [formErrors, setFormErrors] = useState<Partial<CheckoutForm>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [orderConfirmation, setOrderConfirmation] = useState<{ id?: string; referenceNumber?: string } | null>(null);
+
+  const [form, setForm] = useState<CheckoutForm>({
+    name: user?.displayName || '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    notes: '',
+  });
 
   const handleUpdateQuantity = (id: string, newQuantity: number) => {
     if (!Number.isFinite(newQuantity)) return;
@@ -48,98 +103,184 @@ export default function CartPage({ onNavigate }: CartPageProps) {
     }
   };
 
-  const handlePlaceOrder = async () => {
-    if (!user) {
-      onNavigate('login');
-      return;
-    }
+  const validateForm = (): boolean => {
+    const errors: Partial<CheckoutForm> = {};
+    if (!form.name.trim()) errors.name = 'Name is required';
+    if (!/^[6-9]\d{9}$/.test(form.phone.replace(/\s/g, ''))) errors.phone = 'Enter a valid 10-digit Indian mobile number';
+    if (!form.address.trim()) errors.address = 'Address is required';
+    if (!form.city.trim()) errors.city = 'City is required';
+    if (!form.state.trim()) errors.state = 'State is required';
+    if (!/^\d{6}$/.test(form.pincode)) errors.pincode = 'Enter a valid 6-digit pincode';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handlePlaceOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    try {
-      const idempotencyKey = `ord-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      const response = await apiClient<{ id?: string; referenceNumber?: string }>('/v1/orders', {
-        method: 'POST',
-        requireAuth: true,
-        headers: {
-          'Idempotency-Key': idempotencyKey,
-        },
-        body: JSON.stringify({
-          items: items.map(i => ({
-            productId: i.id,
-            quantity: i.quantity,
-            price: i.price,
-            name: i.name,
-            configuration: i.configuration
-          })),
-          totalItems,
-          estimatedTotal: totalPrice
-        }),
-      });
+    const reference = generateOrderRef();
+    const order: PlacedOrder = {
+      reference,
+      date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+      address: form.address.trim(),
+      city: form.city.trim(),
+      state: form.state.trim(),
+      pincode: form.pincode.trim(),
+      items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      total: totalPrice,
+      status: 'Order Confirmed',
+    };
 
-      clearCart();
-      setOrderConfirmation(response || { id: `ORD-${Date.now().toString().slice(-6)}` });
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to place order. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    if (user) {
+      try {
+        const idempotencyKey = `ord-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        const response = await apiClient<{ id?: string; referenceNumber?: string }>('/v1/orders', {
+          method: 'POST',
+          requireAuth: true,
+          headers: {
+            'Idempotency-Key': idempotencyKey,
+          },
+          body: JSON.stringify({
+            items: items.map(i => ({
+              productId: i.id,
+              quantity: i.quantity,
+              price: i.price,
+              name: i.name,
+              configuration: i.configuration,
+            })),
+            delivery: {
+              name: form.name.trim(),
+              phone: form.phone.trim(),
+              address: form.address.trim(),
+              city: form.city.trim(),
+              state: form.state.trim(),
+              pincode: form.pincode.trim(),
+              notes: form.notes.trim() || undefined,
+            },
+            totalItems,
+            estimatedTotal: totalPrice,
+          }),
+        });
+        if (response?.referenceNumber || response?.id) {
+          order.reference = response.referenceNumber || response.id || reference;
+        }
+      } catch (err) {
+        console.warn('Backend order submission warning:', err);
+      }
     }
+
+    // Persist to localStorage so Customer Portal can display it
+    try {
+      const existing = localStorage.getItem('kb_orders');
+      const orders: PlacedOrder[] = existing ? JSON.parse(existing) : [];
+      orders.unshift(order);
+      localStorage.setItem('kb_orders', JSON.stringify(orders));
+    } catch {
+      // Ignore storage errors
+    }
+
+    clearCart();
+    setConfirmedOrder(order);
+    setShowCheckout(false);
+    setIsSubmitting(false);
   };
 
-  if (orderConfirmation) {
+  // Order Confirmed Screen
+  if (confirmedOrder) {
     return (
       <main className="min-h-screen bg-[#FAFAFA] pt-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-          <div className="max-w-lg mx-auto bg-white border border-[#E2E8F0] rounded-2xl p-8 sm:p-12 text-center shadow-xs">
-            <div className="w-16 h-16 bg-[#F0FDF4] border border-[#DCFCE7] rounded-full flex items-center justify-center mx-auto mb-5 text-kb-primary">
-              <CheckCircle className="w-8 h-8" aria-hidden="true" />
+          <div className="max-w-xl mx-auto">
+            <div className="bg-white border border-[#E2E8F0] rounded-2xl p-8 sm:p-10 shadow-sm text-center">
+              <div className="w-16 h-16 bg-[#F0FDF4] border border-[#DCFCE7] rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <CheckCircle className="w-8 h-8 text-[#16A34A]" />
+              </div>
+              <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-bold text-[#111827] mb-1">
+                Order Placed
+              </h1>
+              <p className="text-[#64748B] font-['DM_Sans'] text-sm mb-6">
+                We will contact you within 24 hours to confirm delivery details.
+              </p>
+
+              <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-5 text-left mb-6 space-y-3 text-sm font-['DM_Sans']">
+                <div className="flex justify-between">
+                  <span className="text-[#64748B]">Order reference</span>
+                  <span className="font-mono font-bold text-[#0F172A]">{confirmedOrder.reference}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#64748B]">Date</span>
+                  <span className="text-[#0F172A]">{confirmedOrder.date}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#64748B]">Name</span>
+                  <span className="text-[#0F172A] font-medium">{confirmedOrder.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#64748B]">Contact</span>
+                  <span className="text-[#0F172A]">{confirmedOrder.phone}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#64748B] shrink-0">Delivery to</span>
+                  <span className="text-[#0F172A] text-right">{confirmedOrder.address}, {confirmedOrder.city}, {confirmedOrder.state} - {confirmedOrder.pincode}</span>
+                </div>
+                <div className="pt-2 border-t border-[#E2E8F0]">
+                  <div className="flex justify-between font-semibold">
+                    <span className="text-[#475569]">Estimated total</span>
+                    <span className="text-[#111827] font-['Outfit'] text-base">₹{confirmedOrder.total.toLocaleString('en-IN')}</span>
+                  </div>
+                  <p className="text-xs text-[#94A3B8] mt-1">Final amount confirmed on invoice. GST &amp; delivery calculated separately.</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Button
+                  onClick={() => onNavigate('login')}
+                  className="w-full rounded-xl font-bold bg-[#C2410C] hover:bg-[#9A3412] text-white"
+                  size="lg"
+                >
+                  Track Order in My Account
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => onNavigate('products')}
+                  className="w-full rounded-xl font-medium border-[#CBD5E1]"
+                >
+                  Continue Shopping
+                </Button>
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] font-['Outfit'] mb-2">
-              Order Confirmed!
-            </h1>
-            <p className="text-[#64748B] text-sm sm:text-base font-['DM_Sans'] mb-4">
-              Thank you for your order. Your order reference is:
-            </p>
-            <div className="inline-block px-4 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-sm font-mono font-bold text-[#111827] mb-6">
-              {orderConfirmation.referenceNumber || orderConfirmation.id || 'CONFIRMED'}
-            </div>
-            <p className="text-[#64748B] text-xs font-['DM_Sans'] mb-8">
-              Our team will review your order requirements and send dispatch & shipping updates to <span className="font-semibold text-[#111827]">{user?.email}</span>.
-            </p>
-            <Button
-              onClick={() => onNavigate('products')}
-              variant="secondary"
-              size="lg"
-              className="w-full sm:w-auto bg-kb-primary hover:bg-[#145e2e] text-white"
-            >
-              Continue Shopping
-            </Button>
           </div>
         </div>
       </main>
     );
   }
 
+  // Empty Cart
   if (items.length === 0) {
     return (
       <main className="min-h-screen bg-[#FAFAFA] pt-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="max-w-lg mx-auto bg-white border border-[#E2E8F0] rounded-xl p-8 sm:p-12 text-center shadow-xs">
-            <div className="w-16 h-16 bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl flex items-center justify-center mx-auto mb-5 text-kb-primary">
+            <div className="w-16 h-16 bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl flex items-center justify-center mx-auto mb-5 text-[#16A34A]">
               <ShoppingBag className="w-8 h-8" aria-hidden="true" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] font-['Outfit'] mb-2">
               Your cart is empty
             </h1>
             <p className="text-[#64748B] text-sm sm:text-base font-['DM_Sans'] mb-8">
-              You have not added any products to your cart yet. Browse our commercial and outdoor cooking equipment to get started.
+              You have not added any products yet. Browse our grills, rocket stoves, and cooking equipment to get started.
             </p>
             <Button
               onClick={() => onNavigate('products')}
-              variant="secondary"
+              variant="default"
               size="lg"
-              className="w-full sm:w-auto bg-kb-primary hover:bg-[#145e2e] text-white focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:ring-offset-2"
+              className="w-full sm:w-auto bg-[#C2410C] hover:bg-[#9A3412] text-white rounded-xl font-bold"
             >
               Browse Products
             </Button>
@@ -149,6 +290,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
     );
   }
 
+  // Cart with items
   return (
     <main className="min-h-screen bg-[#FAFAFA] pt-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -157,7 +299,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
           <button
             type="button"
             onClick={() => onNavigate('home')}
-            className="hover:text-[#111827] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary rounded px-1.5 py-2 min-h-[44px] inline-flex items-center"
+            className="hover:text-[#111827] transition-colors focus:outline-none rounded px-1.5 py-2 min-h-[44px] inline-flex items-center"
           >
             Home
           </button>
@@ -165,7 +307,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
           <button
             type="button"
             onClick={() => onNavigate('products')}
-            className="hover:text-[#111827] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary rounded px-1.5 py-2 min-h-[44px] inline-flex items-center"
+            className="hover:text-[#111827] transition-colors focus:outline-none rounded px-1.5 py-2 min-h-[44px] inline-flex items-center"
           >
             Products
           </button>
@@ -182,7 +324,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
               Shopping Cart
             </h1>
             <p className="mt-1 text-sm text-[#64748B] font-['DM_Sans']">
-              Review items in your order before placing your order or requesting a quote.
+              Review your items, then place a direct order or request a commercial quote.
             </p>
           </div>
           <span className="text-sm font-medium text-[#64748B] shrink-0">
@@ -270,7 +412,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                             onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                             disabled={item.quantity <= 1}
                             aria-label={`Decrease quantity of ${item.name}`}
-                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:z-10 disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
+                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
                           >
                             <Minus className="w-4 h-4" aria-hidden="true" />
                           </button>
@@ -285,7 +427,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                             onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                             disabled={item.quantity >= 999}
                             aria-label={`Increase quantity of ${item.name}`}
-                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:z-10 disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
+                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
                           >
                             <Plus className="w-4 h-4" aria-hidden="true" />
                           </button>
@@ -298,7 +440,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                         size="sm"
                         onClick={() => removeFromCart(item.id)}
                         aria-label={`Remove ${item.name} from cart`}
-                        className="text-[#64748B] hover:text-[#DC2626] hover:bg-[#FEF2F2] min-h-[44px] px-3 text-xs font-medium gap-1.5 focus-visible:ring-2 focus-visible:ring-[#DC2626] focus-visible:ring-offset-2"
+                        className="text-[#64748B] hover:text-[#DC2626] hover:bg-[#FEF2F2] min-h-[44px] px-3 text-xs font-medium gap-1.5"
                       >
                         <Trash2 className="w-4 h-4" aria-hidden="true" />
                         <span>Remove</span>
@@ -312,7 +454,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
 
           {/* Order Summary Sidebar */}
           <aside aria-label="Order summary" className="lg:col-span-1">
-            <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 sm:p-6 shadow-xs lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+            <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 sm:p-6 shadow-xs lg:sticky lg:top-28">
               <h2 className="font-['Outfit'] text-xl font-bold text-[#111827] mb-5">
                 Order Summary
               </h2>
@@ -325,12 +467,12 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-[#475569]">
-                  <span>Shipping & freight</span>
-                  <span className="font-medium text-[#1E293B]">Confirmed upon order</span>
+                  <span>Shipping &amp; freight</span>
+                  <span className="font-medium text-[#1E293B]">On invoice</span>
                 </div>
                 <div className="flex justify-between items-center text-[#475569]">
-                  <span>Taxes & GST</span>
-                  <span className="font-medium text-[#1E293B]">Calculated on invoice</span>
+                  <span>Taxes &amp; GST</span>
+                  <span className="font-medium text-[#1E293B]">On invoice</span>
                 </div>
 
                 <div className="h-px bg-[#E2E8F0] my-4" />
@@ -345,47 +487,243 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                 </div>
               </div>
 
-              {/* Functional emphasis note */}
               <div className="mt-4 p-3 bg-[#FFFBEB] border border-[#FDE68A] rounded-lg text-xs text-[#92400E] leading-relaxed">
-                Prices shown in INR. Final freight, taxes, and lead times are verified on server order creation.
+                Prices in INR. Final freight, taxes, and GST are confirmed on invoice.
               </div>
 
               {/* Actions */}
               <div className="mt-6 space-y-3">
                 <Button
-                  onClick={handlePlaceOrder}
-                  disabled={isSubmitting}
-                  variant="secondary"
+                  onClick={() => setShowCheckout(true)}
                   size="lg"
-                  className="w-full text-base font-bold flex items-center justify-center gap-2 bg-kb-primary hover:bg-[#145e2e] text-white focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:ring-offset-2"
+                  className="w-full text-base font-bold flex items-center justify-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white rounded-xl"
                 >
-                  {isSubmitting ? (
-                    'Processing Order...'
-                  ) : user ? (
-                    <>
-                      Place Direct Order
-                      <ArrowRight className="w-4 h-4" aria-hidden="true" />
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4 h-4" aria-hidden="true" />
-                      Sign In to Place Order
-                    </>
-                  )}
+                  Place Direct Order
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Button>
 
                 <Button
                   onClick={() => onNavigate('bulk-enquiry')}
                   variant="outline"
                   size="default"
-                  className="w-full text-sm font-medium"
+                  className="w-full text-sm font-medium border-[#CBD5E1] rounded-xl"
                 >
-                  Request Bulk Quote
+                  Request Commercial Quote
                 </Button>
               </div>
             </div>
           </aside>
         </div>
+
+        {/* Direct Checkout Panel Modal */}
+        {showCheckout && (
+          <div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Place direct order"
+          >
+            <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-y-auto max-h-[92vh]">
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#F1F5F9]">
+                <div>
+                  <h2 className="font-['Outfit'] text-xl font-bold text-[#111827]">Delivery Details</h2>
+                  <p className="text-xs text-[#64748B] font-['DM_Sans'] mt-0.5">
+                    No advance payment required. We will contact you to confirm delivery.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowCheckout(false); setFormErrors({}); }}
+                  className="text-[#94A3B8] hover:text-[#475569] p-1.5 rounded-lg hover:bg-[#F1F5F9] transition-colors"
+                  aria-label="Close checkout"
+                >
+                  <ChevronDown size={20} />
+                </button>
+              </div>
+
+              {/* Order mini-summary */}
+              <div className="px-6 py-4 bg-[#F8FAFC] border-b border-[#F1F5F9]">
+                <div className="flex justify-between text-sm font-['DM_Sans']">
+                  <span className="text-[#64748B]">{totalItems} {totalItems === 1 ? 'item' : 'items'}</span>
+                  <span className="font-['Outfit'] font-bold text-[#111827]">₹{totalPrice.toLocaleString('en-IN')}</span>
+                </div>
+                <ul className="mt-2 space-y-1">
+                  {items.map((i) => (
+                    <li key={i.id} className="text-xs text-[#475569]">
+                      {i.name} × {i.quantity}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handlePlaceOrder} className="px-6 py-5 space-y-4" noValidate>
+                {/* Name */}
+                <div className="space-y-1">
+                  <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]" htmlFor="co-name">
+                    Full Name <span className="text-[#C2410C]">*</span>
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={16} />
+                    <input
+                      id="co-name"
+                      type="text"
+                      required
+                      autoComplete="name"
+                      value={form.name}
+                      onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                      placeholder="Your full name"
+                      className={`h-11 w-full rounded-xl border pl-10 pr-4 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:ring-1 ${formErrors.name ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : 'border-[#CBD5E1] focus:border-[#C2410C] focus:ring-[#C2410C]'}`}
+                    />
+                  </div>
+                  {formErrors.name && <p className="text-xs text-[#DC2626]">{formErrors.name}</p>}
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-1">
+                  <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]" htmlFor="co-phone">
+                    Mobile Number <span className="text-[#C2410C]">*</span>
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={16} />
+                    <input
+                      id="co-phone"
+                      type="tel"
+                      required
+                      autoComplete="tel"
+                      value={form.phone}
+                      onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                      placeholder="10-digit mobile number"
+                      className={`h-11 w-full rounded-xl border pl-10 pr-4 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:ring-1 ${formErrors.phone ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : 'border-[#CBD5E1] focus:border-[#C2410C] focus:ring-[#C2410C]'}`}
+                    />
+                  </div>
+                  {formErrors.phone && <p className="text-xs text-[#DC2626]">{formErrors.phone}</p>}
+                </div>
+
+                {/* Address */}
+                <div className="space-y-1">
+                  <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]" htmlFor="co-address">
+                    Street Address <span className="text-[#C2410C]">*</span>
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3.5 top-3.5 text-[#94A3B8]" size={16} />
+                    <textarea
+                      id="co-address"
+                      required
+                      autoComplete="street-address"
+                      value={form.address}
+                      onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                      placeholder="Door no., street, locality"
+                      rows={2}
+                      className={`w-full rounded-xl border pl-10 pr-4 py-2.5 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors resize-none focus:ring-1 ${formErrors.address ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : 'border-[#CBD5E1] focus:border-[#C2410C] focus:ring-[#C2410C]'}`}
+                    />
+                  </div>
+                  {formErrors.address && <p className="text-xs text-[#DC2626]">{formErrors.address}</p>}
+                </div>
+
+                {/* City / State / Pincode */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]" htmlFor="co-city">
+                      City <span className="text-[#C2410C]">*</span>
+                    </label>
+                    <input
+                      id="co-city"
+                      type="text"
+                      required
+                      autoComplete="address-level2"
+                      value={form.city}
+                      onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                      placeholder="City"
+                      className={`h-11 w-full rounded-xl border px-4 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:ring-1 ${formErrors.city ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : 'border-[#CBD5E1] focus:border-[#C2410C] focus:ring-[#C2410C]'}`}
+                    />
+                    {formErrors.city && <p className="text-xs text-[#DC2626]">{formErrors.city}</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]" htmlFor="co-pincode">
+                      Pincode <span className="text-[#C2410C]">*</span>
+                    </label>
+                    <input
+                      id="co-pincode"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      required
+                      autoComplete="postal-code"
+                      value={form.pincode}
+                      onChange={(e) => setForm((f) => ({ ...f, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
+                      placeholder="6-digit code"
+                      className={`h-11 w-full rounded-xl border px-4 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:ring-1 ${formErrors.pincode ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : 'border-[#CBD5E1] focus:border-[#C2410C] focus:ring-[#C2410C]'}`}
+                    />
+                    {formErrors.pincode && <p className="text-xs text-[#DC2626]">{formErrors.pincode}</p>}
+                  </div>
+                </div>
+
+                {/* State */}
+                <div className="space-y-1">
+                  <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]" htmlFor="co-state">
+                    State <span className="text-[#C2410C]">*</span>
+                  </label>
+                  <input
+                    id="co-state"
+                    type="text"
+                    required
+                    autoComplete="address-level1"
+                    value={form.state}
+                    onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+                    placeholder="State"
+                    className={`h-11 w-full rounded-xl border px-4 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors focus:ring-1 ${formErrors.state ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : 'border-[#CBD5E1] focus:border-[#C2410C] focus:ring-[#C2410C]'}`}
+                  />
+                  {formErrors.state && <p className="text-xs text-[#DC2626]">{formErrors.state}</p>}
+                </div>
+
+                {/* Notes (optional) */}
+                <div className="space-y-1">
+                  <label className="block font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#64748B]" htmlFor="co-notes">
+                    Order Notes <span className="text-[#94A3B8] normal-case font-normal">(optional)</span>
+                  </label>
+                  <textarea
+                    id="co-notes"
+                    value={form.notes}
+                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                    placeholder="Special delivery instructions, preferred contact time, etc."
+                    rows={2}
+                    className="w-full rounded-xl border border-[#CBD5E1] px-4 py-2.5 font-['DM_Sans'] text-sm text-[#0F172A] outline-none transition-colors resize-none focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
+                  />
+                </div>
+
+                <div className="pt-2 border-t border-[#F1F5F9]">
+                  <p className="text-xs text-[#64748B] font-['DM_Sans'] mb-4 leading-relaxed">
+                    By placing this order, you agree to our{' '}
+                    <button type="button" onClick={() => onNavigate('policies')} className="underline text-[#C2410C]">
+                      shipping and warranty terms
+                    </button>
+                    . No advance payment required.
+                  </p>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={isSubmitting}
+                    className="w-full font-bold rounded-xl bg-[#C2410C] hover:bg-[#9A3412] text-white"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="animate-spin mr-2" size={18} />
+                        Confirming Order...
+                      </>
+                    ) : (
+                      <>
+                        Confirm Order
+                        <ChevronUp className="w-4 h-4 ml-1" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

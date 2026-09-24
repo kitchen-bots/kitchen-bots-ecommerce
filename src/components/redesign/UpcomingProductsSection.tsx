@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { getMediaUrl } from '../../lib/cdn';
 
 const UpcomingProductsSection: React.FC = () => {
   const upcomingProducts = [
@@ -8,7 +9,7 @@ const UpcomingProductsSection: React.FC = () => {
       name: "Neo-Pizza Oven Pro",
       tagline: "AI-Controlled Precision Baking",
       description: "Experience the perfect crust every time with our patented thermal sensing technology and automated rotation system.",
-      image: "/images/redesign/upcoming-pizza-oven.png",
+      image: getMediaUrl('/images/redesign/upcoming-pizza-oven.png'),
       releaseDate: "Q3 2026",
       features: ["Voice Control", "Remote Monitoring", "Self-Cleaning Mode"]
     },
@@ -17,7 +18,7 @@ const UpcomingProductsSection: React.FC = () => {
       name: "Smart Thermal Fryer V2",
       tagline: "Healthier Frying, Smarter Control",
       description: "Reducing oil usage by 40% while maintaining the perfect crunch. Integrated with KitchenSync OS for total control.",
-      image: "/images/redesign/fryer.png",
+      image: getMediaUrl('/images/redesign/fryer.png'),
       releaseDate: "Q4 2026",
       features: ["Nutrient Tracking", "Zero-Waste Filter", "Rapid Heat Tech"]
     },
@@ -26,7 +27,7 @@ const UpcomingProductsSection: React.FC = () => {
       name: "Autonomous Grill System",
       tagline: "Chef-Level Grilling, Automated",
       description: "Multi-zone temperature management and robotic flipping capabilities for high-volume kitchen operations.",
-      image: "/images/redesign/robogrill.png",
+      image: getMediaUrl('/images/redesign/robogrill.png'),
       releaseDate: "Q1 2027",
       features: ["Flipping Robotic Arm", "Flare-up Detection", "Smoke Infuser"]
     }
@@ -36,7 +37,7 @@ const UpcomingProductsSection: React.FC = () => {
     <section className="upcoming-products py-24 bg-white overflow-hidden" id="upcoming">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <motion.span 
+          <motion.span
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -44,7 +45,7 @@ const UpcomingProductsSection: React.FC = () => {
           >
             Future of Cooking
           </motion.span>
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -53,14 +54,14 @@ const UpcomingProductsSection: React.FC = () => {
           >
             In the Lab: Upcoming Innovations
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
             className="text-lg text-gray-600 max-w-2xl mx-auto font-body"
           >
-            Our engineers are pushing the boundaries of what's possible in the kitchen. 
+            Our engineers are pushing the boundaries of what's possible in the kitchen.
             Be the first to experience the next generation of robotic appliances.
           </motion.p>
         </div>
@@ -76,13 +77,13 @@ const UpcomingProductsSection: React.FC = () => {
               className="relative group h-full flex flex-col"
             >
               <div className="relative mb-8 rounded-3xl overflow-hidden shadow-premium-lg bg-gray-50 h-80">
-                <img 
-                  src={product.image} 
+                <img
+                  src={product.image}
                   alt={product.name}
                   className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute top-4 right-4 z-10">
-                  <span className="glass px-4 py-2 rounded-full text-xs font-bold text-[#1E2329] shadow-sm">
+                  <span className="bg-white/95 px-3 py-1.5 rounded-lg text-xs font-bold text-[#1E2329] border border-[#E2E8F0] shadow-sm">
                     {product.releaseDate}
                   </span>
                 </div>
@@ -102,15 +103,15 @@ const UpcomingProductsSection: React.FC = () => {
 
                 <div className="flex flex-wrap gap-2 mb-8">
                   {product.features.map((feature, i) => (
-                    <span key={i} className="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-medium">
+                    <span key={i} className="px-3 py-1 bg-gray-100 text-gray-500 rounded-md text-xs font-medium">
                       {feature}
                     </span>
                   ))}
                 </div>
 
                 <div className="mt-auto">
-                  <button className="w-full py-4 bg-[#1E2329] text-white rounded-2xl font-bold hover:bg-[#00A884] transition-colors duration-300 transform group-hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2">
-                    Join the Waitlist
+                  <button className="w-full py-3.5 bg-[#1E2329] text-white rounded-lg font-bold hover:bg-kb-tertiary transition-colors duration-200 shadow-sm flex items-center justify-center gap-2">
+                    Request Information
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -121,7 +122,7 @@ const UpcomingProductsSection: React.FC = () => {
           ))}
         </div>
       </div>
-      
+
       <style>{`
         .upcoming-products {
           position: relative;

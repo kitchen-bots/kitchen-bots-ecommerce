@@ -1,41 +1,41 @@
-import { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle, MessageCircle, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Phone, Mail, Clock, MapPin, Send, CheckCircle, MessageCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { apiClient } from '../lib/api-client';
+import TurnstileWidget from '../components/TurnstileWidget';
+import { submitEnquiry } from '../lib/api';
 
-gsap.registerPlugin(ScrollTrigger);
-
-const contactInfo = [
-  {
-    icon: MapPin,
-    title: 'Manufacturing Unit',
-    details: ['Plot No. 45, Industrial Estate', 'Cherlapally, Hyderabad', 'Telangana 500051'],
-    href: null,
-  },
+const CONTACT_CHANNELS = [
   {
     icon: Phone,
-    title: 'Call Us',
-    details: ['+91 94907 01421'],
+    title: 'Phone Consultation',
+    primary: '+91 94907 01421',
+    description: 'Direct sales and equipment enquiries',
     href: 'tel:+919490701421',
   },
   {
     icon: Mail,
-    title: 'Email Us',
-    details: ['kitchenbots.sales@gmail.com'],
-    href: 'mailto:kitchenbots.sales@gmail.com',
+    title: 'Email Correspondence',
+    primary: 'info@kitchenbots.in',
+    description: 'Technical specs, blueprints, and proposals',
+    href: 'mailto:info@kitchenbots.in',
+  },
+  {
+    icon: MapPin,
+    title: 'Headquarters & Manufacturing',
+    primary: 'Hyderabad, Telangana, India',
+    description: 'Commercial fabrication and dispatch facility',
+    href: null,
   },
   {
     icon: Clock,
-    title: 'Working Hours',
-    details: ['Monday – Saturday', '9:00 AM – 5:00 PM'],
+    title: 'Operational Schedule',
+    primary: 'Monday to Saturday, 9:00 AM - 6:00 PM',
+    description: 'Indian Standard Time (IST)',
     href: null,
   },
 ];
 
 export default function ContactPage() {
-  const sectionRef = useRef<HTMLElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -44,36 +44,10 @@ export default function ContactPage() {
     city: '',
     message: '',
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedRef, setSubmittedRef] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const ctx = gsap.context(() => {
-      const elements = section.querySelectorAll('.animate-in');
-      gsap.set(elements, { opacity: 0, y: 30 });
-
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top 60%',
-        onEnter: () => {
-          gsap.to(elements, {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'expo.out',
-          });
-        },
-        once: true,
-      });
-    }, section);
-
-    return () => ctx.revert();
-  }, []);
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,283 +55,292 @@ export default function ContactPage() {
     setErrorMessage(null);
 
     try {
-      const idempotencyKey = `enq-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      await apiClient('/v1/enquiries', {
-        method: 'POST',
-        headers: {
-          'Idempotency-Key': idempotencyKey,
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          company: formData.company,
-          city: formData.city,
-          message: formData.message,
-          type: 'quote'
-        }),
+      const response = await submitEnquiry({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined,
+        company: formData.company.trim() || undefined,
+        city: formData.city.trim() || undefined,
+        message: formData.message.trim(),
+        items: [],
+        turnstileToken: turnstileToken || undefined,
       });
-      setIsSubmitted(true);
+
+      setSubmittedRef(response.reference);
       setFormData({ name: '', email: '', phone: '', company: '', city: '', message: '' });
+      setTurnstileToken('');
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to submit enquiry. Please try again.');
+      const message = err instanceof Error ? err.message : 'Unable to submit enquiry. Please try again.';
+      setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   return (
-    <section ref={sectionRef} className="pt-20 bg-[#FAFAFA] min-h-screen">
-      <div className="container mx-auto px-6 md:px-[80px] py-12 md:py-20">
-
-        {/* ── Header ───────────────────────────────────────────── */}
-        <div className="animate-in max-w-2xl mb-12">
-          <span className="inline-block text-[11px] font-bold tracking-[0.1em] text-kb-primary uppercase mb-4 font-['Outfit']">
-            Request a Quote
-          </span>
-          <h1 className="text-[40px] md:text-[48px] font-bold font-['Outfit'] text-[#111827] mb-4 leading-tight">
-            Get Quote / Bulk Enquiry
+    <div className="min-h-screen bg-[#FAFAFA] pt-20">
+      {/* Header */}
+      <section className="border-b border-[#F1F5F9] bg-white pb-12 pt-8 lg:pb-16">
+        <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
+          <h1 className="font-['Outfit'] text-[34px] font-bold leading-tight text-[#111827] sm:text-[44px] md:text-[52px]">
+            Contact our engineering & support team
           </h1>
-          <p className="text-[18px] font-bold text-[#111827] mb-3 font-['Outfit']">
-            Request a Quote or Submit Your Bulk Enquiry
-          </p>
-          <p className="text-[15px] text-[#6B7280] leading-relaxed font-['DM_Sans']">
-            Tell us your requirements — products, quantities, and delivery city. Our team will respond within 24 hours to provide a customized solution.
+          <p className="mt-4 max-w-2xl font-['DM_Sans'] text-[17px] leading-relaxed text-[#64748B]">
+            Reach out for standard product questions, custom kitchen equipment requirements, or bulk quotation requests.
           </p>
         </div>
+      </section>
 
-        {/* ── Layout: Form + Sidebar ────────────────────────────── */}
-        <div className="grid lg:grid-cols-3 gap-12">
-
-          {/* Contact Info (sidebar) */}
-          <div className="lg:col-span-1 space-y-4 order-2 lg:order-1">
-            {contactInfo.map((info, index) => {
-              const Icon = info.icon;
-              const content = (
-                <div
-                  className="animate-in p-6 bg-white border border-[#E5E7EB] rounded-2xl hover:border-kb-primary transition-all duration-300 group shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_-5px_rgba(0,0,0,0.1)]"
-                >
-                  <div className="w-12 h-12 bg-[#F0FDF4] rounded-xl flex items-center justify-center mb-4 group-hover:bg-kb-primary transition-colors duration-300">
-                    <Icon className="w-6 h-6 text-kb-primary group-hover:text-white transition-colors" />
-                  </div>
-                  <h3 className="text-[16px] font-bold font-['Outfit'] text-[#111827] mb-1.5">{info.title}</h3>
-                  {info.details.map((d, i) => (
-                    <p key={i} className="text-[14px] text-[#6B7280] font-['DM_Sans']">{d}</p>
-                  ))}
-                </div>
-              );
-
-              return info.href ? (
-                <a key={index} href={info.href} className="block">
-                  {content}
-                </a>
-              ) : (
-                <div key={index}>{content}</div>
-              );
-            })}
-
-            {/* WhatsApp Card */}
-            <a
-              href="https://wa.me/919490701421"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="animate-in flex flex-col gap-2 p-5 bg-[#25D366] text-white rounded-2xl hover:bg-[#128C7E] transition-all duration-300 group shadow-lg shadow-[#25D366]/20"
-            >
-              <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="font-bold font-['Outfit']">Prefer WhatsApp?</h3>
-              <p className="text-sm text-white/80" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                Chat directly → wa.me/919490701421
+      {/* Main Content: Two-column desktop layout */}
+      <section className="py-12 lg:py-16">
+        <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+            
+            {/* Left Column: Verified contact channels */}
+            <div className="space-y-4 lg:col-span-5">
+              <h2 className="font-['Outfit'] text-[22px] font-bold text-[#111827]">
+                Direct communication
+              </h2>
+              <p className="font-['DM_Sans'] text-sm text-[#64748B] mb-6">
+                Our team assists commercial kitchens, caterers, and restaurant owners across India.
               </p>
-              <span className="mt-1 text-sm font-bold underline" style={{ fontFamily: 'DM Sans, sans-serif' }}>Chat with us →</span>
-            </a>
-          </div>
 
-          {/* Form */}
-          <div className="animate-in lg:col-span-2 order-1 lg:order-2">
-            <div className="bg-white border border-[#E0EAE0] rounded-3xl p-8 md:p-10">
-              {isSubmitted ? (
-                /* ── Success State ─────────────────────────────── */
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-[var(--brand-300)]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle className="w-10 h-10 text-[var(--kb-primary)]" />
-                  </div>
-                  <h3 className="text-2xl font-bold font-['Outfit'] text-[#4A4A4A] mb-3">
-                    Thank You!
-                  </h3>
-                  <p className="text-[#4A4A4A]/70 text-lg">
-                    We'll contact you at your phone/email within 24 hours.
-                  </p>
-                  <Button
-                    onClick={() => setIsSubmitted(false)}
-                    variant="ghost"
-                    size="sm"
-                    className="mt-6 text-kb-primary underline hover:no-underline font-normal"
-                  >
-                    Submit another enquiry
-                  </Button>
-                </div>
-              ) : (
-                /* ── Form ──────────────────────────────────────── */
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {errorMessage && (
-                    <div className="p-3.5 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl text-xs text-[#DC2626] flex items-center gap-2 font-['DM_Sans']">
-                      <AlertCircle size={16} className="shrink-0" />
-                      <span>{errorMessage}</span>
-                    </div>
-                  )}
-
-                  {/* Row 1: Name + Email */}
-                  <div className="grid md:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-sm font-medium text-[#4A4A4A] mb-1.5">
-                        Name <span className="text-[var(--brand-600)]">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-[#E0EAE0] focus:outline-none focus:ring-2 focus:ring-[var(--brand-300)]/50 focus:border-[var(--brand-300)] transition-all"
-                        placeholder="e.g. Rahul Sharma"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#4A4A4A] mb-1.5">
-                        Email <span className="text-[var(--brand-600)]">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-[#E0EAE0] focus:outline-none focus:ring-2 focus:ring-[var(--brand-300)]/50 focus:border-[var(--brand-300)] transition-all"
-                        placeholder="name@company.com"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 2: Phone + Company */}
-                  <div className="grid md:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-sm font-medium text-[#4A4A4A] mb-1.5">
-                        Phone
-                      </label>
-                      <div className="flex">
-                        <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-[#E0EAE0] bg-[#F7FAF7] text-[#4A4A4A]/60 text-sm select-none">
-                          +91
+              <div className="space-y-4">
+                {CONTACT_CHANNELS.map((channel) => {
+                  const Icon = channel.icon;
+                  const cardContent = (
+                    <div className="flex items-start gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-md">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#FFF7ED] text-[#C2410C]">
+                        <Icon size={20} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="block text-xs font-bold uppercase tracking-wider text-[#64748B]">
+                          {channel.title}
                         </span>
+                        <span className="mt-0.5 block break-words font-['Outfit'] text-[16px] font-bold text-[#111827]">
+                          {channel.primary}
+                        </span>
+                        <span className="mt-1 block font-['DM_Sans'] text-xs text-[#64748B]">
+                          {channel.description}
+                        </span>
+                      </div>
+                    </div>
+                  );
+
+                  return channel.href ? (
+                    <a key={channel.title} href={channel.href} className="block focus:outline-none">
+                      {cardContent}
+                    </a>
+                  ) : (
+                    <div key={channel.title}>{cardContent}</div>
+                  );
+                })}
+              </div>
+
+              {/* Verified WhatsApp Card */}
+              <div className="mt-6 rounded-2xl border border-[#BBF7D0] bg-[#F0FDF4] p-6 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#166534] text-white">
+                    <MessageCircle size={22} />
+                  </div>
+                  <div>
+                    <h3 className="font-['Outfit'] text-[16px] font-bold text-[#14532D]">Fast WhatsApp support</h3>
+                    <p className="font-['DM_Sans'] text-xs text-[#166534]">Quick equipment queries and catalogue photos</p>
+                  </div>
+                </div>
+                <a
+                  href="https://wa.me/919490701421"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#166534] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#14532D]"
+                >
+                  <MessageCircle size={18} /> Chat on WhatsApp
+                </a>
+              </div>
+            </div>
+
+            {/* Right Column: Enquiry Form */}
+            <div className="lg:col-span-7">
+              <div className="rounded-2xl border border-[#E2E8F0] bg-white p-7 sm:p-10 shadow-sm">
+                <h2 className="font-['Outfit'] text-[24px] font-bold text-[#111827]">
+                  Equipment enquiry form
+                </h2>
+                <p className="mt-1 font-['DM_Sans'] text-sm text-[#64748B] mb-8">
+                  Submit your required specifications, models, or questions. Our engineering desk will respond with details.
+                </p>
+
+                {submittedRef ? (
+                  <div className="py-12 text-center">
+                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FFF7ED] text-[#C2410C]">
+                      <CheckCircle size={36} />
+                    </div>
+                    <h3 className="font-['Outfit'] text-2xl font-bold text-[#111827]">Enquiry received</h3>
+                    <p className="mt-2 font-['Outfit'] text-base font-bold text-[#C2410C]">
+                      Reference number: {submittedRef}
+                    </p>
+                    <p className="mx-auto mt-3 max-w-md font-['DM_Sans'] text-sm leading-relaxed text-[#64748B]">
+                      Your enquiry has been logged in our system. An equipment specialist will review your requirements and reach out directly.
+                    </p>
+                    <Button
+                      onClick={() => setSubmittedRef(null)}
+                      variant="outline"
+                      className="mt-6 rounded-xl border-[#CBD5E1] font-semibold"
+                    >
+                      Submit another enquiry
+                    </Button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-5 font-['DM_Sans']">
+                    {errorMessage && (
+                      <div className="flex items-start gap-3 rounded-xl border border-[#FCA5A5] bg-[#FEF2F2] p-4 text-[#991B1B]">
+                        <AlertCircle className="mt-0.5 shrink-0" size={18} />
+                        <div className="text-sm">
+                          <p className="font-semibold">Submission failed</p>
+                          <p>{errorMessage}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1.5 block text-sm font-semibold text-[#111827]" htmlFor="contact-name">
+                          Full Name <span className="text-[#C2410C]">*</span>
+                        </label>
                         <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
+                          id="contact-name"
+                          type="text"
+                          name="name"
+                          value={formData.name}
                           onChange={handleChange}
-                          className="flex-1 px-4 py-3 rounded-r-xl border border-[#E0EAE0] focus:outline-none focus:ring-2 focus:ring-[var(--brand-300)]/50 focus:border-[var(--brand-300)] transition-all"
-                          placeholder="9490701421"
+                          required
+                          disabled={isSubmitting}
+                          placeholder="e.g. Rahul Sharma"
+                          className="w-full rounded-xl border border-[#CBD5E1] px-4 py-2.5 text-sm outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] disabled:opacity-50"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-sm font-semibold text-[#111827]" htmlFor="contact-email">
+                          Email Address <span className="text-[#C2410C]">*</span>
+                        </label>
+                        <input
+                          id="contact-email"
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
+                          disabled={isSubmitting}
+                          placeholder="name@restaurant.com"
+                          className="w-full rounded-xl border border-[#CBD5E1] px-4 py-2.5 text-sm outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] disabled:opacity-50"
                         />
                       </div>
                     </div>
+
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1.5 block text-sm font-semibold text-[#111827]" htmlFor="contact-phone">
+                          Phone Number
+                        </label>
+                        <div className="flex">
+                          <span className="inline-flex items-center rounded-l-xl border border-r-0 border-[#CBD5E1] bg-[#F8FAFC] px-3.5 text-sm font-medium text-[#64748B]">
+                            +91
+                          </span>
+                          <input
+                            id="contact-phone"
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            disabled={isSubmitting}
+                            placeholder="9490701421"
+                            className="flex-1 rounded-r-xl border border-[#CBD5E1] px-4 py-2.5 text-sm outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] disabled:opacity-50"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-sm font-semibold text-[#111827]" htmlFor="contact-company">
+                          Company / Kitchen Name
+                        </label>
+                        <input
+                          id="contact-company"
+                          type="text"
+                          name="company"
+                          value={formData.company}
+                          onChange={handleChange}
+                          disabled={isSubmitting}
+                          placeholder="e.g. Copper Smoke Grillhouse"
+                          className="w-full rounded-xl border border-[#CBD5E1] px-4 py-2.5 text-sm outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] disabled:opacity-50"
+                        />
+                      </div>
+                    </div>
+
                     <div>
-                      <label className="block text-sm font-medium text-[#4A4A4A] mb-1.5">
-                        Company Name <span className="text-[#4A4A4A]/40 font-normal">(Optional)</span>
+                      <label className="mb-1.5 block text-sm font-semibold text-[#111827]" htmlFor="contact-city">
+                        Delivery City / State
                       </label>
                       <input
+                        id="contact-city"
                         type="text"
-                        name="company"
-                        value={formData.company}
+                        name="city"
+                        value={formData.city}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl border border-[#E0EAE0] focus:outline-none focus:ring-2 focus:ring-[var(--brand-300)]/50 focus:border-[var(--brand-300)] transition-all"
-                        placeholder="Restaurant / Hotel / Trade name"
+                        disabled={isSubmitting}
+                        placeholder="e.g. Mumbai, Bengaluru, Hyderabad"
+                        className="w-full rounded-xl border border-[#CBD5E1] px-4 py-2.5 text-sm outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] disabled:opacity-50"
                       />
                     </div>
-                  </div>
 
-                  {/* Row 3: City */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#4A4A4A] mb-1.5">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border border-[#E0EAE0] focus:outline-none focus:ring-2 focus:ring-[var(--brand-300)]/50 focus:border-[var(--brand-300)] transition-all"
-                      placeholder="e.g. Mumbai, Hyderabad, Delhi"
-                    />
-                  </div>
-
-                  {/* Requirements */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#4A4A4A] mb-1.5">
-                      Requirements <span className="text-[var(--brand-600)]">*</span>
-                    </label>
-                    <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                      rows={5}
-                      className="w-full px-4 py-3 rounded-xl border border-[#E0EAE0] focus:outline-none focus:ring-2 focus:ring-[var(--brand-300)]/50 focus:border-[var(--brand-300)] transition-all resize-none"
-                      placeholder="E.g. 10 units BBQ Grill Commercial Grade, delivery to Mumbai, need GST invoice"
-                    />
-                  </div>
-
-                  {/* Submit */}
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    variant="secondary"
-                    size="lg"
-                    className="w-full"
-                  >
-                    {isSubmitting ? 'Sending…' : 'Submit Enquiry'}
-                    <Send className="w-4 h-4 text-white" />
-                  </Button>
-
-                  {/* Divider */}
-                  <div className="relative py-2">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-[#E0EAE0]" />
+                    <div>
+                      <label className="mb-1.5 block text-sm font-semibold text-[#111827]" htmlFor="contact-message">
+                        Equipment Requirements <span className="text-[#C2410C]">*</span>
+                      </label>
+                      <textarea
+                        id="contact-message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        required
+                        disabled={isSubmitting}
+                        rows={4}
+                        placeholder="Detail equipment types, sizes, custom fabrication needs, or delivery timelines..."
+                        className="w-full rounded-xl border border-[#CBD5E1] p-4 text-sm outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C] disabled:opacity-50 resize-y"
+                      />
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase tracking-wider">
-                      <span className="bg-white px-3 text-[#4A4A4A]/40">or</span>
-                    </div>
-                  </div>
 
-                  {/* WhatsApp alternative */}
-                  <Button
-                    asChild
-                    size="lg"
-                    className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white border-none shadow-lg shadow-[#25D366]/20"
-                  >
-                    <a
-                      href="https://wa.me/919490701421"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <div className="py-1">
+                      <TurnstileWidget
+                        onVerify={(token) => setTurnstileToken(token)}
+                        onExpire={() => setTurnstileToken('')}
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full rounded-xl py-6 text-base font-semibold bg-[#C2410C] hover:bg-[#9A3412] text-white"
                     >
-                      <MessageCircle className="w-5 h-5" />
-                      Prefer WhatsApp? Chat with us →
-                    </a>
-                  </Button>
-                  <p className="text-xs text-center text-[#4A4A4A]/40 mt-1">
-                    Fastest response via WhatsApp · wa.me/919490701421
-                  </p>
-                </form>
-              )}
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Submitting enquiry...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={18} className="mr-2" /> Submit equipment enquiry
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                )}
+              </div>
             </div>
+
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

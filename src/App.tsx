@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navigation from './components/Navigation';
@@ -52,6 +53,29 @@ function MainAppContent() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+  const navigateTo = useCallback((page: Page, productId?: string) => {
+    // Authentication Guard Check
+    if (!user && page !== 'login' && page !== 'forgot-password') {
+      setIntendedDestination({ page, productId });
+      setCurrentPage('login');
+      window.history.pushState({}, '', '/login');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    setCurrentPage(page);
+    if (productId) {
+      setSelectedProductId(productId);
+    }
+    const path = page === 'home'
+      ? '/'
+      : page === 'product-detail' && productId
+        ? `/product-detail?${new URLSearchParams({ id: productId })}`
+        : `/${page}`;
+    window.history.pushState({}, '', path);
+    window.scrollTo(0, 0);
+  }, [user]);
+
   // Sync state with URL on initial load and back/forward navigation
   useEffect(() => {
     const handleLocationChange = () => {
@@ -78,14 +102,17 @@ function MainAppContent() {
   // Handle post-login redirection to intended destination
   useEffect(() => {
     if (!isAuthLoading && user && currentPage === 'login') {
-      if (intendedDestination) {
-        navigateTo(intendedDestination.page, intendedDestination.productId);
-        setIntendedDestination(null);
-      } else {
-        navigateTo('home');
-      }
+      const timer = setTimeout(() => {
+        if (intendedDestination) {
+          navigateTo(intendedDestination.page, intendedDestination.productId);
+          setIntendedDestination(null);
+        } else {
+          navigateTo('home');
+        }
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [user, isAuthLoading, currentPage, intendedDestination]);
+  }, [user, isAuthLoading, currentPage, intendedDestination, navigateTo]);
 
   useEffect(() => {
     // Reveal animation observer
@@ -116,29 +143,6 @@ function MainAppContent() {
   }, [currentPage]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  const navigateTo = (page: Page, productId?: string) => {
-    // Authentication Guard Check
-    if (!user && page !== 'login' && page !== 'forgot-password') {
-      setIntendedDestination({ page, productId });
-      setCurrentPage('login');
-      window.history.pushState({}, '', '/login');
-      window.scrollTo(0, 0);
-      return;
-    }
-
-    setCurrentPage(page);
-    if (productId) {
-      setSelectedProductId(productId);
-    }
-    const path = page === 'home'
-      ? '/'
-      : page === 'product-detail' && productId
-        ? `/product-detail?${new URLSearchParams({ id: productId })}`
-        : `/${page}`;
-    window.history.pushState({}, '', path);
-    window.scrollTo(0, 0);
-  };
 
   const browseCatalog = (query = '', category = 'All') => {
     if (!user) {
@@ -187,9 +191,14 @@ function MainAppContent() {
           <ProductDetailPage
             productId={selectedProductId}
             onBack={() => navigateTo('products')}
+            onNavigate={navigateTo}
           />
         ) : (
-          <ProductsPage onProductClick={(id) => navigateTo('product-detail', id)} onCartOpen={() => setIsCartOpen(true)} />
+          <ProductsPage
+            onProductClick={(id) => navigateTo('product-detail', id)}
+            onCartOpen={() => setIsCartOpen(true)}
+            onNavigate={navigateTo}
+          />
         );
       case 'contact':
         return <ContactPage />;
@@ -235,7 +244,17 @@ function MainAppContent() {
         />
         
         <main>
-          {renderPage()}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activePage === 'product-detail' ? `detail-${selectedProductId}` : activePage}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {renderPage()}
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         <Footer onNavigate={navigateTo} />

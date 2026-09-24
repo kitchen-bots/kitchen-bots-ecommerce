@@ -9,13 +9,13 @@ export const BRAND = {
     website: 'https://kitchenbots.in',
 
     positioning:
-        'KitchenBots is India\'s premier manufacturer of engineered outdoor cooking systems — built to outperform international brands at a fraction of the cost. Every product is precision-engineered from high-grade Indian steel, tested to withstand extreme heat cycles, and designed to last decades.',
+        'KitchenBots is India\'s premier manufacturer of engineered outdoor cooking systems - built to outperform international brands at a fraction of the cost. Every product is precision-engineered from high-grade Indian steel, tested to withstand extreme heat cycles, and designed to last decades.',
 
     mission:
-        'To redefine outdoor cooking in India by engineering high-performance, durable BBQ grills, rocket stoves, and cooking systems that combine advanced thermal design with everyday practicality — accessible to both home cooks and commercial kitchens.',
+        'To redefine outdoor cooking in India by engineering high-performance, durable BBQ grills, rocket stoves, and cooking systems that combine advanced thermal design with everyday practicality - accessible to both home cooks and commercial kitchens.',
 
     vision:
-        'A future where every Indian outdoor cooking experience is powered by precision engineering — from backyard celebrations to professional catering operations.',
+        'A future where every Indian outdoor cooking experience is powered by precision engineering - from backyard celebrations to professional catering operations.',
 
     valuePropositions: [
         {
@@ -28,7 +28,7 @@ export const BRAND = {
         },
         {
             title: 'Modular & Serviceable',
-            description: 'Every component is replaceable. Every unit is designed to be maintained, upgraded, and extended — not discarded.',
+            description: 'Every component is replaceable. Every unit is designed to be maintained, upgraded, and extended - not discarded.',
         },
         {
             title: 'Commercial-Grade Available',
@@ -36,12 +36,12 @@ export const BRAND = {
         },
         {
             title: 'Delivered Across India',
-            description: 'Pan-India delivery network. Doorstep delivery to 19,000+ PIN codes — metro, tier 2, and tier 3 cities included.',
+            description: 'Pan-India delivery network. Doorstep delivery to 19,000+ PIN codes - metro, tier 2, and tier 3 cities included.',
         },
     ],
 
     engineeringPhilosophy:
-        'We don\'t build products. We engineer systems. Every KitchenBots unit begins as an engineering challenge: how do we maximise heat output, minimise fuel consumption, maximise structural rigidity, and minimise weight — all within a budget that serves Indian families and commercial kitchens alike? The answer is precision. Every weld. Every grate. Every hinge.',
+        'We don\'t build products. We engineer systems. Every KitchenBots unit begins as an engineering challenge: how do we maximise heat output, minimise fuel consumption, maximise structural rigidity, and minimise weight - all within a budget that serves Indian families and commercial kitchens alike? The answer is precision. Every weld. Every grate. Every hinge.',
 
     trustedBy: [
         'Amazon India',

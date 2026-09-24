@@ -48,20 +48,15 @@ export interface UseProductDetailResult {
 
 export function useProductDetail(productId: string | null): UseProductDetailResult {
   const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(Boolean(productId));
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!productId) {
-      setProduct(null);
-      setLoading(false);
       return;
     }
 
     let isMounted = true;
-    setLoading(true);
-    setError(null);
-
     fetchCatalogProductById(productId)
       .then((data) => {
         if (isMounted) {
@@ -82,8 +77,8 @@ export function useProductDetail(productId: string | null): UseProductDetailResu
   }, [productId]);
 
   return {
-    product,
-    loading,
-    error,
+    product: productId ? product : null,
+    loading: productId ? loading : false,
+    error: productId ? error : null,
   };
 }

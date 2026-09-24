@@ -1,6 +1,5 @@
-import { Phone, Mail, Globe, Twitter, Linkedin, Facebook, Instagram } from 'lucide-react';
+import { Phone, Mail, MapPin, MessageCircle } from 'lucide-react';
 import type { Page } from '../App';
-import { Button } from './ui/button';
 
 interface FooterProps {
   onNavigate?: (page: Page) => void;
@@ -9,183 +8,185 @@ interface FooterProps {
 export default function Footer({ onNavigate }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
-  const footerLinks = {
-    company: [
-      { label: 'About Us', page: 'about' as Page },
-      { label: 'Our Capabilities', page: 'capabilities' as Page },
-      { label: 'Blog', page: 'blog' as Page },
-      { label: 'Careers', page: 'home' as Page },
-    ],
-    products: [
-      { label: 'Deep Fryers', page: 'products' as Page },
-      { label: 'Food Preparation', page: 'products' as Page },
-      { label: 'Grilling Solutions', page: 'products' as Page },
-      { label: 'Custom Solutions', page: 'products' as Page },
-    ],
-    support: [
-      { label: 'Contact Us', page: 'contact' as Page },
-      { label: 'Privacy Policy', page: 'policies' as Page },
-      { label: 'Terms of Service', page: 'policies' as Page },
-      { label: 'Bulk Enquiry', page: 'bulk-enquiry' as Page },
-    ]
-  };
-
   return (
-    <footer className="bg-[#1E2329] text-white pt-16 pb-48 md:pb-8 font-['DM_Sans']">
-      <div className="max-w-[1200px] mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 mb-16">
-          {/* Brand Column */}
+    <footer className="border-t border-[#1E293B] bg-[#0F172A] text-white font-['DM_Sans']">
+      <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16 py-14 lg:py-16">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-10">
+          
+          {/* Brand & Overview */}
           <div className="lg:col-span-3">
-            <div 
-              className="mb-6 cursor-pointer group" 
+            <button
               onClick={() => onNavigate?.('home')}
+              className="mb-6 inline-block text-left focus:outline-none group"
+              aria-label="KitchenBots home"
             >
-              <img 
-                src="/images/kitchen-bots-white.png" 
-                alt="KitchenBots" 
-                className="h-[48px] w-auto object-contain transition-transform group-hover:scale-105" 
-              />
-            </div>
-            <p className="text-gray-400 text-[14px] leading-relaxed mb-8 max-w-sm">
-              Innovating the future of commercial kitchens through advanced automation, intelligent engineering, and smart technology solutions.
+              <div className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2.5 shadow-sm transition-transform duration-200 group-hover:scale-[1.02]">
+                <img
+                  src="/images/kitchenbots-logo.svg"
+                  alt="KitchenBots"
+                  className="h-8 md:h-9 w-auto object-contain"
+                />
+              </div>
+            </button>
+            <p className="max-w-sm text-sm leading-relaxed text-[#94A3B8]">
+              Heavy-duty grills, rocket stoves, and outdoor cooking hardware engineered for backyard pitmasters, home chefs, and commercial foodservice operations.
             </p>
-            <div className="flex items-center gap-4">
-              <a href="https://twitter.com/kitchenbots" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/5 rounded-lg flex items-center justify-center hover:bg-kb-tertiary transition-colors">
-                <Twitter size={18} />
-              </a>
-              <a href="https://linkedin.com/company/kitchenbots" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/5 rounded-lg flex items-center justify-center hover:bg-kb-tertiary transition-colors">
-                <Linkedin size={18} />
-              </a>
-              <a href="https://facebook.com/kitchenbots" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/5 rounded-lg flex items-center justify-center hover:bg-kb-tertiary transition-colors">
-                <Facebook size={18} />
-              </a>
-              <a href="https://instagram.com/kitchenbots" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/5 rounded-lg flex items-center justify-center hover:bg-kb-tertiary transition-colors">
-                <Instagram size={18} />
+            <div className="mt-6">
+              <a
+                href="https://wa.me/919490701421"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#166534] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#14532D]"
+              >
+                <MessageCircle size={16} /> WhatsApp Sales Support
               </a>
             </div>
           </div>
 
-          {/* Links Columns */}
-          <div className="lg:col-span-2">
-            <h4 className="text-[15px] font-bold text-white mb-6 font-['Outfit'] uppercase tracking-wider">Company</h4>
-            <ul className="space-y-4">
-              {footerLinks.company.map((link) => (
-                <li key={link.label}>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => onNavigate?.(link.page)} 
-                    className="h-auto p-0 text-[14px] text-gray-400 hover:text-kb-tertiary hover:bg-transparent transition-colors font-medium"
-                  >
-                    {link.label}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lg:col-span-2">
-            <h4 className="text-[15px] font-bold text-white mb-6 font-['Outfit'] uppercase tracking-wider">Products</h4>
-            <ul className="space-y-4">
-              {footerLinks.products.map((link) => (
-                <li key={link.label}>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => onNavigate?.(link.page)} 
-                    className="h-auto p-0 text-[14px] text-gray-400 hover:text-kb-tertiary hover:bg-transparent transition-colors font-medium"
-                  >
-                    {link.label}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lg:col-span-2">
-            <h4 className="text-[15px] font-bold text-white mb-6 font-['Outfit'] uppercase tracking-wider">Contact Info</h4>
-            <div className="space-y-5">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center shrink-0">
-                  <Phone size={18} className="text-kb-primary" />
-                </div>
-                <div>
-                  <div className="text-[12px] text-gray-500 uppercase font-bold mb-0.5">Call Us</div>
-                  <div className="text-[15px] font-bold text-white">+91 94907 01421</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center shrink-0">
-                  <Mail size={18} className="text-kb-primary" />
-                </div>
-                <div>
-                  <div className="text-[12px] text-gray-500 uppercase font-bold mb-0.5">Email Us</div>
-                  <div className="text-[15px] font-bold text-white break-all">info@kitchenbots.in</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center shrink-0">
-                  <Globe size={18} className="text-kb-primary" />
-                </div>
-                <div>
-                  <div className="text-[12px] text-gray-500 uppercase font-bold mb-0.5">Website</div>
-                  <div className="text-[15px] font-bold text-white">www.kitchenbots.in</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Newsletter Column */}
+          {/* Equipment Navigation */}
           <div className="lg:col-span-3">
-            <h4 className="text-[15px] font-bold text-white mb-6 font-['Outfit'] uppercase tracking-wider">Stay Updated</h4>
-            <p className="text-gray-400 text-[14px] mb-4">
-              Subscribe to our newsletter for the latest industry insights and product updates.
-            </p>
-            <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="bg-white/5 border border-white/10 text-white placeholder-gray-500 rounded-lg px-4 py-3 text-[14px] focus:outline-none focus:border-kb-primary transition-colors w-full"
-                required
-              />
-              <Button type="submit" className="w-full bg-kb-primary hover:bg-kb-primary-dark text-white">
-                Subscribe
-              </Button>
-            </form>
+            <h3 className="font-['Outfit'] text-sm font-bold uppercase tracking-wider text-white">
+              Equipment Categories
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm text-[#94A3B8]">
+              <li>
+                <button
+                  onClick={() => onNavigate?.('products')}
+                  className="hover:text-white transition-colors"
+                >
+                  Santa Maria Grills
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate?.('products')}
+                  className="hover:text-white transition-colors"
+                >
+                  Rocket Stoves
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate?.('products')}
+                  className="hover:text-white transition-colors"
+                >
+                  Collapsible BBQ Units
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate?.('products')}
+                  className="hover:text-white transition-colors"
+                >
+                  Automatic BBQ Rotisseries
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate?.('bulk-enquiry')}
+                  className="hover:text-white transition-colors"
+                >
+                  Bulk Equipment Quotations
+                </button>
+              </li>
+            </ul>
           </div>
+
+          {/* Company & Support */}
+          <div className="lg:col-span-3">
+            <h3 className="font-['Outfit'] text-sm font-bold uppercase tracking-wider text-white">
+              Company
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm text-[#94A3B8]">
+              <li>
+                <button
+                  onClick={() => onNavigate?.('about')}
+                  className="hover:text-white transition-colors"
+                >
+                  About KitchenBots
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate?.('capabilities')}
+                  className="hover:text-white transition-colors"
+                >
+                  Engineering Capabilities
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate?.('blog')}
+                  className="hover:text-white transition-colors"
+                >
+                  Technical Articles
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate?.('contact')}
+                  className="hover:text-white transition-colors"
+                >
+                  Contact Desk
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate?.('policies')}
+                  className="hover:text-white transition-colors"
+                >
+                  Policies & Terms
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Verified Contact Details */}
+          <div className="lg:col-span-3">
+            <h3 className="font-['Outfit'] text-sm font-bold uppercase tracking-wider text-white">
+              Verified Operations
+            </h3>
+            <div className="mt-4 space-y-3.5 text-sm text-[#94A3B8]">
+              <div className="flex items-start gap-3">
+                <Phone size={17} className="mt-0.5 shrink-0 text-[#C2410C]" />
+                <a href="tel:+919490701421" className="hover:text-white font-medium text-white">
+                  +91 94907 01421
+                </a>
+              </div>
+              <div className="flex items-start gap-3">
+                <Mail size={17} className="mt-0.5 shrink-0 text-[#C2410C]" />
+                <a href="mailto:info@kitchenbots.in" className="hover:text-white break-all font-medium text-white">
+                  info@kitchenbots.in
+                </a>
+              </div>
+              <div className="flex items-start gap-3">
+                <MapPin size={17} className="mt-0.5 shrink-0 text-[#C2410C]" />
+                <span>Hyderabad, Telangana, India</span>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4">
-          <p className="text-[13px] text-gray-500 text-center md:text-left">
-            © {currentYear} KitchenBots India Pvt. Ltd. All Rights Reserved.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
-            <Button 
-              variant="link" 
-              onClick={() => onNavigate?.('policies')} 
-              className="p-0 h-auto text-[13px] text-gray-500 hover:text-white transition-colors"
+        <div className="mt-12 border-t border-[#1E293B] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#64748B]">
+          <p>© {currentYear} KitchenBots. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => onNavigate?.('policies')}
+              className="hover:text-[#94A3B8] transition-colors"
             >
-              Privacy Policy
-            </Button>
-            <Button 
-              variant="link" 
-              onClick={() => onNavigate?.('policies')} 
-              className="p-0 h-auto text-[13px] text-gray-500 hover:text-white transition-colors"
+              Privacy & Warranty Terms
+            </button>
+            <button
+              onClick={() => onNavigate?.('contact')}
+              className="hover:text-[#94A3B8] transition-colors"
             >
-              Terms of Service
-            </Button>
-            <Button 
-              variant="link" 
-              onClick={() => onNavigate?.('home')} 
-              className="p-0 h-auto text-[13px] text-gray-500 hover:text-white transition-colors"
-            >
-              Cookie Policy
-            </Button>
+              Support
+            </button>
           </div>
         </div>
       </div>
     </footer>
-
   );
 }
