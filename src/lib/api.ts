@@ -1,7 +1,8 @@
 import { PRODUCTS, getProductById } from '../data/products';
 import type { Product, ProductCategory } from '../types/product';
-export const DEFAULT_API_BASE_URL = 'https://kitchen-bots-api.workofcharan.workers.dev';
+export const DEFAULT_API_BASE_URL = '';
 export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
+export const DEFAULT_ENQUIRY_API_URL = 'https://kitchen-bots-api.workofcharan.workers.dev';
 
 export interface ApiProduct {
   id: string;
@@ -196,7 +197,7 @@ export async function fetchCatalogProduct(
 
 export async function submitEnquiry(
   payload: EnquiryPayload,
-  baseUrl = API_BASE_URL
+  baseUrl = API_BASE_URL || DEFAULT_ENQUIRY_API_URL
 ): Promise<EnquiryResponseData> {
   const token = payload.turnstileToken || 'test-pass-token';
   const body = {

@@ -56,6 +56,7 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
   const [activeImage, setActiveImage] = useState(0);
   const [tab, setTab] = useState<Tab>('Description');
   const [added, setAdded] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
 
@@ -74,15 +75,16 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
     setIsLoading(true);
     setError(null);
     try {
+      const local = getProductById(productId);
+      if (local) {
+        setProduct(local);
+        setIsLoading(false);
+      }
       const item = await fetchCatalogProduct(productId);
       if (item) {
         setProduct(item);
-      } else if (!product) {
-        const local = getProductById(productId);
-        setProduct(local || null);
       }
     } catch {
-      // Fallback to local
       const local = getProductById(productId);
       if (local) {
         setProduct(local);
@@ -92,7 +94,7 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
     } finally {
       setIsLoading(false);
     }
-  }, [productId, product]);
+  }, [productId]);
 
   useEffect(() => {
     loadProduct();
@@ -140,13 +142,58 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
   };
 
   const share = async () => {
-    const url = new URL('/product-detail', window.location.origin);
-    url.searchParams.set('id', product.id);
-    try {
-      await navigator.clipboard.writeText(url.toString());
-      showToast('Product link copied');
-    } catch {
-      showToast('Unable to copy product link');
+    const shareUrl = `${window.location.origin}/?page=product-detail&id=${encodeURIComponent(product.id)}`;
+
+    // 1. Mobile Native Share Sheet
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.name,
+          text: product.shortDescription || product.description,
+          url: shareUrl,
+        });
+        showToast('Shared successfully!');
+        return;
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
+      }
+    }
+
+    // 2. Modern Clipboard API
+    let copiedSuccess = false;
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        copiedSuccess = true;
+      } catch {
+        copiedSuccess = false;
+      }
+    }
+
+    // 3. Fallback textarea copy
+    if (!copiedSuccess) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = shareUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        copiedSuccess = document.execCommand('copy');
+        document.body.removeChild(textArea);
+      } catch {
+        copiedSuccess = false;
+      }
+    }
+
+    if (copiedSuccess) {
+      setCopied(true);
+      showToast('Product link copied to clipboard!');
+      window.setTimeout(() => setCopied(false), 2200);
+    } else {
+      window.prompt('Copy product link:', shareUrl);
     }
   };
 
@@ -154,7 +201,7 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
   const quantityInCart = cartItem?.quantity ?? 0;
 
   return (
-    <section className="min-h-screen overflow-x-hidden bg-[#FAFAFA] pb-24 pt-24 sm:pt-28">
+    <section className="min-h-screen overflow-x-hidden bg-[#FAFAFA] pb-24 pt-6 sm:pt-8">
       <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
         {error && (
           <div className="mb-6 flex items-center justify-between rounded-xl border border-[#FCA5A5] bg-[#FEF2F2] p-4 text-[#991B1B]">
@@ -182,11 +229,15 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
             <Button
               variant="outline"
               size="icon"
-              className="rounded-xl border-[#CBD5E1] bg-white hover:bg-[#F8FAFC]"
+              className={cn(
+                'rounded-xl border-[#CBD5E1] bg-white transition-all hover:bg-[#F8FAFC]',
+                copied && 'border-green-400 bg-green-50 text-green-700'
+              )}
               onClick={share}
-              aria-label="Copy product link"
+              aria-label="Share product"
+              title={copied ? 'Link copied!' : 'Share product'}
             >
-              <Share2 size={17} />
+              {copied ? <Check size={17} className="text-green-600" /> : <Share2 size={17} />}
             </Button>
             <Button
               variant="outline"
@@ -346,15 +397,10 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
               <div className="font-['Outfit'] text-3xl sm:text-4xl font-bold text-[#0F172A]">
                 {formatPrice(product.price)}
               </div>
-              {product.mrp && (
+              {product.mrp && product.mrp > product.price && (
                 <div className="text-base text-[#94A3B8] line-through font-medium">
-                  {formatPrice(product.mrp)}
+                  MRP {formatPrice(product.mrp)}
                 </div>
-              )}
-              {product.mrp && (
-                <span className="rounded-lg bg-green-50 px-2 py-0.5 text-xs font-bold text-green-700 border border-green-200">
-                  Save {Math.round(((product.mrp - product.price) / product.mrp) * 100)}%
-                </span>
               )}
             </div>
 

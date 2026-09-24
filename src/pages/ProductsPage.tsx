@@ -13,7 +13,6 @@ import {
   RotateCw,
   Film,
   Eye,
-  Flame,
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import type { Page } from '../App';
@@ -104,91 +103,73 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
   }, [products, activeCategory, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-20">
-      {/* Hero Header */}
-      <section className="border-b border-[#F1F5F9] bg-white pb-12 pt-6 lg:pb-16">
+    <div className="min-h-screen bg-[#FAFAFA]">
+      {/* Unified Header & Catalog Controls (Seamless, no gap below navbar) */}
+      <section className="border-b border-[#E2E8F0] bg-white pb-8 pt-6 sm:pt-8">
         <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
-          <nav className="mb-6 flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-[#94A3B8]" aria-label="Breadcrumb">
+          <nav className="mb-4 flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-[#94A3B8]" aria-label="Breadcrumb">
             <button className="hover:text-[#111827]" onClick={() => onNavigate?.('home')}>Home</button>
             <ChevronRight size={12} />
             <span className="text-[#C2410C]">Products</span>
           </nav>
 
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF7ED] px-3 py-1 text-xs font-bold text-[#C2410C] border border-[#FFEDD5]">
-                  <Flame size={13} /> Engineered Outdoor Cooking Systems
-                </span>
-                <span className="text-xs font-bold text-[#94A3B8]">12 Authentic Models</span>
+          <div>
+            <h1 className="font-['Outfit'] text-[32px] font-bold leading-tight text-[#111827] sm:text-[42px] md:text-[48px]">
+              Product catalog
+            </h1>
+            <p className="mt-2 max-w-2xl font-['DM_Sans'] text-[15px] sm:text-[16px] leading-relaxed text-[#64748B]">
+              Precision-engineered Santa Maria crank grills, secondary-combustion rocket stoves, synchronized rotisseries, and boltless flat-pack BBQs. Sourced directly from our factory floor.
+            </p>
+          </div>
+
+          {/* Integrated Search & Filter Controls */}
+          <div className="mt-6 flex flex-col gap-4">
+            {/* Search Bar */}
+            <div className="relative w-full">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#C2410C]" size={18} />
+              <label className="sr-only" htmlFor="catalog-search">Search products</label>
+              <input
+                id="catalog-search"
+                type="search"
+                placeholder="Search by product name, materials, features, or thermal specs..."
+                value={searchQuery}
+                onChange={event => setSearchQuery(event.target.value)}
+                className="h-12 w-full rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] pl-12 pr-4 font-['DM_Sans'] text-[14px] outline-none transition-colors focus:border-[#C2410C] focus:bg-white focus:ring-1 focus:ring-[#C2410C]"
+              />
+            </div>
+
+            {/* Category Pills & View Mode Row */}
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              {/* Category Pills */}
+              <div className="flex w-full gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
+                {CATEGORIES.map(category => (
+                  <button
+                    key={category}
+                    className={`shrink-0 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
+                      activeCategory === category
+                        ? 'bg-[#C2410C] text-white shadow-sm'
+                        : 'border border-[#CBD5E1] bg-white text-[#475569] hover:bg-[#F8FAFC] hover:text-[#111827]'
+                    }`}
+                    onClick={() => setActiveCategory(category)}
+                    aria-pressed={activeCategory === category}
+                  >
+                    {category === 'All' ? 'All products (12)' : category}
+                  </button>
+                ))}
               </div>
-              <h1 className="font-['Outfit'] text-[36px] font-bold leading-tight text-[#111827] sm:text-[46px] md:text-[52px]">
-                Product catalog
-              </h1>
-              <p className="mt-3 max-w-2xl font-['DM_Sans'] text-[16px] sm:text-[17px] leading-relaxed text-[#64748B]">
-                Precision-engineered Santa Maria crank grills, secondary-combustion rocket stoves, synchronized rotisseries, and boltless flat-pack BBQs. Sourced directly from our factory floor.
-              </p>
+
+              {/* View Mode Toggle */}
+              <Button
+                type="button"
+                variant="outline"
+                className="change-view-button shrink-0 self-start rounded-xl border-[#CBD5E1] text-[#334155] hover:bg-[#F8FAFC] lg:self-auto"
+                onClick={() => setView(current => current === 'grid' ? 'list' : 'grid')}
+                aria-label={`Switch to ${view === 'grid' ? 'list' : 'grid'} view`}
+              >
+                {view === 'grid' ? <List size={18} className="text-[#C2410C]" /> : <LayoutGrid size={18} className="text-[#C2410C]" />}
+                {view === 'grid' ? 'List view' : 'Grid view'}
+              </Button>
             </div>
-
-            <div className="flex items-center gap-4 text-xs font-semibold text-[#64748B] shrink-0">
-              <span className="flex items-center gap-1.5 rounded-lg bg-[#F8FAFC] px-3 py-2 border border-[#E2E8F0]">
-                <RotateCw size={14} className="text-[#C2410C]" /> 360° 3D Interactive
-              </span>
-              <span className="flex items-center gap-1.5 rounded-lg bg-[#F8FAFC] px-3 py-2 border border-[#E2E8F0]">
-                <Film size={14} className="text-[#C2410C]" /> HD Video Tours
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Sticky Filter & Search Toolbar */}
-      <section className="sticky top-20 z-40 border-b border-[#E2E8F0] bg-white/95 py-4 shadow-xs backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-[1440px] 2xl:max-w-[1480px] flex-col gap-4 px-6 lg:px-12 2xl:px-16">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            {/* Category Pills */}
-            <div className="flex w-full gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
-              {CATEGORIES.map(category => (
-                <button
-                  key={category}
-                  className={`shrink-0 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
-                    activeCategory === category
-                      ? 'bg-[#C2410C] text-white shadow-sm'
-                      : 'border border-[#CBD5E1] bg-white text-[#475569] hover:bg-[#F8FAFC] hover:text-[#111827]'
-                  }`}
-                  onClick={() => setActiveCategory(category)}
-                  aria-pressed={activeCategory === category}
-                >
-                  {category === 'All' ? 'All products (12)' : category}
-                </button>
-              ))}
-            </div>
-
-            {/* View Mode Toggle */}
-            <Button
-              type="button"
-              variant="outline"
-              className="change-view-button shrink-0 self-start rounded-xl border-[#CBD5E1] text-[#334155] hover:bg-[#F8FAFC] lg:self-auto"
-              onClick={() => setView(current => current === 'grid' ? 'list' : 'grid')}
-              aria-label={`Switch to ${view === 'grid' ? 'list' : 'grid'} view`}
-            >
-              {view === 'grid' ? <List size={18} className="text-[#C2410C]" /> : <LayoutGrid size={18} className="text-[#C2410C]" />}
-              {view === 'grid' ? 'List view' : 'Grid view'}
-            </Button>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#C2410C]" size={18} />
-            <label className="sr-only" htmlFor="catalog-search">Search products</label>
-            <input
-              id="catalog-search"
-              type="search"
-              placeholder="Search by product name, materials, features, or thermal specs..."
-              value={searchQuery}
-              onChange={event => setSearchQuery(event.target.value)}
-              className="h-12 w-full rounded-xl border border-[#CBD5E1] bg-white pl-12 pr-4 font-['DM_Sans'] text-[14px] outline-none transition-colors focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
-            />
           </div>
         </div>
       </section>
@@ -270,11 +251,6 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
                             <Film size={11} /> Video
                           </span>
                         )}
-                        {images.length > 1 && (
-                          <span className="rounded-lg bg-white/90 px-2 py-1 text-[11px] font-bold text-[#475569] shadow-xs backdrop-blur-md border border-[#E2E8F0]">
-                            {images.length} views
-                          </span>
-                        )}
                       </div>
 
                       {/* Main Image Clickable */}
@@ -339,9 +315,9 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
                         <span className="font-['Outfit'] text-[22px] sm:text-[24px] font-bold text-[#0F172A]">
                           {formatPrice(product.price)}
                         </span>
-                        {product.mrp && (
+                        {product.mrp && product.mrp > product.price && (
                           <span className="text-xs text-[#94A3B8] line-through font-medium">
-                            {formatPrice(product.mrp)}
+                            MRP {formatPrice(product.mrp)}
                           </span>
                         )}
                       </div>

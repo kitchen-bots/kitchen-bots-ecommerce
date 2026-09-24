@@ -101,7 +101,7 @@ export default function QuickViewModal({
                     : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#F1F5F9]'
                 }`}
               >
-                <Camera size={14} /> Photos ({images.length})
+                <Camera size={14} /> Photos
               </button>
 
               {product.sequenceId && (
@@ -198,9 +198,9 @@ export default function QuickViewModal({
               <span className="font-['Outfit'] text-3xl font-bold text-[#0F172A]">
                 {formatPrice(product.price)}
               </span>
-              {product.mrp && (
+              {product.mrp && product.mrp > product.price && (
                 <span className="text-sm font-medium text-[#94A3B8] line-through">
-                  {formatPrice(product.mrp)}
+                  MRP {formatPrice(product.mrp)}
                 </span>
               )}
             </div>
