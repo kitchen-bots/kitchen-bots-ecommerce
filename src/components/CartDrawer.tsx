@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { X, Plus, Minus, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { useCart } from '../hooks/use-cart';
 import type { Page } from '../App';
@@ -13,19 +14,45 @@ interface CartDrawerProps {
 export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerProps) {
   const { items, removeFromCart, updateQuantity, totalItems, totalPrice } = useCart();
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+    document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[#1E2329]/40 backdrop-blur-md z-[2000] transition-opacity duration-500"
+        className="fixed inset-0 bg-[#1E2329]/40 backdrop-blur-md z-[2000] transition-opacity duration-500 touch-none"
         onClick={onClose}
       />
 
       {/* Drawer */}
       <div
-        className={`fixed right-0 top-0 h-full w-full max-w-[480px] bg-white z-[2001] shadow-premium flex flex-col transform transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed right-0 top-0 h-full w-full max-w-[480px] bg-white z-[2001] shadow-premium flex flex-col transform transition-transform duration-500 ease-out overscroll-contain ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-8 border-b border-[#F1F5F9]">
@@ -51,7 +78,7 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto p-8 scrollbar-hide overscroll-contain">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="w-24 h-24 bg-[#F8FAFC] rounded-[32px] flex items-center justify-center mb-8 text-[#E2E8F0] border border-[#F1F5F9]">
