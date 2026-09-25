@@ -20,7 +20,6 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { totalItems } = useCart();
@@ -29,17 +28,9 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   const productButton = useRef<HTMLButtonElement>(null);
   const searchButton = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
+  const searchContainer = useRef<HTMLDivElement>(null);
   const userMenu = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     if (searchOpen) searchInput.current?.focus();
@@ -69,6 +60,12 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
       }
       if (!userMenu.current?.contains(event.target as Node)) {
         setUserMenuOpen(false);
+      }
+      if (
+        !searchContainer.current?.contains(event.target as Node) &&
+        !searchButton.current?.contains(event.target as Node)
+      ) {
+        setSearchOpen(false);
       }
     };
     document.addEventListener('pointerdown', handlePointerDown);
@@ -125,28 +122,12 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   };
 
   return (
-    <header className="sticky top-0 z-50 relative">
-      {/* Outer padding shell - only padding transitions, no height change */}
-      <div
-        style={{
-          padding: isScrolled ? '10px 12px' : '0px',
-          transition: 'padding 500ms cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-      >
-        <div
-          className={`mx-auto flex items-center justify-between gap-6 ${
-            isScrolled
-              ? 'max-w-[1440px] 2xl:max-w-[1480px] h-16 rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_10px_35px_rgba(0,0,0,0.06)] px-5 sm:px-8'
-              : 'h-20 w-full border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm px-6 lg:px-12 2xl:px-16'
-          }`}
-          style={{
-            transitionProperty: 'height, max-width, background-color, border-color, box-shadow, border-radius, padding',
-            transitionDuration: '500ms',
-            transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        >
+    <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none px-3 pt-3 sm:px-6 sm:pt-4 lg:px-8">
+      {/* Floating pill navigation shell */}
+      <div className="relative mx-auto max-w-[1440px] 2xl:max-w-[1480px]">
+        <div className="pointer-events-auto flex h-16 w-full items-center justify-between gap-4 sm:gap-6 rounded-2xl border border-white/70 bg-white/85 px-4 sm:px-8 shadow-[0_10px_35px_rgba(0,0,0,0.06)] backdrop-blur-xl">
           <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-kb-tertiary">
-            <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className={`w-auto object-contain transition-all duration-300 ${isScrolled ? 'h-9 md:h-10' : 'h-11 md:h-12'}`} />
+            <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-9 md:h-10 w-auto object-contain" />
           </button>
 
           <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
@@ -346,33 +327,36 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
             </Button>
           </div>
         </div>
+
+        {searchOpen && (
+          <div
+            ref={searchContainer}
+            className="pointer-events-auto absolute right-0 top-[calc(100%+8px)] w-[min(560px,calc(100vw-24px))] rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-xl"
+          >
+            <form role="search" className="flex gap-2" onSubmit={submitSearch} onKeyDown={event => {
+              if (event.key === 'Escape') {
+                setSearchOpen(false);
+                searchButton.current?.focus();
+              }
+            }}>
+              <label className="sr-only" htmlFor="navbar-search">Search products</label>
+              <input
+                ref={searchInput}
+                id="navbar-search"
+                type="search"
+                value={query}
+                onChange={event => setQuery(event.target.value)}
+                placeholder="Search grills, rocket stoves, features..."
+                className="min-w-0 flex-1 rounded-xl border border-[#CBD5E1] px-4 py-2.5 outline-none font-['DM_Sans'] text-sm focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
+              />
+              <Button type="submit" className="rounded-xl"><Search size={17} /> Search</Button>
+            </form>
+          </div>
+        )}
       </div>
 
-      {searchOpen && (
-        <div className="absolute right-6 top-[calc(100%+8px)] w-[min(560px,calc(100%-3rem))] rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-xl lg:right-[80px]">
-          <form role="search" className="flex gap-2" onSubmit={submitSearch} onKeyDown={event => {
-            if (event.key === 'Escape') {
-              setSearchOpen(false);
-              searchButton.current?.focus();
-            }
-          }}>
-            <label className="sr-only" htmlFor="navbar-search">Search products</label>
-            <input
-              ref={searchInput}
-              id="navbar-search"
-              type="search"
-              value={query}
-              onChange={event => setQuery(event.target.value)}
-              placeholder="Search grills, rocket stoves, features..."
-              className="min-w-0 flex-1 rounded-xl border border-[#CBD5E1] px-4 py-2.5 outline-none font-['DM_Sans'] text-sm focus:border-[#C2410C] focus:ring-1 focus:ring-[#C2410C]"
-            />
-            <Button type="submit" className="rounded-xl"><Search size={17} /> Search</Button>
-          </form>
-        </div>
-      )}
-
       {/* Mobile Drawer */}
-      <div className={`fixed inset-0 z-[60] lg:hidden ${mobileOpen ? '' : 'pointer-events-none'}`}>
+      <div className={`fixed inset-0 z-[60] lg:hidden ${mobileOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
         <button
           className={`absolute inset-0 bg-[#0F172A]/40 transition-opacity duration-200 ${mobileOpen ? 'opacity-100' : 'opacity-0'}`}
           onClick={() => setMobileOpen(false)}
