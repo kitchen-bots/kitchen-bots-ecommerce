@@ -52,10 +52,10 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
 
       {/* Drawer */}
       <div
-        className={`fixed right-0 top-0 h-full w-full max-w-[480px] bg-white z-[2001] shadow-premium flex flex-col transform transition-transform duration-500 ease-out overscroll-contain ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed right-0 top-0 h-full w-full max-w-[480px] bg-white/80 backdrop-blur-2xl border-l border-white/60 z-[2001] shadow-2xl flex flex-col transform transition-transform duration-500 ease-out overscroll-contain ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-8 border-b border-[#F1F5F9]">
+        <div className="flex items-center justify-between p-8 border-b border-[#F1F5F9]/80 bg-white/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#F0FDF4] rounded-xl flex items-center justify-center text-kb-primary">
               <ShoppingBag size={20} />
@@ -71,7 +71,7 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
             variant="ghost"
             size="icon-lg"
             onClick={onClose}
-            className="hover:bg-[#F8FAFC] rounded-full group"
+            className="hover:bg-white/60 rounded-full group"
           >
             <X className="text-[#94A3B8] group-hover:text-[#111827]" size={20} />
           </Button>
@@ -81,7 +81,7 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
         <div className="flex-1 overflow-y-auto p-8 scrollbar-hide overscroll-contain">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-24 h-24 bg-[#F8FAFC] rounded-[32px] flex items-center justify-center mb-8 text-[#E2E8F0] border border-[#F1F5F9]">
+              <div className="w-24 h-24 bg-white/50 backdrop-blur-md rounded-[32px] flex items-center justify-center mb-8 text-[#94A3B8] border border-white/80">
                 <ShoppingBag size={48} />
               </div>
               <h3 className="text-[24px] font-bold text-[#111827] mb-3 font-['Outfit']">Cart is Clear</h3>
@@ -101,9 +101,9 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
               {items.map((item) => (
                 <div 
                   key={item.id} 
-                  className="flex gap-6 p-6 bg-white border border-[#F1F5F9] rounded-[32px] group hover:shadow-premium transition-all duration-300"
+                  className="flex gap-6 p-6 bg-white/70 backdrop-blur-md border border-white/80 rounded-[32px] group hover:shadow-premium hover:bg-white/80 transition-all duration-300"
                 >
-                  <div className="w-24 h-24 bg-[#F8FAFC] rounded-2xl flex items-center justify-center p-4 shrink-0 overflow-hidden">
+                  <div className="w-24 h-24 bg-transparent rounded-2xl flex items-center justify-center p-2 shrink-0 overflow-hidden">
                     <ProductImage
                       src={item.image}
                       alt={item.name}
@@ -128,7 +128,7 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
                       ₹{item.price.toLocaleString('en-IN')}
                     </p>
                     
-                    <div className="flex items-center gap-3 bg-[#F8FAFC] border border-[#E2E8F0] w-fit rounded-lg overflow-hidden h-[36px]">
+                    <div className="flex items-center gap-3 bg-white/80 border border-[#E2E8F0] w-fit rounded-lg overflow-hidden h-[36px]">
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -158,7 +158,7 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="p-8 border-t border-[#F1F5F9] bg-[#F8FAFC]">
+          <div className="p-8 border-t border-[#F1F5F9]/80 bg-white/60 backdrop-blur-md">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <span className="text-[12px] font-bold text-[#94A3B8] uppercase tracking-widest font-['Outfit']">Estimated Total</span>
@@ -182,7 +182,7 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
                 onClick={() => { onClose(); onNavigate?.('cart'); }}
                 variant="ghost"
                 size="lg"
-                className="w-full text-[12px] uppercase tracking-widest text-[#64748B] hover:text-[#111827] hover:bg-[#F1F5F9] border border-[#E2E8F0]"
+                className="w-full text-[12px] uppercase tracking-widest text-[#64748B] hover:text-[#111827] hover:bg-white/80 border border-[#E2E8F0]"
               >
                 View Full Cart
               </Button>
