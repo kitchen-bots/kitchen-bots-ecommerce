@@ -129,4 +129,17 @@ describe('Storefront API Client', () => {
       )
     ).rejects.toThrow('Invalid email address provided.');
   });
+
+  it('submitEnquiry throws error when turnstileToken is missing', async () => {
+    await expect(
+      submitEnquiry(
+        {
+          name: 'Rahul',
+          email: 'rahul@example.com',
+          message: 'Short message',
+        },
+        'https://api.kitchenbots.in'
+      )
+    ).rejects.toThrow('Please complete the security verification.');
+  });
 });

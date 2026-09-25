@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   NotebookPen,
   Send,
@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import type { Page } from '../App';
 import { Button } from '../components/ui/button';
-import TurnstileWidget from '../components/TurnstileWidget';
+import TurnstileWidget, { type TurnstileWidgetRef } from '../components/TurnstileWidget';
 import { submitEnquiry } from '../lib/api';
 import { useCart } from '../hooks/use-cart';
 import { getMediaUrl } from '../lib/cdn';
@@ -33,9 +33,15 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken) {
+      setErrorMessage('Please complete the security verification.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
 
@@ -53,15 +59,15 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
         city: formData.city || undefined,
         message: formData.requirements,
         items: enquiryItems,
-        turnstileToken: turnstileToken || undefined,
+        turnstileToken: turnstileToken,
       });
 
-      setSubmittedRef(response.reference);
+      setSubmittedRef(response.reference || response.id);
       setTurnstileToken('');
       try {
         const itemSummaries = items.map(item => `${item.name} (${item.quantity}x)`);
         const newRecord = {
-          reference: response.reference,
+          reference: response.reference || response.id,
           date: new Date().toISOString().split('T')[0],
           name: formData.name,
           company: formData.company || 'Commercial Client',
@@ -77,6 +83,8 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to submit enquiry. Please try again.';
       setErrorMessage(message);
+      setTurnstileToken('');
+      turnstileRef.current?.reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -282,16 +290,26 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
 
                     <div className="py-1">
                       <TurnstileWidget
-                        onVerify={(token) => setTurnstileToken(token)}
-                        onExpire={() => setTurnstileToken('')}
+                        ref={turnstileRef}
+                        onVerify={(token) => {
+                          setTurnstileToken(token);
+                          setErrorMessage(null);
+                        }}
+                        onError={() => {
+                          setTurnstileToken('');
+                          setErrorMessage('Security verification failed. Please refresh and try again.');
+                        }}
+                        onExpire={() => {
+                          setTurnstileToken('');
+                        }}
                       />
                     </div>
 
                     <Button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !turnstileToken}
                       size="lg"
-                      className="w-full h-[60px] gap-3 rounded-xl bg-[#C2410C] hover:bg-[#9A3412] text-white font-bold"
+                      className="w-full h-[60px] gap-3 rounded-xl bg-[#C2410C] hover:bg-[#9A3412] text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
                         <>

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Phone, Mail, Clock, MapPin, Send, CheckCircle, MessageCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import TurnstileWidget from '../components/TurnstileWidget';
+import TurnstileWidget, { type TurnstileWidgetRef } from '../components/TurnstileWidget';
 import { submitEnquiry } from '../lib/api';
 
 const CONTACT_CHANNELS = [
@@ -48,9 +48,15 @@ export default function ContactPage() {
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken) {
+      setErrorMessage('Please complete the security verification.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
 
@@ -63,15 +69,17 @@ export default function ContactPage() {
         city: formData.city.trim() || undefined,
         message: formData.message.trim(),
         items: [],
-        turnstileToken: turnstileToken || undefined,
+        turnstileToken: turnstileToken,
       });
 
-      setSubmittedRef(response.reference);
+      setSubmittedRef(response.reference || response.id);
       setFormData({ name: '', email: '', phone: '', company: '', city: '', message: '' });
       setTurnstileToken('');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to submit enquiry. Please try again.';
       setErrorMessage(message);
+      setTurnstileToken('');
+      turnstileRef.current?.reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -313,15 +321,25 @@ export default function ContactPage() {
 
                     <div className="py-1">
                       <TurnstileWidget
-                        onVerify={(token) => setTurnstileToken(token)}
-                        onExpire={() => setTurnstileToken('')}
+                        ref={turnstileRef}
+                        onVerify={(token) => {
+                          setTurnstileToken(token);
+                          setErrorMessage(null);
+                        }}
+                        onError={() => {
+                          setTurnstileToken('');
+                          setErrorMessage('Security verification failed. Please refresh and try again.');
+                        }}
+                        onExpire={() => {
+                          setTurnstileToken('');
+                        }}
                       />
                     </div>
 
                     <Button
                       type="submit"
-                      disabled={isSubmitting}
-                      className="w-full rounded-xl py-6 text-base font-semibold bg-[#C2410C] hover:bg-[#9A3412] text-white"
+                      disabled={isSubmitting || !turnstileToken}
+                      className="w-full rounded-xl py-6 text-base font-semibold bg-[#C2410C] hover:bg-[#9A3412] text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
                         <>

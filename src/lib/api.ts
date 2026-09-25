@@ -1,7 +1,7 @@
 import { PRODUCTS, getProductById } from '../data/products';
 import type { Product, ProductCategory } from '../types/product';
 export const DEFAULT_API_BASE_URL = '';
-export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
+export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || import.meta.env?.VITE_API_URL || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
 export const DEFAULT_ENQUIRY_API_URL = 'https://kitchen-bots-api.workofcharan.workers.dev';
 
 export interface ApiProduct {
@@ -199,7 +199,11 @@ export async function submitEnquiry(
   payload: EnquiryPayload,
   baseUrl = API_BASE_URL || DEFAULT_ENQUIRY_API_URL
 ): Promise<EnquiryResponseData> {
-  const token = payload.turnstileToken || 'test-pass-token';
+  const token = payload.turnstileToken;
+  if (!token) {
+    throw new Error('Please complete the security verification.');
+  }
+
   const body = {
     name: payload.name.trim(),
     email: payload.email.trim(),
@@ -226,12 +230,26 @@ export async function submitEnquiry(
   const json = (await res.json()) as {
     data?: EnquiryResponseData;
     error?: { code: string; message: string };
+    message?: string;
+    success?: boolean;
+    reference?: string;
+    id?: string;
   };
 
-  if (!res.ok || !json.data) {
-    const errorMessage = json.error?.message || `Enquiry submission failed (${res.status})`;
+  if (!res.ok || (!json.data && !json.id)) {
+    const errorMessage = json.error?.message || json.message || `Enquiry submission failed (${res.status})`;
     throw new Error(errorMessage);
   }
 
-  return json.data;
+  const data = json.data || {
+    id: json.id || '',
+    reference: json.reference || json.id || '',
+    status: 'New',
+    createdAt: new Date().toISOString(),
+  };
+
+  return {
+    ...data,
+    reference: data.reference || data.id,
+  };
 }
