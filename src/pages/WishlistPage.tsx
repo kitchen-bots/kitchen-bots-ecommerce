@@ -27,7 +27,7 @@ export default function WishlistPage({ onProductClick, onNavigate }: WishlistPag
     }).format(price);
 
   return (
-    <section className="pt-20 min-h-screen bg-[#FAFAFA]">
+    <section className="pt-24 sm:pt-28 min-h-screen bg-[#FAFAFA]">
       <div className="container mx-auto px-6 md:px-[80px] py-12 md:py-20">
         <div className="max-w-6xl mx-auto">
           {/* HEADER */}

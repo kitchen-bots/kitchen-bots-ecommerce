@@ -135,7 +135,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
   // ─── Order Confirmed Screen ───────────────────────────────────────────────
   if (confirmedOrder) {
     return (
-      <main className="min-h-screen bg-[#FAFAFA] pt-20">
+      <main className="min-h-screen bg-[#FAFAFA] pt-24 sm:pt-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="max-w-xl mx-auto">
             <div className="bg-white border border-[#E2E8F0] rounded-2xl p-8 sm:p-10 shadow-sm text-center">
@@ -205,7 +205,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
   // ─── Empty Cart ───────────────────────────────────────────────────────────
   if (items.length === 0) {
     return (
-      <main className="min-h-screen bg-[#FAFAFA] pt-20">
+      <main className="min-h-screen bg-[#FAFAFA] pt-24 sm:pt-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <div className="max-w-lg mx-auto bg-white border border-[#E2E8F0] rounded-xl p-8 sm:p-12 text-center shadow-xs">
             <div className="w-16 h-16 bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl flex items-center justify-center mx-auto mb-5 text-kb-primary">
@@ -233,7 +233,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
 
   // ─── Cart with items ──────────────────────────────────────────────────────
   return (
-    <main className="min-h-screen bg-[#FAFAFA] pt-20">
+    <main className="min-h-screen bg-[#FAFAFA] pt-24 sm:pt-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#64748B]">

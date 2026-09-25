@@ -201,7 +201,7 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
   const quantityInCart = cartItem?.quantity ?? 0;
 
   return (
-    <section className="min-h-screen overflow-x-hidden bg-[#FAFAFA] pb-24 pt-6 sm:pt-8">
+    <section className="min-h-screen overflow-x-hidden bg-[#FAFAFA] pb-24 pt-24 sm:pt-28">
       <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
         {error && (
           <div className="mb-6 flex items-center justify-between rounded-xl border border-[#FCA5A5] bg-[#FEF2F2] p-4 text-[#991B1B]">

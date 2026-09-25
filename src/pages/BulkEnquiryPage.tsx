@@ -83,7 +83,7 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-20">
+    <div className="min-h-screen bg-[#FAFAFA] pt-24 sm:pt-28">
       {/* BREADCRUMB */}
       <div className="container mx-auto px-6 md:px-[80px] pt-12 md:pt-20 pb-6">
         <nav className="flex items-center gap-2 text-[13px] text-[#64748B] font-medium font-['DM_Sans']">
