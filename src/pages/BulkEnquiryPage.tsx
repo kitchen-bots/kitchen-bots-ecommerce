@@ -6,13 +6,16 @@ import {
   ShoppingBag,
   MessageCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Plus,
+  Minus
 } from 'lucide-react';
 import type { Page } from '../App';
 import { Button } from '../components/ui/button';
 import TurnstileWidget from '../components/TurnstileWidget';
 import { submitEnquiry } from '../lib/api';
 import { useCart } from '../hooks/use-cart';
+import { MAX_ITEM_QUANTITY } from '../context/CartContextData';
 import ProductImage from '../components/ProductImage';
 import { getProductById } from '../data/products';
 
@@ -22,7 +25,7 @@ interface BulkEnquiryPageProps {
 }
 
 export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkEnquiryPageProps) {
-  const { items, clearCart } = useCart();
+  const { items, clearCart, updateQuantity } = useCart();
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
 
   const selectedCartItem = items.length > 0
@@ -35,6 +38,8 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
 
   const displayImage = selectedCartItem?.image || selectedFallbackProduct?.image;
   const displayName = selectedCartItem?.name || selectedFallbackProduct?.name;
+  const displayPrice = selectedCartItem?.price ?? selectedFallbackProduct?.price;
+  const displayQuantity = selectedCartItem?.quantity ?? 1;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -133,12 +138,83 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
           {/* LEFT: Info & Benefits */}
           <div className="lg:col-span-5 space-y-8">
             {displayImage ? (
-              <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden bg-white border border-[#E2E8F0] shadow-xl p-8 flex items-center justify-center">
-                <ProductImage
-                  src={displayImage}
-                  alt={displayName || 'Selected Product'}
-                  className="w-full h-full object-contain"
-                />
+              <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden bg-white border border-[#E2E8F0] shadow-xl p-6 sm:p-8 flex flex-col justify-between">
+                {/* Top: Product Name & Tag */}
+                <div className="w-full flex items-center justify-between gap-3 pb-3 border-b border-[#F1F5F9]">
+                  <div className="min-w-0">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
+                      Quotation Item
+                    </span>
+                    <h3 className="font-['Outfit'] font-bold text-base sm:text-lg text-[#111827] truncate mt-0.5">
+                      {displayName}
+                    </h3>
+                  </div>
+                  {selectedCartItem && (
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#FFF7ED] text-[#C2410C] border border-[#FFEDD5] font-['Outfit'] shrink-0">
+                      In Cart
+                    </span>
+                  )}
+                </div>
+
+                {/* Center: Product Image */}
+                <div className="flex-1 w-full flex items-center justify-center py-4 min-h-0">
+                  <ProductImage
+                    src={displayImage}
+                    alt={displayName || 'Selected Product'}
+                    className="w-full h-full object-contain max-h-[260px] sm:max-h-[300px] transition-transform duration-300 hover:scale-105"
+                  />
+                </div>
+
+                {/* Bottom: Price & Quantity */}
+                <div className="w-full pt-4 border-t border-[#F1F5F9] flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
+                      Price
+                    </span>
+                    <div className="text-xl sm:text-2xl font-bold text-[#111827] font-['Outfit']">
+                      {displayPrice ? `₹${displayPrice.toLocaleString('en-IN')}` : 'Price on Request'}
+                    </div>
+                    {displayPrice && displayQuantity > 1 && (
+                      <span className="text-xs text-[#64748B] font-['DM_Sans']">
+                        Subtotal: ₹{(displayPrice * displayQuantity).toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-[#64748B] font-['Outfit']">Qty:</span>
+                    {selectedCartItem ? (
+                      <div className="flex items-center border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] overflow-hidden h-9">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(selectedCartItem.id, selectedCartItem.quantity - 1)}
+                          disabled={selectedCartItem.quantity <= 1}
+                          aria-label="Decrease quantity"
+                          className="w-8 h-full flex items-center justify-center text-[#475569] hover:bg-[#E2E8F0] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <Minus size={13} />
+                        </button>
+                        <span className="w-8 text-center text-sm font-bold text-[#111827] font-['Outfit'] select-none">
+                          {selectedCartItem.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(selectedCartItem.id, selectedCartItem.quantity + 1)}
+                          disabled={selectedCartItem.quantity >= MAX_ITEM_QUANTITY}
+                          aria-label="Increase quantity"
+                          title={selectedCartItem.quantity >= MAX_ITEM_QUANTITY ? `Maximum limit of ${MAX_ITEM_QUANTITY} items` : undefined}
+                          className="w-8 h-full flex items-center justify-center text-[#475569] hover:bg-[#E2E8F0] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <Plus size={13} />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="px-3 py-1 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] font-bold text-sm text-[#111827] font-['Outfit']">
+                        {displayQuantity}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden bg-white border border-[#E2E8F0] shadow-sm flex flex-col items-center justify-center p-8 text-center">
