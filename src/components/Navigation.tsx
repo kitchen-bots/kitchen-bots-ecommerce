@@ -137,7 +137,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
           className={`mx-auto flex items-center justify-between gap-6 ${
             isScrolled
               ? 'max-w-[1440px] 2xl:max-w-[1480px] h-16 rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_10px_35px_rgba(0,0,0,0.06)] px-5 sm:px-8'
-              : 'h-20 w-full border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm px-6 lg:px-12 2xl:px-16'
+              : 'h-20 w-full border-b border-[#F1F5F9]/80 bg-white/70 backdrop-blur-xl shadow-xs px-6 lg:px-12 2xl:px-16'
           }`}
           style={{
             transitionProperty: 'height, max-width, background-color, border-color, box-shadow, border-radius, padding',

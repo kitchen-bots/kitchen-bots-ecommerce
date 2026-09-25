@@ -57,8 +57,8 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
         {/* Header */}
         <div className="flex items-center justify-between p-8 border-b border-[#F1F5F9]/80 bg-white/40 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#F0FDF4] rounded-xl flex items-center justify-center text-kb-primary">
-              <ShoppingBag size={20} />
+            <div className="w-10 h-10 bg-transparent flex items-center justify-center text-kb-primary">
+              <ShoppingBag size={22} />
             </div>
             <div>
               <h2 className="text-[20px] font-bold text-[#111827] font-['Outfit']">Your Selection</h2>
