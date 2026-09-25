@@ -520,8 +520,11 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
                 variant="outline"
                 className="h-[52px] min-w-[160px] flex-1 rounded-xl border-[#CBD5E1] bg-white font-bold text-[#0F172A] hover:bg-[#F8FAFC]"
                 onClick={() => {
+                  if (quantityInCart === 0) {
+                    addToCart({ id: product.id, name: product.name, price: product.price, image: product.image });
+                  }
                   if (onNavigate) {
-                    onNavigate('bulk-enquiry');
+                    onNavigate('bulk-enquiry', product.id);
                   } else {
                     window.location.href = '/bulk-enquiry';
                   }

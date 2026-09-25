@@ -14,13 +14,28 @@ import TurnstileWidget from '../components/TurnstileWidget';
 import { submitEnquiry } from '../lib/api';
 import { useCart } from '../hooks/use-cart';
 import { getMediaUrl } from '../lib/cdn';
+import ProductImage from '../components/ProductImage';
+import { getProductById } from '../data/products';
 
 interface BulkEnquiryPageProps {
   onNavigate: (page: Page) => void;
+  selectedProductId?: string | null;
 }
 
-export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
+export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkEnquiryPageProps) {
   const { items, clearCart } = useCart();
+  const [selectedItemIndex, setSelectedItemIndex] = useState(0);
+
+  const selectedCartItem = items.length > 0
+    ? items[Math.min(selectedItemIndex, items.length - 1)]
+    : null;
+
+  const selectedFallbackProduct = !selectedCartItem && selectedProductId
+    ? getProductById(selectedProductId)
+    : null;
+
+  const displayImage = selectedCartItem?.image || selectedFallbackProduct?.image;
+  const displayName = selectedCartItem?.name || selectedFallbackProduct?.name;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -118,22 +133,60 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
 
           {/* LEFT: Info & Benefits */}
           <div className="lg:col-span-5 space-y-8">
-            <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl">
-              <img
-                src={getMediaUrl('/images/redesign/bulk-enquiry-hero.png')}
-                alt="Bulk Kitchen Equipment"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-10">
-                <div className="flex items-center gap-3 text-white mb-2">
-                  <Building2 size={24} />
-                  <span className="text-[20px] font-bold font-['Outfit']">Enterprise Ready</span>
-                </div>
-                <p className="text-white/80 text-[15px] font-['DM_Sans']">
-                  Supporting hotels, restaurants, and cloud kitchens across India with smart automation.
-                </p>
+            {displayImage ? (
+              <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden bg-white border border-[#E2E8F0] shadow-xl p-8 flex items-center justify-center">
+                <ProductImage
+                  src={displayImage}
+                  alt={displayName || 'Selected Product'}
+                  className="w-full h-full object-contain"
+                />
               </div>
-            </div>
+            ) : (
+              <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl">
+                <img
+                  src={getMediaUrl('/images/redesign/bulk-enquiry-hero.png')}
+                  alt="Bulk Kitchen Equipment"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-10">
+                  <div className="flex items-center gap-3 text-white mb-2">
+                    <Building2 size={24} />
+                    <span className="text-[20px] font-bold font-['Outfit']">Enterprise Ready</span>
+                  </div>
+                  <p className="text-white/80 text-[15px] font-['DM_Sans']">
+                    Supporting hotels, restaurants, and cloud kitchens across India with smart automation.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {items.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1">
+                {items.map((item, idx) => {
+                  const isSelected = idx === Math.min(selectedItemIndex, items.length - 1);
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setSelectedItemIndex(idx)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-all ${
+                        isSelected
+                          ? 'border-[#C2410C] bg-[#FFF7ED] ring-2 ring-[#C2410C]/20 shadow-xs'
+                          : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-[#F8FAFC] border border-[#F1F5F9] p-1 shrink-0 flex items-center justify-center">
+                        <ProductImage src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                      </div>
+                      <div className="text-left min-w-0 max-w-[120px]">
+                        <p className="text-xs font-bold text-[#111827] truncate font-['Outfit']">{item.name}</p>
+                        <p className="text-[11px] text-[#64748B]">Qty: {item.quantity}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-6 bg-white rounded-2xl border border-[#F1F5F9] shadow-sm">
