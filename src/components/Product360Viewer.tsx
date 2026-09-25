@@ -10,7 +10,6 @@ interface Product360ViewerProps {
   productName: string;
   posterImage?: string;
   className?: string;
-  autoRotateDefault?: boolean;
 }
 
 export default function Product360Viewer({
@@ -19,7 +18,6 @@ export default function Product360Viewer({
   productName,
   posterImage,
   className = '',
-  autoRotateDefault = true,
 }: Product360ViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,7 +25,6 @@ export default function Product360Viewer({
 
   const [currentFrame, setCurrentFrame] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAutoRotating, setIsAutoRotating] = useState(autoRotateDefault);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -112,28 +109,6 @@ export default function Product360Viewer({
     draw(currentFrame);
   }, [currentFrame, draw]);
 
-  // Auto-rotation loop using requestAnimationFrame with delta timing
-  useEffect(() => {
-    if (!isAutoRotating || isLoading || isDragging) return;
-
-    let animId: number;
-    let lastTime = performance.now();
-    const frameDuration = 1000 / 24; // 24 fps turntable spin
-
-    const tick = (now: number) => {
-      const delta = now - lastTime;
-      if (delta >= frameDuration) {
-        const framesToAdvance = Math.max(1, Math.floor(delta / frameDuration));
-        setCurrentFrame((prev) => wrapIndex(prev + framesToAdvance, frameCount));
-        lastTime = now - (delta % frameDuration);
-      }
-      animId = requestAnimationFrame(tick);
-    };
-
-    animId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(animId);
-  }, [isAutoRotating, isLoading, isDragging, frameCount]);
-
   // Unified Pointer Drag Handlers with pointer capture
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('button, [data-no-drag="true"]')) {
@@ -146,7 +121,6 @@ export default function Product360Viewer({
       // Ignored if pointer capture is not supported
     }
 
-    setIsAutoRotating(false);
     setHasInteracted(true);
     setIsDragging(true);
     dragStateRef.current = {
@@ -182,16 +156,11 @@ export default function Product360Viewer({
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft') {
-      setIsAutoRotating(false);
       setHasInteracted(true);
       setCurrentFrame((prev) => wrapIndex(prev - (e.shiftKey ? 5 : 1), frameCount));
     } else if (e.key === 'ArrowRight') {
-      setIsAutoRotating(false);
       setHasInteracted(true);
       setCurrentFrame((prev) => wrapIndex(prev + (e.shiftKey ? 5 : 1), frameCount));
-    } else if (e.key === ' ') {
-      e.preventDefault();
-      setIsAutoRotating((prev) => !prev);
     }
   };
 
@@ -214,7 +183,6 @@ export default function Product360Viewer({
     const targetDegrees = nextQuarter * 90;
     const targetFrame = wrapIndex(Math.round((targetDegrees / 360) * frameCount), frameCount);
 
-    setIsAutoRotating(false);
     setHasInteracted(true);
 
     const start = frameRef.current;

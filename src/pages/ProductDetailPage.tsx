@@ -362,7 +362,6 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
                     productName={product.name}
                     posterImage={product.image}
                     className="h-full w-full border-0"
-                    autoRotateDefault={true}
                   />
                 </div>
               )}
