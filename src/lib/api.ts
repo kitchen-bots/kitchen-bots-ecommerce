@@ -67,16 +67,56 @@ export function categoryIdToName(categoryId: string): ProductCategory {
   return 'Accessories';
 }
 
-export function toStorefrontProduct(apiProduct: ApiProduct): Product {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function toStorefrontProduct(apiProduct: any): Product {
   const local = getProductById(apiProduct.id) || PRODUCTS.find((p) => p.slug === apiProduct.slug);
-  const images = apiProduct.imageUrls && apiProduct.imageUrls.length > 0
-    ? apiProduct.imageUrls
-    : (local?.images || []);
-  const primaryImage = images[0] || local?.image || '';
+  const rawImages = (Array.isArray(apiProduct.images) && apiProduct.images.length > 0)
+    ? apiProduct.images
+    : ((Array.isArray(apiProduct.imageKeys) && apiProduct.imageKeys.length > 0)
+      ? apiProduct.imageKeys
+      : (Array.isArray(apiProduct.imageUrls) && apiProduct.imageUrls.length > 0
+        ? apiProduct.imageUrls
+        : (local?.images || [])));
+
+  const images: string[] = rawImages
+    .map((img: unknown) => {
+      if (typeof img === 'string') return img;
+      if (img && typeof img === 'object' && 'url' in img && typeof (img as { url?: string }).url === 'string') {
+        return (img as { url: string }).url;
+      }
+      return '';
+    })
+    .filter(Boolean);
+
+  const primaryImage = (typeof apiProduct.image === 'string' && apiProduct.image)
+    ? apiProduct.image
+    : (images[0] || local?.image || '');
+
+  let specifications: Record<string, string> = {};
+  if (Array.isArray(apiProduct.specifications) && apiProduct.specifications.length > 0) {
+    for (const spec of apiProduct.specifications) {
+      if (spec && typeof spec === 'object') {
+        const specObj = spec as Record<string, unknown>;
+        const key = typeof specObj.name === 'string'
+          ? specObj.name
+          : (typeof specObj.label === 'string' ? specObj.label : (typeof specObj.key === 'string' ? specObj.key : ''));
+        if (key && specObj.value !== undefined && specObj.value !== null) {
+          specifications[key] = String(specObj.value);
+        }
+      }
+    }
+  } else if (apiProduct.specifications && typeof apiProduct.specifications === 'object' && !Array.isArray(apiProduct.specifications) && Object.keys(apiProduct.specifications).length > 0) {
+    specifications = apiProduct.specifications as Record<string, string>;
+  } else {
+    specifications = local?.specifications || {};
+  }
+
   const priceRupees =
-    apiProduct.pricePaise !== null && apiProduct.pricePaise !== undefined
-      ? Math.round(apiProduct.pricePaise / 100)
-      : (local?.price ?? 0);
+    apiProduct.price !== undefined && apiProduct.price !== null
+      ? Number(apiProduct.price)
+      : (apiProduct.pricePaise !== undefined && apiProduct.pricePaise !== null
+        ? Math.round(Number(apiProduct.pricePaise) / 100)
+        : (local?.price ?? 0));
 
   return {
     ...(local || {}),
@@ -87,16 +127,16 @@ export function toStorefrontProduct(apiProduct: ApiProduct): Product {
     price: priceRupees,
     image: primaryImage,
     images,
-    category: categoryIdToName(apiProduct.categoryId) || local?.category || 'Collapsible BBQ',
-    features: (apiProduct.features && apiProduct.features.length > 0) ? apiProduct.features : (local?.features || []),
-    specifications: Object.keys(apiProduct.specifications || {}).length > 0 ? apiProduct.specifications : (local?.specifications || {}),
+    category: categoryIdToName(apiProduct.categoryId || apiProduct.category || '') || local?.category || 'Collapsible BBQ',
+    features: (Array.isArray(apiProduct.features) && apiProduct.features.length > 0) ? apiProduct.features : (local?.features || []),
+    specifications,
     video: local?.video,
     videoPath: local?.videoPath,
     sequenceId: local?.sequenceId,
     sequenceFrameCount: local?.sequenceFrameCount,
     has3D: local?.has3D,
     hasVideo: local?.hasVideo,
-    featured: local?.featured ?? false,
+    featured: apiProduct.isFeatured ?? apiProduct.featured ?? local?.featured ?? false,
   };
 }
 

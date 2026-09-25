@@ -43,6 +43,31 @@ describe('Storefront API Client', () => {
     expect(product.category).toBe('Santa Maria Series');
   });
 
+  it('toStorefrontProduct normalizes ImageItem[] to string[] and SpecificationItem[] to Record<string, string>', () => {
+    const rawApiProduct = {
+      id: 'prod-1',
+      name: 'Commercial BBQ Grill',
+      price: 1382,
+      images: [
+        { id: 'img-1', url: '/images/img1.jpg', isPrimary: true },
+        { id: 'img-2', url: '/images/img2.jpg', isPrimary: false }
+      ],
+      specifications: [
+        { id: 'spec-1', name: 'Material', value: '304 Stainless Steel' },
+        { id: 'spec-2', label: 'Grate Type', value: 'V-Groove Grate' }
+      ],
+      features: ['Heavy Duty']
+    };
+
+    const product = toStorefrontProduct(rawApiProduct);
+    expect(product.images).toEqual(['/images/img1.jpg', '/images/img2.jpg']);
+    expect(product.image).toBe('/images/img1.jpg');
+    expect(product.specifications).toEqual({
+      Material: '304 Stainless Steel',
+      'Grate Type': 'V-Groove Grate'
+    });
+  });
+
   it('fetchCatalogProducts fetches from API when API_BASE_URL is set', async () => {
     const mockResponse = {
       data: [mockApiProduct],
