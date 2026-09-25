@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import type { Page } from '../App';
 import { Button } from '../components/ui/button';
-import TurnstileWidget from '../components/TurnstileWidget';
 import { submitEnquiry } from '../lib/api';
 import { useCart } from '../hooks/use-cart';
 import { MAX_ITEM_QUANTITY } from '../context/CartContextData';
@@ -51,7 +50,6 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedRef, setSubmittedRef] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,11 +70,9 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
         city: formData.city || undefined,
         message: formData.requirements,
         items: enquiryItems,
-        turnstileToken: turnstileToken || undefined,
       });
 
       setSubmittedRef(response.reference);
-      setTurnstileToken('');
       try {
         const itemSummaries = items.map(item => `${item.name} (${item.quantity}x)`);
         const newRecord = {
@@ -405,13 +401,6 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
                         className="w-full h-[140px] p-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[var(--kb-primary)]/20 focus:border-kb-primary transition-all font-['DM_Sans'] resize-none disabled:opacity-50"
                         value={formData.requirements}
                         onChange={(e) => setFormData({...formData, requirements: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="py-1">
-                      <TurnstileWidget
-                        onVerify={(token) => setTurnstileToken(token)}
-                        onExpire={() => setTurnstileToken('')}
                       />
                     </div>
 
