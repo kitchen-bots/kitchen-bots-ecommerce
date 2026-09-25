@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, ShoppingCart, Minus, Plus, ArrowRight, Camera, RotateCw, Film, Shield, Truck } from 'lucide-react';
 import type { Product } from '../types/product';
 import { useCart } from '../hooks/use-cart';
+import { MAX_ITEM_QUANTITY } from '../context/CartContextData';
 import { useToast } from '../hooks/use-toast';
 import { Button } from './ui/button';
 import ProductImage from './ProductImage';
@@ -307,26 +308,35 @@ export default function QuickViewModal({
             {/* Action Buttons */}
             <div className="mt-auto flex flex-col gap-3 pt-6">
               {quantityInCart > 0 ? (
-                <div className="flex h-12 w-full items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1.5">
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(product.id, quantityInCart - 1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-xs hover:bg-[#F1F5F9]"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="font-['Outfit'] font-bold text-sm text-[#0F172A]">
-                    {quantityInCart} in cart
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(product.id, quantityInCart + 1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-xs hover:bg-[#9A3412]"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus size={16} />
-                  </button>
+                <div className="space-y-2">
+                  <div className="flex h-12 w-full items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1.5">
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(product.id, quantityInCart - 1)}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-xs hover:bg-[#F1F5F9]"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <span className="font-['Outfit'] font-bold text-sm text-[#0F172A]">
+                      {quantityInCart} in cart
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(product.id, quantityInCart + 1)}
+                      disabled={quantityInCart >= MAX_ITEM_QUANTITY}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-xs hover:bg-[#9A3412] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#C2410C]"
+                      aria-label="Increase quantity"
+                      title={quantityInCart >= MAX_ITEM_QUANTITY ? `Maximum limit of ${MAX_ITEM_QUANTITY} items per order` : undefined}
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  {quantityInCart >= MAX_ITEM_QUANTITY && (
+                    <p className="text-center text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/70 py-1 px-2 rounded-lg font-['DM_Sans']">
+                      Maximum limit of {MAX_ITEM_QUANTITY} units reached
+                    </p>
+                  )}
                 </div>
               ) : (
                 <Button

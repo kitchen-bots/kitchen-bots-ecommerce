@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../hooks/use-cart';
+import { MAX_ITEM_QUANTITY } from '../context/CartContextData';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle, MapPin, Phone, User, ChevronDown, ChevronUp } from 'lucide-react';
 import type { Page } from '../App';
 import { Button } from '../components/ui/button';
@@ -82,7 +83,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
   const handleUpdateQuantity = (id: string, newQuantity: number) => {
     if (!Number.isFinite(newQuantity)) return;
     const sanitized = Math.floor(newQuantity);
-    if (sanitized >= 1 && sanitized <= 999) {
+    if (sanitized >= 1 && sanitized <= MAX_ITEM_QUANTITY) {
       updateQuantity(id, sanitized);
     }
   };
@@ -338,34 +339,42 @@ export default function CartPage({ onNavigate }: CartPageProps) {
 
                     {/* Quantity & Removal Controls */}
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#F1F5F9]">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-[#64748B]">Quantity:</span>
-                        <div className="flex items-center border border-[#CBD5E1] rounded-lg bg-[#F8FAFC] overflow-hidden">
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
-                            aria-label={`Decrease quantity of ${item.name}`}
-                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:z-10 disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
-                          >
-                            <Minus className="w-4 h-4" aria-hidden="true" />
-                          </button>
-                          <span
-                            aria-label={`Current quantity: ${item.quantity}`}
-                            className="w-10 text-center font-['Outfit'] text-sm font-semibold text-[#111827] select-none"
-                          >
-                            {item.quantity}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                            disabled={item.quantity >= 999}
-                            aria-label={`Increase quantity of ${item.name}`}
-                            className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:z-10 disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
-                          >
-                            <Plus className="w-4 h-4" aria-hidden="true" />
-                          </button>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-[#64748B]">Quantity:</span>
+                          <div className="flex items-center border border-[#CBD5E1] rounded-lg bg-[#F8FAFC] overflow-hidden">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                              aria-label={`Decrease quantity of ${item.name}`}
+                              className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:z-10 disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
+                            >
+                              <Minus className="w-4 h-4" aria-hidden="true" />
+                            </button>
+                            <span
+                              aria-label={`Current quantity: ${item.quantity}`}
+                              className="w-10 text-center font-['Outfit'] text-sm font-semibold text-[#111827] select-none"
+                            >
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= MAX_ITEM_QUANTITY}
+                              aria-label={`Increase quantity of ${item.name}`}
+                              title={item.quantity >= MAX_ITEM_QUANTITY ? `Maximum limit of ${MAX_ITEM_QUANTITY} items per order` : undefined}
+                              className="w-11 h-11 flex items-center justify-center text-[#475569] hover:text-[#111827] hover:bg-[#E2E8F0] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:z-10 disabled:opacity-40 disabled:cursor-not-allowed hover:disabled:bg-transparent hover:disabled:text-[#475569]"
+                            >
+                              <Plus className="w-4 h-4" aria-hidden="true" />
+                            </button>
+                          </div>
                         </div>
+                        {item.quantity >= MAX_ITEM_QUANTITY && (
+                          <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/70 px-2.5 py-1 rounded-md">
+                            Max limit ({MAX_ITEM_QUANTITY}) reached
+                          </span>
+                        )}
                       </div>
 
                       <Button

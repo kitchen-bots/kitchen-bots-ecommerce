@@ -4,4 +4,5 @@
  */
 
 export { useCart } from '../hooks/use-cart';
+export { MAX_ITEM_QUANTITY } from '../context/CartContextData';
 export type { CartItem } from '../context/CartContextData';

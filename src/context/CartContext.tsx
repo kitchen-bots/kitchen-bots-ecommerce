@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { trackAddToCart } from '../lib/analytics';
-import { CartContext, type CartItem } from './CartContextData';
+import { CartContext, type CartItem, MAX_ITEM_QUANTITY } from './CartContextData';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -8,7 +8,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addToCart = useCallback((newItem: Omit<CartItem, 'quantity'>) => {
     setItems(prev => {
       const existingItem = prev.find(item => item.id === newItem.id);
-      const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+      if (existingItem && existingItem.quantity >= MAX_ITEM_QUANTITY) {
+        return prev;
+      }
+      const newQuantity = existingItem ? Math.min(MAX_ITEM_QUANTITY, existingItem.quantity + 1) : 1;
 
       // Fire analytics
       trackAddToCart({
@@ -36,9 +39,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeFromCart(id);
       return;
     }
+    const clampedQuantity = Math.min(MAX_ITEM_QUANTITY, Math.floor(quantity));
     setItems(prev =>
       prev.map(item =>
-        item.id === id ? { ...item, quantity } : item
+        item.id === id ? { ...item, quantity: clampedQuantity } : item
       )
     );
   }, [removeFromCart]);
