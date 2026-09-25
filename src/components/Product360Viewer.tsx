@@ -1,8 +1,18 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { RotateCw, Pause, Play, RefreshCw, Maximize2, Minimize2, Loader2, Sparkles } from 'lucide-react';
 import { preloadFrames } from '../modules/media-loader';
-import { renderFrame, wrapIndex, dragToFrame, type DragState } from '../modules/sequence-viewer';
+import { renderFrame, wrapIndex, shortestFrameDistance, type DragState } from '../modules/sequence-viewer';
 import { Button } from './ui/button';
+import { cn } from '../lib/utils';
+
+interface WebKitDocument extends Document {
+  webkitFullscreenElement?: Element;
+  webkitExitFullscreen?: () => Promise<void> | void;
+}
+
+interface WebKitHTMLDivElement extends HTMLDivElement {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+}
 
 interface Product360ViewerProps {
   sequenceId: string;
@@ -32,6 +42,7 @@ export default function Product360Viewer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const dragStateRef = useRef<DragState>({ isDragging: false, startX: 0, startFrame: 0 });
   const frameRef = useRef(0);
@@ -55,7 +66,7 @@ export default function Product360Viewer({
     setLoadError(false);
   }
 
-  // Preload frames progressively
+  // Preload frames progressively with caching
   useEffect(() => {
     let isCancelled = false;
 
@@ -66,7 +77,7 @@ export default function Product360Viewer({
       () => {
         if (!isCancelled) {
           setIsLoading(false);
-          draw(0);
+          draw(frameRef.current);
         }
       }
     )
@@ -98,8 +109,8 @@ export default function Product360Viewer({
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = canvas.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) {
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
         draw(frameRef.current);
       }
     });
@@ -113,49 +124,88 @@ export default function Product360Viewer({
     draw(currentFrame);
   }, [currentFrame, draw]);
 
-  // Auto-rotation loop using requestAnimationFrame
+  // Synchronize fullscreen state with browser events (e.g. Esc key)
   useEffect(() => {
-    if (!isAutoRotating || isLoading) return;
+    const onFullscreenChange = () => {
+      const doc = document as WebKitDocument;
+      const isFull = Boolean(document.fullscreenElement || doc.webkitFullscreenElement);
+      setIsFullscreen(isFull);
+    };
+
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
+    };
+  }, []);
+
+  // Auto-rotation loop using requestAnimationFrame with delta timing
+  useEffect(() => {
+    if (!isAutoRotating || isLoading || isResetting || isDragging) return;
 
     let animId: number;
     let lastTime = performance.now();
-    const frameDuration = 1000 / 24; // ~24 fps turntable spin
+    const frameDuration = 1000 / 24; // 24 fps turntable spin
 
     const tick = (now: number) => {
       const delta = now - lastTime;
       if (delta >= frameDuration) {
         const framesToAdvance = Math.max(1, Math.floor(delta / frameDuration));
         setCurrentFrame((prev) => wrapIndex(prev + framesToAdvance, frameCount));
-        lastTime = now;
+        lastTime = now - (delta % frameDuration);
       }
       animId = requestAnimationFrame(tick);
     };
 
     animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
-  }, [isAutoRotating, isLoading, frameCount]);
+  }, [isAutoRotating, isLoading, isResetting, isDragging, frameCount]);
 
-  // Mouse & Touch Drag Handlers
-  const handlePointerDown = (clientX: number) => {
+  // Unified Pointer Drag Handlers with pointer capture
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Avoid triggering drag when interacting with controls or buttons
+    if ((e.target as HTMLElement).closest('button, [data-no-drag="true"]')) {
+      return;
+    }
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignored if pointer capture is not supported
+    }
+
     setIsAutoRotating(false);
     setHasInteracted(true);
     setIsDragging(true);
     dragStateRef.current = {
       isDragging: true,
-      startX: clientX,
+      startX: e.clientX,
       startFrame: frameRef.current,
     };
   };
 
-  const handlePointerMove = (clientX: number) => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragStateRef.current.isDragging) return;
-    const newFrame = dragToFrame(dragStateRef.current, clientX, frameCount, 8);
+    const rect = containerRef.current?.getBoundingClientRect();
+    const width = rect?.width || 400;
+    const pixelsPerFrame = Math.max(4, width / frameCount);
+    const deltaX = e.clientX - dragStateRef.current.startX;
+    const framesDelta = Math.round(deltaX / pixelsPerFrame);
+    const newFrame = wrapIndex(dragStateRef.current.startFrame + framesDelta, frameCount);
     setCurrentFrame(newFrame);
   };
 
-  const handlePointerUp = () => {
-    dragStateRef.current.isDragging = false;
-    setIsDragging(false);
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStateRef.current.isDragging) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignored
+      }
+      dragStateRef.current.isDragging = false;
+      setIsDragging(false);
+    }
   };
 
   // Keyboard navigation
@@ -163,28 +213,123 @@ export default function Product360Viewer({
     if (e.key === 'ArrowLeft') {
       setIsAutoRotating(false);
       setHasInteracted(true);
-      setCurrentFrame((prev) => wrapIndex(prev - 1, frameCount));
+      setCurrentFrame((prev) => wrapIndex(prev - (e.shiftKey ? 5 : 1), frameCount));
     } else if (e.key === 'ArrowRight') {
       setIsAutoRotating(false);
       setHasInteracted(true);
-      setCurrentFrame((prev) => wrapIndex(prev + 1, frameCount));
+      setCurrentFrame((prev) => wrapIndex(prev + (e.shiftKey ? 5 : 1), frameCount));
     } else if (e.key === ' ') {
       e.preventDefault();
       setIsAutoRotating((prev) => !prev);
+    } else if (e.key === 'Home' || e.key === 'r' || e.key === 'R') {
+      e.preventDefault();
+      smoothResetToFront();
+    } else if (e.key === 'f' || e.key === 'F') {
+      e.preventDefault();
+      toggleFullscreen();
     }
   };
 
   const toggleFullscreen = () => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    const container = containerRef.current as WebKitHTMLDivElement | null;
+    if (!container) return;
+    const doc = document as WebKitDocument;
+    const isDocFull = Boolean(document.fullscreenElement || doc.webkitFullscreenElement);
+
+    if (!isDocFull) {
+      if (container.requestFullscreen) {
+        container.requestFullscreen().catch(() => {});
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      }
     } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      }
     }
   };
 
-  // Degrees calculated from current frame
-  const degrees = Math.round((currentFrame / frameCount) * 360);
+  // Smoothly rotate turntable back to 0° (front view)
+  const smoothResetToFront = () => {
+    if (isResetting) return;
+    setIsAutoRotating(false);
+    setHasInteracted(true);
+
+    const start = frameRef.current;
+    if (start === 0) {
+      // If already at 0, initiate a showcase continuous spin
+      setIsAutoRotating(true);
+      return;
+    }
+
+    setIsResetting(true);
+    const startTime = performance.now();
+    const duration = 350; // ms
+    const diff = shortestFrameDistance(start, 0, frameCount);
+
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      // Cubic ease-out
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const nextFrame = wrapIndex(Math.round(start + diff * ease), frameCount);
+      setCurrentFrame(nextFrame);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCurrentFrame(0);
+        setIsResetting(false);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  };
+
+  // Degrees calculated from current frame (0 to 359)
+  const degrees = Math.round((currentFrame / frameCount) * 360) % 360;
+
+  // Cardinal view direction label
+  const cardinalLabel = useMemo(() => {
+    if (degrees >= 345 || degrees <= 15) return 'Front';
+    if (degrees >= 75 && degrees <= 105) return 'Right';
+    if (degrees >= 165 && degrees <= 195) return 'Back';
+    if (degrees >= 255 && degrees <= 285) return 'Left';
+    return null;
+  }, [degrees]);
+
+  // Snap to next 90° angle quadrant when clicking degree badge
+  const snapToNextQuarter = () => {
+    const currentQuarter = Math.floor((degrees + 45) / 90) % 4;
+    const nextQuarter = (currentQuarter + 1) % 4;
+    const targetDegrees = nextQuarter * 90;
+    const targetFrame = wrapIndex(Math.round((targetDegrees / 360) * frameCount), frameCount);
+
+    setIsAutoRotating(false);
+    setHasInteracted(true);
+
+    const start = frameRef.current;
+    const diff = shortestFrameDistance(start, targetFrame, frameCount);
+    const startTime = performance.now();
+    const duration = 280;
+
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const nextF = wrapIndex(Math.round(start + diff * ease), frameCount);
+      setCurrentFrame(nextF);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCurrentFrame(targetFrame);
+      }
+    };
+    requestAnimationFrame(animate);
+  };
 
   if (loadError && posterImage) {
     return (
@@ -199,28 +344,32 @@ export default function Product360Viewer({
       ref={containerRef}
       tabIndex={0}
       role="region"
-      aria-label={`360 interactive view of ${productName}`}
+      aria-label={`360 interactive turntable view of ${productName}`}
+      aria-valuenow={degrees}
+      aria-valuemin={0}
+      aria-valuemax={360}
       onKeyDown={handleKeyDown}
-      className={`group relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-[#E2E8F0] bg-gradient-to-b from-[#FFFFFF] to-[#F8FAFC] select-none outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C] ${
-        isDragging ? 'cursor-grabbing' : 'cursor-grab'
-      } ${className}`}
-      onMouseDown={(e) => handlePointerDown(e.clientX)}
-      onMouseMove={(e) => handlePointerMove(e.clientX)}
-      onMouseUp={handlePointerUp}
-      onMouseLeave={handlePointerUp}
-      onTouchStart={(e) => handlePointerDown(e.touches[0].clientX)}
-      onTouchMove={(e) => handlePointerMove(e.touches[0].clientX)}
-      onTouchEnd={handlePointerUp}
+      className={cn(
+        'group relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-[#E2E8F0] bg-gradient-to-b from-[#FFFFFF] to-[#F8FAFC] select-none outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C] touch-none',
+        isDragging ? 'cursor-grabbing' : 'cursor-grab',
+        isFullscreen && 'fixed inset-0 z-50 rounded-none border-0 bg-white p-4',
+        className
+      )}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       {/* 360 Degree Canvas */}
       <canvas
         ref={canvasRef}
-        className="h-full w-full object-contain touch-none"
+        className="h-full w-full object-contain pointer-events-none"
+        style={{ width: '100%', height: '100%' }}
       />
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/75 backdrop-blur-xs transition-opacity">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-xs transition-opacity z-20">
           <Loader2 className="h-8 w-8 animate-spin text-[#C2410C]" />
           <p className="mt-2 font-['DM_Sans'] text-xs font-semibold text-[#64748B]">Loading 3D Turntable...</p>
         </div>
@@ -228,32 +377,54 @@ export default function Product360Viewer({
 
       {/* Interactive Guidance Hint Pill */}
       {!hasInteracted && !isLoading && (
-        <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 animate-pulse flex items-center gap-1.5 rounded-full bg-black/75 px-3.5 py-1 text-xs font-medium text-white shadow-md backdrop-blur-md">
+        <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 animate-pulse flex items-center gap-1.5 rounded-full bg-black/75 px-3.5 py-1 text-xs font-medium text-white shadow-md backdrop-blur-md z-10">
           <RotateCw size={13} className="text-[#FDBA74]" />
           <span>Drag or swipe to rotate 360°</span>
         </div>
       )}
 
-      {/* Degree Badge Pill */}
-      <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-xl bg-white/90 px-3 py-1.5 text-xs font-bold text-[#1E293B] shadow-sm backdrop-blur-md border border-[#E2E8F0]/80">
-        <Sparkles size={13} className="text-[#C2410C]" />
+      {/* Degree Badge Pill (Interactive: click to snap to next 90° angle) */}
+      <button
+        type="button"
+        data-no-drag="true"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={snapToNextQuarter}
+        title="Click to snap to next 90° view"
+        className="absolute bottom-4 left-4 z-10 flex items-center gap-2 rounded-xl bg-white/95 px-3 py-1.5 text-xs font-bold text-[#1E293B] shadow-sm backdrop-blur-md border border-[#E2E8F0]/80 transition-all active:scale-95 hover:border-[#FDBA74] hover:bg-white select-none cursor-pointer"
+      >
+        <Sparkles size={13} className="text-[#C2410C] shrink-0" />
         <span>{degrees}° view</span>
-        <span className="text-[#94A3B8]">({currentFrame + 1}/{frameCount})</span>
-      </div>
+        {cardinalLabel && (
+          <span className="text-[#C2410C] font-semibold text-[11px] bg-[#FFF7ED] px-1.5 py-0.5 rounded-md border border-[#FFEDD5]">
+            {cardinalLabel}
+          </span>
+        )}
+        <span className="text-[#94A3B8] font-medium">({currentFrame + 1}/{frameCount})</span>
+      </button>
 
       {/* Interactive Controls Overlay */}
-      <div className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-xl bg-white/90 p-1 shadow-sm backdrop-blur-md border border-[#E2E8F0]/80">
+      <div
+        data-no-drag="true"
+        onPointerDown={(e) => e.stopPropagation()}
+        className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 rounded-xl bg-white/95 p-1 shadow-sm backdrop-blur-md border border-[#E2E8F0]/80"
+      >
         <Button
           type="button"
           size="icon"
           variant="ghost"
-          className="h-8 w-8 rounded-lg text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+          className={cn(
+            'h-8 w-8 rounded-lg transition-all',
+            isAutoRotating
+              ? 'bg-[#FFF7ED] text-[#C2410C] ring-1 ring-[#FDBA74]'
+              : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
+          )}
           onClick={(e) => {
             e.stopPropagation();
             setIsAutoRotating((prev) => !prev);
           }}
+          onPointerDown={(e) => e.stopPropagation()}
           aria-label={isAutoRotating ? 'Pause rotation' : 'Start auto-rotation'}
-          title={isAutoRotating ? 'Pause rotation' : 'Auto-rotate'}
+          title={isAutoRotating ? 'Pause rotation' : 'Auto-rotate (360° spin)'}
         >
           {isAutoRotating ? <Pause size={15} /> : <Play size={15} />}
         </Button>
@@ -265,26 +436,32 @@ export default function Product360Viewer({
           className="h-8 w-8 rounded-lg text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]"
           onClick={(e) => {
             e.stopPropagation();
-            setCurrentFrame(0);
-            setIsAutoRotating(false);
+            smoothResetToFront();
           }}
-          aria-label="Reset orientation"
-          title="Reset to front"
+          onPointerDown={(e) => e.stopPropagation()}
+          aria-label="Reset to front view"
+          title="Reset to front (0°)"
         >
-          <RefreshCw size={14} />
+          <RefreshCw size={14} className={isResetting ? 'animate-spin' : ''} />
         </Button>
 
         <Button
           type="button"
           size="icon"
           variant="ghost"
-          className="h-8 w-8 rounded-lg text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+          className={cn(
+            'h-8 w-8 rounded-lg transition-all',
+            isFullscreen
+              ? 'bg-[#FFF7ED] text-[#C2410C]'
+              : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
+          )}
           onClick={(e) => {
             e.stopPropagation();
             toggleFullscreen();
           }}
+          onPointerDown={(e) => e.stopPropagation()}
           aria-label={isFullscreen ? 'Exit fullscreen' : 'View fullscreen'}
-          title="Fullscreen"
+          title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen'}
         >
           {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
         </Button>

@@ -255,16 +255,21 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
         <div className="grid gap-10 lg:grid-cols-12 xl:gap-16">
           {/* Left Column: Media Stage (7 cols) */}
           <div className="flex flex-col lg:col-span-7">
-            {/* Media Mode Switcher Buttons */}
-            <div className="mb-4 flex flex-wrap items-center gap-2">
+            {/* Media Mode Switcher Tabs */}
+            <div className="mb-4 flex flex-wrap items-center gap-2" role="tablist" aria-label="Product Media Options">
               <button
                 type="button"
+                role="tab"
+                id="media-tab-photos"
+                aria-selected={activeMediaMode === 'photos'}
+                aria-controls="media-panel-photos"
                 onClick={() => setActiveMediaMode('photos')}
-                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all ${
+                className={cn(
+                  'flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all select-none',
                   activeMediaMode === 'photos'
-                    ? 'bg-[#0F172A] text-white shadow-md'
-                    : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#F8FAFC]'
-                }`}
+                    ? 'bg-[#C2410C] text-white shadow-md shadow-[#C2410C]/20 border border-[#C2410C]'
+                    : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#FFF7ED]/50 hover:text-[#C2410C] hover:border-[#FDBA74]'
+                )}
               >
                 <Camera size={16} /> Photos & Angles ({images.length})
               </button>
@@ -272,12 +277,17 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
               {product.sequenceId && (
                 <button
                   type="button"
+                  role="tab"
+                  id="media-tab-360"
+                  aria-selected={activeMediaMode === '360'}
+                  aria-controls="media-panel-360"
                   onClick={() => setActiveMediaMode('360')}
-                  className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all ${
+                  className={cn(
+                    'flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all select-none',
                     activeMediaMode === '360'
-                      ? 'bg-[#C2410C] text-white shadow-md'
-                      : 'bg-white text-[#C2410C] border border-[#FDBA74] hover:bg-[#FFF7ED]'
-                  }`}
+                      ? 'bg-[#C2410C] text-white shadow-md shadow-[#C2410C]/20 border border-[#C2410C]'
+                      : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#FFF7ED]/50 hover:text-[#C2410C] hover:border-[#FDBA74]'
+                  )}
                 >
                   <RotateCw size={16} /> Interactive 360° 3D
                 </button>
@@ -286,12 +296,17 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
               {product.video && (
                 <button
                   type="button"
+                  role="tab"
+                  id="media-tab-video"
+                  aria-selected={activeMediaMode === 'video'}
+                  aria-controls="media-panel-video"
                   onClick={() => setActiveMediaMode('video')}
-                  className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all ${
+                  className={cn(
+                    'flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all select-none',
                     activeMediaMode === 'video'
-                      ? 'bg-[#C2410C] text-white shadow-md'
-                      : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#F8FAFC]'
-                  }`}
+                      ? 'bg-[#C2410C] text-white shadow-md shadow-[#C2410C]/20 border border-[#C2410C]'
+                      : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#FFF7ED]/50 hover:text-[#C2410C] hover:border-[#FDBA74]'
+                  )}
                 >
                   <Film size={16} /> HD Turntable Video
                 </button>
@@ -300,7 +315,12 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
 
             {/* Media Display Container */}
             <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white p-6 sm:p-8 shadow-sm">
-              {activeMediaMode === 'photos' && (
+              <div
+                id="media-panel-photos"
+                role="tabpanel"
+                aria-labelledby="media-tab-photos"
+                className={cn('h-full w-full', activeMediaMode === 'photos' ? 'block' : 'hidden')}
+              >
                 <div
                   className="relative h-full w-full cursor-crosshair select-none"
                   onMouseEnter={() => setIsZoomed(true)}
@@ -327,41 +347,61 @@ export default function ProductDetailPage({ productId, onBack, onNavigate }: Pro
                     <ZoomIn size={14} /> Hover to zoom
                   </div>
                 </div>
+              </div>
+
+              {product.sequenceId && (
+                <div
+                  id="media-panel-360"
+                  role="tabpanel"
+                  aria-labelledby="media-tab-360"
+                  className={cn('h-full w-full', activeMediaMode === '360' ? 'block' : 'hidden')}
+                >
+                  <Product360Viewer
+                    sequenceId={product.sequenceId}
+                    frameCount={product.sequenceFrameCount || 40}
+                    productName={product.name}
+                    posterImage={product.image}
+                    className="h-full w-full border-0"
+                    autoRotateDefault={true}
+                  />
+                </div>
               )}
 
-              {activeMediaMode === '360' && product.sequenceId && (
-                <Product360Viewer
-                  sequenceId={product.sequenceId}
-                  frameCount={product.sequenceFrameCount || 40}
-                  productName={product.name}
-                  posterImage={product.image}
-                  className="h-full w-full border-0"
-                  autoRotateDefault={true}
-                />
-              )}
-
-              {activeMediaMode === 'video' && product.video && (
-                <ProductVideoPlayer
-                  src={product.video}
-                  poster={product.image}
-                  productName={product.name}
-                  className="h-full w-full border-0"
-                  autoPlay={true}
-                />
+              {product.video && (
+                <div
+                  id="media-panel-video"
+                  role="tabpanel"
+                  aria-labelledby="media-tab-video"
+                  className={cn('h-full w-full', activeMediaMode === 'video' ? 'block' : 'hidden')}
+                >
+                  <ProductVideoPlayer
+                    src={product.video}
+                    poster={product.image}
+                    productName={product.name}
+                    className="h-full w-full border-0"
+                    autoPlay={activeMediaMode === 'video'}
+                  />
+                </div>
               )}
             </div>
 
-            {/* Gallery Thumbnails (active under photos mode) */}
-            {activeMediaMode === 'photos' && images.length > 1 && (
+            {/* Gallery Thumbnails (active under photos mode, or click to switch to photos) */}
+            {images.length > 1 && (
               <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
                 {images.map((image, index) => (
                   <button
                     key={image}
-                    onClick={() => setActiveImage(index)}
-                    aria-pressed={activeImage === index}
+                    onClick={() => {
+                      setActiveImage(index);
+                      setActiveMediaMode('photos');
+                    }}
+                    aria-pressed={activeMediaMode === 'photos' && activeImage === index}
+                    title={`View photo ${index + 1}`}
                     className={cn(
-                      'h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 bg-white p-1.5 transition-all',
-                      activeImage === index ? 'border-[#C2410C] shadow-sm scale-105' : 'border-[#E2E8F0] hover:border-[#CBD5E1]',
+                      'h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 bg-white p-1.5 transition-all cursor-pointer',
+                      activeMediaMode === 'photos' && activeImage === index
+                        ? 'border-[#C2410C] shadow-sm scale-105'
+                        : 'border-[#E2E8F0] hover:border-[#CBD5E1]',
                     )}
                   >
                     <ProductImage src={image} alt="" className="h-full w-full object-contain" />

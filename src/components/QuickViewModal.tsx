@@ -7,6 +7,7 @@ import { Button } from './ui/button';
 import ProductImage from './ProductImage';
 import Product360Viewer from './Product360Viewer';
 import ProductVideoPlayer from './ProductVideoPlayer';
+import { cn } from '../lib/utils';
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -91,92 +92,131 @@ export default function QuickViewModal({
           {/* Media Section (Left 7 cols) */}
           <div className="flex flex-col border-b border-[#E2E8F0] bg-[#F8FAFC] p-6 lg:col-span-7 lg:border-b-0 lg:border-r">
             {/* Media Mode Tabs */}
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-4 flex items-center gap-2" role="tablist" aria-label="Quick View Media Options">
               <button
                 type="button"
+                role="tab"
+                id="quick-tab-photos"
+                aria-selected={activeMediaTab === 'photos'}
+                aria-controls="quick-panel-photos"
                 onClick={() => setActiveMediaTab('photos')}
-                className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                className={cn(
+                  'flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all select-none',
                   activeMediaTab === 'photos'
-                    ? 'bg-[#0F172A] text-white shadow-sm'
-                    : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#F1F5F9]'
-                }`}
+                    ? 'bg-[#C2410C] text-white shadow-sm border border-[#C2410C]'
+                    : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#FFF7ED]/50 hover:text-[#C2410C] hover:border-[#FDBA74]'
+                )}
               >
-                <Camera size={14} /> Photos
+                <Camera size={14} /> Photos ({images.length})
               </button>
 
               {product.sequenceId && (
                 <button
                   type="button"
+                  role="tab"
+                  id="quick-tab-360"
+                  aria-selected={activeMediaTab === '360'}
+                  aria-controls="quick-panel-360"
                   onClick={() => setActiveMediaTab('360')}
-                  className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all select-none',
                     activeMediaTab === '360'
-                      ? 'bg-[#C2410C] text-white shadow-sm'
-                      : 'bg-white text-[#C2410C] border border-[#FDBA74] hover:bg-[#FFF7ED]'
-                  }`}
+                      ? 'bg-[#C2410C] text-white shadow-sm border border-[#C2410C]'
+                      : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#FFF7ED]/50 hover:text-[#C2410C] hover:border-[#FDBA74]'
+                  )}
                 >
-                  <RotateCw size={14} /> 360° 3D View
+                  <RotateCw size={14} /> Interactive 360° 3D
                 </button>
               )}
 
               {product.video && (
                 <button
                   type="button"
+                  role="tab"
+                  id="quick-tab-video"
+                  aria-selected={activeMediaTab === 'video'}
+                  aria-controls="quick-panel-video"
                   onClick={() => setActiveMediaTab('video')}
-                  className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all select-none',
                     activeMediaTab === 'video'
-                      ? 'bg-[#C2410C] text-white shadow-sm'
-                      : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#F1F5F9]'
-                  }`}
+                      ? 'bg-[#C2410C] text-white shadow-sm border border-[#C2410C]'
+                      : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#FFF7ED]/50 hover:text-[#C2410C] hover:border-[#FDBA74]'
+                  )}
                 >
-                  <Film size={14} /> Video Tour
+                  <Film size={14} /> HD Turntable Video
                 </button>
               )}
             </div>
 
             {/* Media Stage */}
-            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-4">
-              {activeMediaTab === 'photos' && (
-                <div className="h-full w-full flex items-center justify-center">
-                  <ProductImage
-                    src={images[activeImageIdx]}
-                    alt={product.name}
-                    className="h-full w-full object-contain"
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-xs">
+              <div
+                id="quick-panel-photos"
+                role="tabpanel"
+                aria-labelledby="quick-tab-photos"
+                className={cn('h-full w-full flex items-center justify-center', activeMediaTab === 'photos' ? 'block' : 'hidden')}
+              >
+                <ProductImage
+                  src={images[activeImageIdx]}
+                  alt={product.name}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+
+              {product.sequenceId && (
+                <div
+                  id="quick-panel-360"
+                  role="tabpanel"
+                  aria-labelledby="quick-tab-360"
+                  className={cn('h-full w-full', activeMediaTab === '360' ? 'block' : 'hidden')}
+                >
+                  <Product360Viewer
+                    sequenceId={product.sequenceId}
+                    frameCount={product.sequenceFrameCount || 40}
+                    productName={product.name}
+                    posterImage={product.image}
+                    className="h-full w-full border-0"
+                    autoRotateDefault={true}
                   />
                 </div>
               )}
 
-              {activeMediaTab === '360' && product.sequenceId && (
-                <Product360Viewer
-                  sequenceId={product.sequenceId}
-                  frameCount={product.sequenceFrameCount || 40}
-                  productName={product.name}
-                  posterImage={product.image}
-                  className="h-full w-full border-0"
-                  autoRotateDefault={true}
-                />
-              )}
-
-              {activeMediaTab === 'video' && product.video && (
-                <ProductVideoPlayer
-                  src={product.video}
-                  poster={product.image}
-                  productName={product.name}
-                  className="h-full w-full border-0"
-                  autoPlay={true}
-                />
+              {product.video && (
+                <div
+                  id="quick-panel-video"
+                  role="tabpanel"
+                  aria-labelledby="quick-tab-video"
+                  className={cn('h-full w-full', activeMediaTab === 'video' ? 'block' : 'hidden')}
+                >
+                  <ProductVideoPlayer
+                    src={product.video}
+                    poster={product.image}
+                    productName={product.name}
+                    className="h-full w-full border-0"
+                    autoPlay={activeMediaTab === 'video'}
+                  />
+                </div>
               )}
             </div>
 
-            {/* Thumbnail Rail (only for Photos tab) */}
-            {activeMediaTab === 'photos' && images.length > 1 && (
+            {/* Thumbnail Rail */}
+            {images.length > 1 && (
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                 {images.map((img, i) => (
                   <button
                     key={img}
-                    onClick={() => setActiveImageIdx(i)}
-                    className={`h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 bg-white p-1 transition-all ${
-                      activeImageIdx === i ? 'border-[#C2410C]' : 'border-[#E2E8F0] hover:border-[#CBD5E1]'
-                    }`}
+                    onClick={() => {
+                      setActiveImageIdx(i);
+                      setActiveMediaTab('photos');
+                    }}
+                    title={`View photo ${i + 1}`}
+                    className={cn(
+                      'h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 bg-white p-1 transition-all cursor-pointer',
+                      activeMediaTab === 'photos' && activeImageIdx === i
+                        ? 'border-[#C2410C] shadow-xs scale-105'
+                        : 'border-[#E2E8F0] hover:border-[#CBD5E1]'
+                    )}
                   >
                     <ProductImage src={img} alt="" className="h-full w-full object-contain" />
                   </button>
