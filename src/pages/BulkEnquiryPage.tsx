@@ -8,7 +8,8 @@ import {
   AlertCircle,
   Loader2,
   Plus,
-  Minus
+  Minus,
+  Trash2
 } from 'lucide-react';
 import type { Page } from '../App';
 import { Button } from '../components/ui/button';
@@ -24,21 +25,11 @@ interface BulkEnquiryPageProps {
 }
 
 export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkEnquiryPageProps) {
-  const { items, clearCart, updateQuantity } = useCart();
-  const [selectedItemIndex, setSelectedItemIndex] = useState(0);
+  const { items, clearCart, updateQuantity, removeFromCart, totalPrice } = useCart();
 
-  const selectedCartItem = items.length > 0
-    ? items[Math.min(selectedItemIndex, items.length - 1)]
-    : null;
-
-  const selectedFallbackProduct = !selectedCartItem && selectedProductId
+  const selectedFallbackProduct = items.length === 0 && selectedProductId
     ? getProductById(selectedProductId)
     : null;
-
-  const displayImage = selectedCartItem?.image || selectedFallbackProduct?.image;
-  const displayName = selectedCartItem?.name || selectedFallbackProduct?.name;
-  const displayPrice = selectedCartItem?.price ?? selectedFallbackProduct?.price;
-  const displayQuantity = selectedCartItem?.quantity ?? 1;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -132,84 +123,148 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
         <div className="grid lg:grid-cols-12 gap-12">
 
           {/* LEFT: Info & Benefits */}
-          <div className="lg:col-span-5 space-y-8">
-            {displayImage ? (
-              <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden bg-white border border-[#E2E8F0] shadow-xl p-6 sm:p-8 flex flex-col justify-between">
-                {/* Top: Product Name & Tag */}
+          <div className="lg:col-span-5 space-y-6">
+            {items.length > 0 ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#64748B] font-['Outfit']">
+                      Quotation Items
+                    </span>
+                    <span className="bg-[#FFF7ED] text-[#C2410C] border border-[#FFEDD5] text-xs font-bold px-2.5 py-0.5 rounded-full font-['Outfit']">
+                      {items.length} {items.length === 1 ? 'item' : 'items'}
+                    </span>
+                  </div>
+                  <span className="text-sm font-bold text-[#111827] font-['Outfit']">
+                    Est. Total: ₹{totalPrice.toLocaleString('en-IN')}
+                  </span>
+                </div>
+
+                <div className="space-y-4">
+                  {items.map((item, index) => (
+                    <div
+                      key={item.id}
+                      className="bg-white border border-[#E2E8F0] rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      {/* Top: Item Index, Product Name & Remove button */}
+                      <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#F1F5F9]">
+                        <div className="min-w-0">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
+                            Item {index + 1} of {items.length}
+                          </span>
+                          <h3
+                            className="font-['Outfit'] font-bold text-base sm:text-lg text-[#111827] truncate mt-0.5"
+                            title={item.name}
+                          >
+                            {item.name}
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#FFF7ED] text-[#C2410C] border border-[#FFEDD5] font-['Outfit']">
+                            In Cart
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeFromCart(item.id)}
+                            className="text-[#94A3B8] hover:text-[#EF4444] p-1.5 rounded-lg hover:bg-[#FEF2F2] transition-colors"
+                            title={`Remove ${item.name} from quotation`}
+                            aria-label={`Remove ${item.name}`}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Center: Product Image */}
+                      <div className="w-full h-44 sm:h-52 flex items-center justify-center py-3 my-1">
+                        <ProductImage
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+                        />
+                      </div>
+
+                      {/* Bottom: Price & Quantity */}
+                      <div className="pt-3 border-t border-[#F1F5F9] flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
+                            Price
+                          </span>
+                          <div className="text-xl sm:text-2xl font-bold text-[#111827] font-['Outfit']">
+                            ₹{item.price.toLocaleString('en-IN')}
+                          </div>
+                          {item.quantity > 1 && (
+                            <span className="text-xs text-[#64748B] font-['DM_Sans'] block">
+                              Subtotal: ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-[#64748B] font-['Outfit']">Qty:</span>
+                          <div className="flex items-center border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] overflow-hidden h-9">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                              aria-label="Decrease quantity"
+                              className="w-8 h-full flex items-center justify-center text-[#475569] hover:bg-[#E2E8F0] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Minus size={13} />
+                            </button>
+                            <span className="w-8 text-center text-sm font-bold text-[#111827] font-['Outfit'] select-none">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= MAX_ITEM_QUANTITY}
+                              aria-label="Increase quantity"
+                              title={item.quantity >= MAX_ITEM_QUANTITY ? `Maximum limit of ${MAX_ITEM_QUANTITY} items` : undefined}
+                              className="w-8 h-full flex items-center justify-center text-[#475569] hover:bg-[#E2E8F0] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Plus size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : selectedFallbackProduct ? (
+              <div className="bg-white border border-[#E2E8F0] rounded-[28px] p-6 sm:p-7 shadow-sm">
                 <div className="w-full flex items-center justify-between gap-3 pb-3 border-b border-[#F1F5F9]">
                   <div className="min-w-0">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
                       Quotation Item
                     </span>
                     <h3 className="font-['Outfit'] font-bold text-base sm:text-lg text-[#111827] truncate mt-0.5">
-                      {displayName}
+                      {selectedFallbackProduct.name}
                     </h3>
                   </div>
-                  {selectedCartItem && (
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#FFF7ED] text-[#C2410C] border border-[#FFEDD5] font-['Outfit'] shrink-0">
-                      In Cart
-                    </span>
-                  )}
                 </div>
 
-                {/* Center: Product Image */}
-                <div className="flex-1 w-full flex items-center justify-center py-4 min-h-0">
+                <div className="w-full h-48 sm:h-56 flex items-center justify-center py-3 my-2">
                   <ProductImage
-                    src={displayImage}
-                    alt={displayName || 'Selected Product'}
-                    className="w-full h-full object-contain max-h-[260px] sm:max-h-[300px] transition-transform duration-300 hover:scale-105"
+                    src={selectedFallbackProduct.image}
+                    alt={selectedFallbackProduct.name}
+                    className="w-full h-full object-contain"
                   />
                 </div>
 
-                {/* Bottom: Price & Quantity */}
-                <div className="w-full pt-4 border-t border-[#F1F5F9] flex flex-wrap items-center justify-between gap-3">
+                <div className="pt-3 border-t border-[#F1F5F9] flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
                       Price
                     </span>
                     <div className="text-xl sm:text-2xl font-bold text-[#111827] font-['Outfit']">
-                      {displayPrice ? `₹${displayPrice.toLocaleString('en-IN')}` : 'Price on Request'}
+                      {selectedFallbackProduct.price ? `₹${selectedFallbackProduct.price.toLocaleString('en-IN')}` : 'Price on Request'}
                     </div>
-                    {displayPrice && displayQuantity > 1 && (
-                      <span className="text-xs text-[#64748B] font-['DM_Sans']">
-                        Subtotal: ₹{(displayPrice * displayQuantity).toLocaleString('en-IN')}
-                      </span>
-                    )}
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[#64748B] font-['Outfit']">Qty:</span>
-                    {selectedCartItem ? (
-                      <div className="flex items-center border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] overflow-hidden h-9">
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(selectedCartItem.id, selectedCartItem.quantity - 1)}
-                          disabled={selectedCartItem.quantity <= 1}
-                          aria-label="Decrease quantity"
-                          className="w-8 h-full flex items-center justify-center text-[#475569] hover:bg-[#E2E8F0] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <Minus size={13} />
-                        </button>
-                        <span className="w-8 text-center text-sm font-bold text-[#111827] font-['Outfit'] select-none">
-                          {selectedCartItem.quantity}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(selectedCartItem.id, selectedCartItem.quantity + 1)}
-                          disabled={selectedCartItem.quantity >= MAX_ITEM_QUANTITY}
-                          aria-label="Increase quantity"
-                          title={selectedCartItem.quantity >= MAX_ITEM_QUANTITY ? `Maximum limit of ${MAX_ITEM_QUANTITY} items` : undefined}
-                          className="w-8 h-full flex items-center justify-center text-[#475569] hover:bg-[#E2E8F0] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <Plus size={13} />
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="px-3 py-1 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] font-bold text-sm text-[#111827] font-['Outfit']">
-                        {displayQuantity}
-                      </span>
-                    )}
-                  </div>
+                  <span className="px-3 py-1 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] font-bold text-sm text-[#111827] font-['Outfit']">
+                    Qty: 1
+                  </span>
                 </div>
               </div>
             ) : (
@@ -228,34 +283,6 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
                 >
                   Browse Products
                 </Button>
-              </div>
-            )}
-
-            {items.length > 1 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1">
-                {items.map((item, idx) => {
-                  const isSelected = idx === Math.min(selectedItemIndex, items.length - 1);
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setSelectedItemIndex(idx)}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-all ${
-                        isSelected
-                          ? 'border-[#C2410C] bg-[#FFF7ED] ring-2 ring-[#C2410C]/20 shadow-xs'
-                          : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
-                      }`}
-                    >
-                      <div className="w-10 h-10 rounded-lg bg-[#F8FAFC] border border-[#F1F5F9] p-1 shrink-0 flex items-center justify-center">
-                        <ProductImage src={item.image} alt={item.name} className="w-full h-full object-contain" />
-                      </div>
-                      <div className="text-left min-w-0 max-w-[120px]">
-                        <p className="text-xs font-bold text-[#111827] truncate font-['Outfit']">{item.name}</p>
-                        <p className="text-[11px] text-[#64748B]">Qty: {item.quantity}</p>
-                      </div>
-                    </button>
-                  );
-                })}
               </div>
             )}
 
