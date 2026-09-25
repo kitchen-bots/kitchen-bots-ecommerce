@@ -1,18 +1,8 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { RotateCw, Pause, Play, RefreshCw, Maximize2, Minimize2, Loader2, Sparkles } from 'lucide-react';
+import { RotateCw, Loader2, Sparkles } from 'lucide-react';
 import { preloadFrames } from '../modules/media-loader';
 import { renderFrame, wrapIndex, shortestFrameDistance, type DragState } from '../modules/sequence-viewer';
-import { Button } from './ui/button';
 import { cn } from '../lib/utils';
-
-interface WebKitDocument extends Document {
-  webkitFullscreenElement?: Element;
-  webkitExitFullscreen?: () => Promise<void> | void;
-}
-
-interface WebKitHTMLDivElement extends HTMLDivElement {
-  webkitRequestFullscreen?: () => Promise<void> | void;
-}
 
 interface Product360ViewerProps {
   sequenceId: string;
@@ -39,10 +29,8 @@ export default function Product360Viewer({
   const [isLoading, setIsLoading] = useState(true);
   const [isAutoRotating, setIsAutoRotating] = useState(autoRotateDefault);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
 
   const dragStateRef = useRef<DragState>({ isDragging: false, startX: 0, startFrame: 0 });
   const frameRef = useRef(0);
@@ -124,25 +112,9 @@ export default function Product360Viewer({
     draw(currentFrame);
   }, [currentFrame, draw]);
 
-  // Synchronize fullscreen state with browser events (e.g. Esc key)
-  useEffect(() => {
-    const onFullscreenChange = () => {
-      const doc = document as WebKitDocument;
-      const isFull = Boolean(document.fullscreenElement || doc.webkitFullscreenElement);
-      setIsFullscreen(isFull);
-    };
-
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', onFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
-    };
-  }, []);
-
   // Auto-rotation loop using requestAnimationFrame with delta timing
   useEffect(() => {
-    if (!isAutoRotating || isLoading || isResetting || isDragging) return;
+    if (!isAutoRotating || isLoading || isDragging) return;
 
     let animId: number;
     let lastTime = performance.now();
@@ -160,11 +132,10 @@ export default function Product360Viewer({
 
     animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
-  }, [isAutoRotating, isLoading, isResetting, isDragging, frameCount]);
+  }, [isAutoRotating, isLoading, isDragging, frameCount]);
 
   // Unified Pointer Drag Handlers with pointer capture
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Avoid triggering drag when interacting with controls or buttons
     if ((e.target as HTMLElement).closest('button, [data-no-drag="true"]')) {
       return;
     }
@@ -221,71 +192,7 @@ export default function Product360Viewer({
     } else if (e.key === ' ') {
       e.preventDefault();
       setIsAutoRotating((prev) => !prev);
-    } else if (e.key === 'Home' || e.key === 'r' || e.key === 'R') {
-      e.preventDefault();
-      smoothResetToFront();
-    } else if (e.key === 'f' || e.key === 'F') {
-      e.preventDefault();
-      toggleFullscreen();
     }
-  };
-
-  const toggleFullscreen = () => {
-    const container = containerRef.current as WebKitHTMLDivElement | null;
-    if (!container) return;
-    const doc = document as WebKitDocument;
-    const isDocFull = Boolean(document.fullscreenElement || doc.webkitFullscreenElement);
-
-    if (!isDocFull) {
-      if (container.requestFullscreen) {
-        container.requestFullscreen().catch(() => {});
-      } else if (container.webkitRequestFullscreen) {
-        container.webkitRequestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      } else if (doc.webkitExitFullscreen) {
-        doc.webkitExitFullscreen();
-      }
-    }
-  };
-
-  // Smoothly rotate turntable back to 0° (front view)
-  const smoothResetToFront = () => {
-    if (isResetting) return;
-    setIsAutoRotating(false);
-    setHasInteracted(true);
-
-    const start = frameRef.current;
-    if (start === 0) {
-      // If already at 0, initiate a showcase continuous spin
-      setIsAutoRotating(true);
-      return;
-    }
-
-    setIsResetting(true);
-    const startTime = performance.now();
-    const duration = 350; // ms
-    const diff = shortestFrameDistance(start, 0, frameCount);
-
-    const animate = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(1, elapsed / duration);
-      // Cubic ease-out
-      const ease = 1 - Math.pow(1 - progress, 3);
-      const nextFrame = wrapIndex(Math.round(start + diff * ease), frameCount);
-      setCurrentFrame(nextFrame);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setCurrentFrame(0);
-        setIsResetting(false);
-      }
-    };
-
-    requestAnimationFrame(animate);
   };
 
   // Degrees calculated from current frame (0 to 359)
@@ -352,7 +259,6 @@ export default function Product360Viewer({
       className={cn(
         'group relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-[#E2E8F0] bg-gradient-to-b from-[#FFFFFF] to-[#F8FAFC] select-none outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C] touch-none',
         isDragging ? 'cursor-grabbing' : 'cursor-grab',
-        isFullscreen && 'fixed inset-0 z-50 rounded-none border-0 bg-white p-4',
         className
       )}
       onPointerDown={handlePointerDown}
@@ -401,71 +307,6 @@ export default function Product360Viewer({
         )}
         <span className="text-[#94A3B8] font-medium">({currentFrame + 1}/{frameCount})</span>
       </button>
-
-      {/* Interactive Controls Overlay */}
-      <div
-        data-no-drag="true"
-        onPointerDown={(e) => e.stopPropagation()}
-        className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 rounded-xl bg-white/95 p-1 shadow-sm backdrop-blur-md border border-[#E2E8F0]/80"
-      >
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className={cn(
-            'h-8 w-8 rounded-lg transition-all',
-            isAutoRotating
-              ? 'bg-[#FFF7ED] text-[#C2410C] ring-1 ring-[#FDBA74]'
-              : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
-          )}
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsAutoRotating((prev) => !prev);
-          }}
-          onPointerDown={(e) => e.stopPropagation()}
-          aria-label={isAutoRotating ? 'Pause rotation' : 'Start auto-rotation'}
-          title={isAutoRotating ? 'Pause rotation' : 'Auto-rotate (360° spin)'}
-        >
-          {isAutoRotating ? <Pause size={15} /> : <Play size={15} />}
-        </Button>
-
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8 rounded-lg text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]"
-          onClick={(e) => {
-            e.stopPropagation();
-            smoothResetToFront();
-          }}
-          onPointerDown={(e) => e.stopPropagation()}
-          aria-label="Reset to front view"
-          title="Reset to front (0°)"
-        >
-          <RefreshCw size={14} className={isResetting ? 'animate-spin' : ''} />
-        </Button>
-
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className={cn(
-            'h-8 w-8 rounded-lg transition-all',
-            isFullscreen
-              ? 'bg-[#FFF7ED] text-[#C2410C]'
-              : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
-          )}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleFullscreen();
-          }}
-          onPointerDown={(e) => e.stopPropagation()}
-          aria-label={isFullscreen ? 'Exit fullscreen' : 'View fullscreen'}
-          title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen'}
-        >
-          {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-        </Button>
-      </div>
     </div>
   );
 }
