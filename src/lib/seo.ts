@@ -39,7 +39,7 @@ export const PAGE_SEO: Record<string, SEOMeta> = {
         title: 'Get a Quote | KitchenBots India',
         description:
             'Request a quote for your commercial kitchen. Directly contact our manufacturing team in Hyderabad for product specifications and delivery timelines.',
-        ogImage: getMediaUrl('/images/redesign/bulk-enquiry-hero.png'),
+        ogImage: DEFAULT_OG_IMAGE,
         ogType: 'website',
     },
     policies: {
@@ -78,7 +78,7 @@ export const PAGE_SEO: Record<string, SEOMeta> = {
     'bulk-enquiry': {
         title: 'Bulk Equipment Enquiry | KitchenBots India',
         description: 'Submit high-volume commercial kitchen requirements and get a detailed manufacturing quotation.',
-        ogImage: getMediaUrl('/images/redesign/bulk-enquiry-hero.png'),
+        ogImage: DEFAULT_OG_IMAGE,
         ogType: 'website',
     },
 };

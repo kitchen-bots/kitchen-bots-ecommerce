@@ -3,7 +3,31 @@ import { trackAddToCart } from '../lib/analytics';
 import { CartContext, type CartItem, MAX_ITEM_QUANTITY } from './CartContextData';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    try {
+      if (typeof window === 'undefined') return [];
+      const saved = localStorage.getItem('kb_cart');
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item: CartItem) => ({
+          ...item,
+          quantity: Math.min(MAX_ITEM_QUANTITY, Math.max(1, item.quantity || 1)),
+        }));
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  });
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('kb_cart', JSON.stringify(items));
+    } catch {
+      // Ignore storage errors
+    }
+  }, [items]);
 
   const addToCart = useCallback((newItem: Omit<CartItem, 'quantity'>) => {
     setItems(prev => {

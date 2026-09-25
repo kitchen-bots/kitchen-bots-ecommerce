@@ -3,7 +3,7 @@ import {
   NotebookPen,
   Send,
   CheckCircle,
-  Building2,
+  ShoppingBag,
   MessageCircle,
   AlertCircle,
   Loader2
@@ -13,7 +13,6 @@ import { Button } from '../components/ui/button';
 import TurnstileWidget from '../components/TurnstileWidget';
 import { submitEnquiry } from '../lib/api';
 import { useCart } from '../hooks/use-cart';
-import { getMediaUrl } from '../lib/cdn';
 import ProductImage from '../components/ProductImage';
 import { getProductById } from '../data/products';
 
@@ -142,21 +141,21 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
                 />
               </div>
             ) : (
-              <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl">
-                <img
-                  src={getMediaUrl('/images/redesign/bulk-enquiry-hero.png')}
-                  alt="Bulk Kitchen Equipment"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-10">
-                  <div className="flex items-center gap-3 text-white mb-2">
-                    <Building2 size={24} />
-                    <span className="text-[20px] font-bold font-['Outfit']">Enterprise Ready</span>
-                  </div>
-                  <p className="text-white/80 text-[15px] font-['DM_Sans']">
-                    Supporting hotels, restaurants, and cloud kitchens across India with smart automation.
-                  </p>
+              <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden bg-white border border-[#E2E8F0] shadow-sm flex flex-col items-center justify-center p-8 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-[#FFF7ED] flex items-center justify-center mb-4 text-[#C2410C]">
+                  <ShoppingBag size={28} />
                 </div>
+                <h4 className="font-['Outfit'] font-bold text-xl text-[#111827] mb-2">No Product in Cart</h4>
+                <p className="text-sm text-[#64748B] font-['DM_Sans'] mb-6 max-w-xs leading-relaxed">
+                  Add equipment to your cart or select a machine from our catalog to review and request a commercial quotation.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => onNavigate('products')}
+                  className="rounded-xl font-bold border-[#CBD5E1] text-[#0F172A] hover:bg-[#F8FAFC]"
+                >
+                  Browse Products
+                </Button>
               </div>
             )}
 
