@@ -277,7 +277,10 @@ export default function CartPage({ onNavigate }: CartPageProps) {
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Cart Items List */}
-          <section aria-label="Cart items" className="lg:col-span-2 space-y-4">
+          <section
+            aria-label="Cart items"
+            className="lg:col-span-2 max-h-[580px] sm:max-h-[620px] overflow-y-auto pr-2 sm:pr-3 space-y-4 thin-scrollbar"
+          >
             {items.map((item) => {
               const itemSubtotal = item.price * item.quantity;
               const hasConfig = Boolean(
