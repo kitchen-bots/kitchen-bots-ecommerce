@@ -18,7 +18,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: Page) 
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16 py-20 lg:py-28">
+      <div className="relative z-10 mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16 pt-28 pb-20 sm:pt-32 sm:pb-24 lg:pt-36 lg:pb-28">
         <div className="max-w-2xl 2xl:max-w-3xl rounded-2xl bg-white/70 lg:bg-transparent p-6 sm:p-8 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none border border-white/60 lg:border-none shadow-sm lg:shadow-none">
           <h1 className="font-['Outfit'] text-[38px] font-bold leading-[1.08] tracking-[-0.02em] text-[#112329] sm:text-[54px] lg:text-[68px] 2xl:text-[76px]">
             Heavy-duty grills & outdoor cooking gear

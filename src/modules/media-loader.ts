@@ -9,30 +9,52 @@
  */
 import { getMediaUrl } from '../lib/cdn';
 
+const sequenceCache = new Map<string, HTMLImageElement[]>();
+const loadingPromises = new Map<string, Promise<HTMLImageElement[]>>();
+
 export async function preloadFrames(
     productId: string,
     frameCount: number,
-    priorityCount = 5,
+    priorityCount = 6,
     onFirstBatch?: () => void
 ): Promise<HTMLImageElement[]> {
-    const images: HTMLImageElement[] = new Array(frameCount);
-
-    const makeUrl = (i: number) =>
-        getMediaUrl(`/3d-assets/sequences/${productId}/${String(i).padStart(3, '0')}.webp`);
-
-    // Load first `priorityCount` frames synchronously (await all at once)
-    const priorityPromises = Array.from({ length: Math.min(priorityCount, frameCount) }, (_, i) =>
-        loadImage(makeUrl(i)).then((img) => { images[i] = img; })
-    );
-    await Promise.all(priorityPromises);
-    onFirstBatch?.();
-
-    // Load rest progressively in the background
-    for (let i = priorityCount; i < frameCount; i++) {
-        loadImage(makeUrl(i)).then((img) => { images[i] = img; });
+    if (sequenceCache.has(productId)) {
+        const cached = sequenceCache.get(productId)!;
+        onFirstBatch?.();
+        return cached;
     }
 
-    return images;
+    if (loadingPromises.has(productId)) {
+        const existingPromise = loadingPromises.get(productId)!;
+        onFirstBatch?.();
+        return existingPromise;
+    }
+
+    const loadPromise = (async () => {
+        const images: HTMLImageElement[] = new Array(frameCount);
+
+        const makeUrl = (i: number) =>
+            getMediaUrl(`/3d-assets/sequences/${productId}/${String(i).padStart(3, '0')}.webp`);
+
+        // Load first `priorityCount` frames synchronously (await all at once)
+        const priorityPromises = Array.from({ length: Math.min(priorityCount, frameCount) }, (_, i) =>
+            loadImage(makeUrl(i)).then((img) => { images[i] = img; })
+        );
+        await Promise.all(priorityPromises);
+        onFirstBatch?.();
+
+        // Load rest progressively in the background
+        for (let i = priorityCount; i < frameCount; i++) {
+            loadImage(makeUrl(i)).then((img) => { images[i] = img; });
+        }
+
+        sequenceCache.set(productId, images);
+        loadingPromises.delete(productId);
+        return images;
+    })();
+
+    loadingPromises.set(productId, loadPromise);
+    return loadPromise;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {

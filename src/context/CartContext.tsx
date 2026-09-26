@@ -1,14 +1,41 @@
 import React, { useState, useCallback } from 'react';
 import { trackAddToCart } from '../lib/analytics';
-import { CartContext, type CartItem } from './CartContextData';
+import { CartContext, type CartItem, MAX_ITEM_QUANTITY } from './CartContextData';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    try {
+      if (typeof window === 'undefined') return [];
+      const saved = localStorage.getItem('kb_cart');
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item: CartItem) => ({
+          ...item,
+          quantity: Math.min(MAX_ITEM_QUANTITY, Math.max(1, item.quantity || 1)),
+        }));
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  });
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('kb_cart', JSON.stringify(items));
+    } catch {
+      // Ignore storage errors
+    }
+  }, [items]);
 
   const addToCart = useCallback((newItem: Omit<CartItem, 'quantity'>) => {
     setItems(prev => {
       const existingItem = prev.find(item => item.id === newItem.id);
-      const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+      if (existingItem && existingItem.quantity >= MAX_ITEM_QUANTITY) {
+        return prev;
+      }
+      const newQuantity = existingItem ? Math.min(MAX_ITEM_QUANTITY, existingItem.quantity + 1) : 1;
 
       // Fire analytics
       trackAddToCart({
@@ -36,9 +63,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeFromCart(id);
       return;
     }
+    const clampedQuantity = Math.min(MAX_ITEM_QUANTITY, Math.floor(quantity));
     setItems(prev =>
       prev.map(item =>
-        item.id === id ? { ...item, quantity } : item
+        item.id === id ? { ...item, quantity: clampedQuantity } : item
       )
     );
   }, [removeFromCart]);

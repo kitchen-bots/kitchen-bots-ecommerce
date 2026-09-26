@@ -1,5 +1,7 @@
 import React from 'react';
 
+export const MAX_ITEM_QUANTITY = 5;
+
 export interface CartItem {
   id: string;
   name: string;

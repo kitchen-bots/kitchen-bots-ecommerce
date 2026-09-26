@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { X, ShoppingCart, Minus, Plus, ArrowRight, Camera, RotateCw, Film, Shield, Truck } from 'lucide-react';
 import type { Product } from '../types/product';
 import { useCart } from '../hooks/use-cart';
+import { MAX_ITEM_QUANTITY } from '../context/CartContextData';
 import { useToast } from '../hooks/use-toast';
 import { Button } from './ui/button';
 import ProductImage from './ProductImage';
 import Product360Viewer from './Product360Viewer';
 import ProductVideoPlayer from './ProductVideoPlayer';
+import { cn } from '../lib/utils';
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -44,15 +46,31 @@ export default function QuickViewModal({
   const { addToCart, items, updateQuantity } = useCart();
   const { showToast } = useToast();
 
-  // Handle ESC key to close
+  // Handle ESC key to close and lock body scroll
   useEffect(() => {
+    if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+    document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
         onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen || !product) return null;
@@ -91,92 +109,130 @@ export default function QuickViewModal({
           {/* Media Section (Left 7 cols) */}
           <div className="flex flex-col border-b border-[#E2E8F0] bg-[#F8FAFC] p-6 lg:col-span-7 lg:border-b-0 lg:border-r">
             {/* Media Mode Tabs */}
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-4 flex items-center gap-2" role="tablist" aria-label="Quick View Media Options">
               <button
                 type="button"
+                role="tab"
+                id="quick-tab-photos"
+                aria-selected={activeMediaTab === 'photos'}
+                aria-controls="quick-panel-photos"
                 onClick={() => setActiveMediaTab('photos')}
-                className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                className={cn(
+                  'flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all select-none',
                   activeMediaTab === 'photos'
-                    ? 'bg-[#0F172A] text-white shadow-sm'
-                    : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#F1F5F9]'
-                }`}
+                    ? 'bg-[#C2410C] text-white shadow-sm border border-[#C2410C]'
+                    : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#FFF7ED]/50 hover:text-[#C2410C] hover:border-[#FDBA74]'
+                )}
               >
-                <Camera size={14} /> Photos
+                <Camera size={14} /> Photos ({images.length})
               </button>
 
               {product.sequenceId && (
                 <button
                   type="button"
+                  role="tab"
+                  id="quick-tab-360"
+                  aria-selected={activeMediaTab === '360'}
+                  aria-controls="quick-panel-360"
                   onClick={() => setActiveMediaTab('360')}
-                  className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all select-none',
                     activeMediaTab === '360'
-                      ? 'bg-[#C2410C] text-white shadow-sm'
-                      : 'bg-white text-[#C2410C] border border-[#FDBA74] hover:bg-[#FFF7ED]'
-                  }`}
+                      ? 'bg-[#C2410C] text-white shadow-sm border border-[#C2410C]'
+                      : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#FFF7ED]/50 hover:text-[#C2410C] hover:border-[#FDBA74]'
+                  )}
                 >
-                  <RotateCw size={14} /> 360° 3D View
+                  <RotateCw size={14} /> Interactive 360° 3D
                 </button>
               )}
 
               {product.video && (
                 <button
                   type="button"
+                  role="tab"
+                  id="quick-tab-video"
+                  aria-selected={activeMediaTab === 'video'}
+                  aria-controls="quick-panel-video"
                   onClick={() => setActiveMediaTab('video')}
-                  className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all select-none',
                     activeMediaTab === 'video'
-                      ? 'bg-[#C2410C] text-white shadow-sm'
-                      : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#F1F5F9]'
-                  }`}
+                      ? 'bg-[#C2410C] text-white shadow-sm border border-[#C2410C]'
+                      : 'bg-white text-[#475569] border border-[#CBD5E1] hover:bg-[#FFF7ED]/50 hover:text-[#C2410C] hover:border-[#FDBA74]'
+                  )}
                 >
-                  <Film size={14} /> Video Tour
+                  <Film size={14} /> HD Turntable Video
                 </button>
               )}
             </div>
 
             {/* Media Stage */}
-            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-4">
-              {activeMediaTab === 'photos' && (
-                <div className="h-full w-full flex items-center justify-center">
-                  <ProductImage
-                    src={images[activeImageIdx]}
-                    alt={product.name}
-                    className="h-full w-full object-contain"
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-xs">
+              <div
+                id="quick-panel-photos"
+                role="tabpanel"
+                aria-labelledby="quick-tab-photos"
+                className={cn('h-full w-full flex items-center justify-center', activeMediaTab === 'photos' ? 'block' : 'hidden')}
+              >
+                <ProductImage
+                  src={images[activeImageIdx]}
+                  alt={product.name}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+
+              {product.sequenceId && (
+                <div
+                  id="quick-panel-360"
+                  role="tabpanel"
+                  aria-labelledby="quick-tab-360"
+                  className={cn('h-full w-full', activeMediaTab === '360' ? 'block' : 'hidden')}
+                >
+                  <Product360Viewer
+                    sequenceId={product.sequenceId}
+                    frameCount={product.sequenceFrameCount || 40}
+                    productName={product.name}
+                    posterImage={product.image}
+                    className="h-full w-full border-0"
                   />
                 </div>
               )}
 
-              {activeMediaTab === '360' && product.sequenceId && (
-                <Product360Viewer
-                  sequenceId={product.sequenceId}
-                  frameCount={product.sequenceFrameCount || 40}
-                  productName={product.name}
-                  posterImage={product.image}
-                  className="h-full w-full border-0"
-                  autoRotateDefault={true}
-                />
-              )}
-
-              {activeMediaTab === 'video' && product.video && (
-                <ProductVideoPlayer
-                  src={product.video}
-                  poster={product.image}
-                  productName={product.name}
-                  className="h-full w-full border-0"
-                  autoPlay={true}
-                />
+              {product.video && (
+                <div
+                  id="quick-panel-video"
+                  role="tabpanel"
+                  aria-labelledby="quick-tab-video"
+                  className={cn('h-full w-full', activeMediaTab === 'video' ? 'block' : 'hidden')}
+                >
+                  <ProductVideoPlayer
+                    src={product.video}
+                    poster={product.image}
+                    productName={product.name}
+                    className="h-full w-full border-0"
+                    autoPlay={activeMediaTab === 'video'}
+                  />
+                </div>
               )}
             </div>
 
-            {/* Thumbnail Rail (only for Photos tab) */}
-            {activeMediaTab === 'photos' && images.length > 1 && (
+            {/* Thumbnail Rail */}
+            {images.length > 1 && (
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                 {images.map((img, i) => (
                   <button
                     key={img}
-                    onClick={() => setActiveImageIdx(i)}
-                    className={`h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 bg-white p-1 transition-all ${
-                      activeImageIdx === i ? 'border-[#C2410C]' : 'border-[#E2E8F0] hover:border-[#CBD5E1]'
-                    }`}
+                    onClick={() => {
+                      setActiveImageIdx(i);
+                      setActiveMediaTab('photos');
+                    }}
+                    title={`View photo ${i + 1}`}
+                    className={cn(
+                      'h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 bg-white p-1 transition-all cursor-pointer',
+                      activeMediaTab === 'photos' && activeImageIdx === i
+                        ? 'border-[#C2410C] shadow-xs scale-105'
+                        : 'border-[#E2E8F0] hover:border-[#CBD5E1]'
+                    )}
                   >
                     <ProductImage src={img} alt="" className="h-full w-full object-contain" />
                   </button>
@@ -252,26 +308,35 @@ export default function QuickViewModal({
             {/* Action Buttons */}
             <div className="mt-auto flex flex-col gap-3 pt-6">
               {quantityInCart > 0 ? (
-                <div className="flex h-12 w-full items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1.5">
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(product.id, quantityInCart - 1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-xs hover:bg-[#F1F5F9]"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="font-['Outfit'] font-bold text-sm text-[#0F172A]">
-                    {quantityInCart} in cart
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(product.id, quantityInCart + 1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-xs hover:bg-[#9A3412]"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus size={16} />
-                  </button>
+                <div className="space-y-2">
+                  <div className="flex h-12 w-full items-center justify-between rounded-xl border border-[#CBD5E1] bg-[#F8FAFC] p-1.5">
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(product.id, quantityInCart - 1)}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#0F172A] border border-[#E2E8F0] shadow-xs hover:bg-[#F1F5F9]"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <span className="font-['Outfit'] font-bold text-sm text-[#0F172A]">
+                      {quantityInCart} in cart
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(product.id, quantityInCart + 1)}
+                      disabled={quantityInCart >= MAX_ITEM_QUANTITY}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-xs hover:bg-[#9A3412] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#C2410C]"
+                      aria-label="Increase quantity"
+                      title={quantityInCart >= MAX_ITEM_QUANTITY ? `Maximum limit of ${MAX_ITEM_QUANTITY} items per order` : undefined}
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  {quantityInCart >= MAX_ITEM_QUANTITY && (
+                    <p className="text-center text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/70 py-1 px-2 rounded-lg font-['DM_Sans']">
+                      Maximum limit of {MAX_ITEM_QUANTITY} units reached
+                    </p>
+                  )}
                 </div>
               ) : (
                 <Button

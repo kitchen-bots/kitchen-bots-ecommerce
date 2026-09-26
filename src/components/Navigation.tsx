@@ -20,7 +20,6 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { totalItems } = useCart();
@@ -31,15 +30,6 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   const searchInput = useRef<HTMLInputElement>(null);
   const userMenu = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     if (searchOpen) searchInput.current?.focus();
@@ -125,28 +115,13 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
   };
 
   return (
-    <header className="sticky top-0 z-50 relative">
-      {/* Outer padding shell - only padding transitions, no height change */}
-      <div
-        style={{
-          padding: isScrolled ? '10px 12px' : '0px',
-          transition: 'padding 500ms cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-      >
+    <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
+      <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-3 sm:px-4 lg:px-6 pt-3 sm:pt-3.5">
         <div
-          className={`mx-auto flex items-center justify-between gap-6 ${
-            isScrolled
-              ? 'max-w-[1440px] 2xl:max-w-[1480px] h-16 rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_10px_35px_rgba(0,0,0,0.06)] px-5 sm:px-8'
-              : 'h-20 w-full border-b border-[#F1F5F9] bg-white/95 backdrop-blur-md shadow-sm px-6 lg:px-12 2xl:px-16'
-          }`}
-          style={{
-            transitionProperty: 'height, max-width, background-color, border-color, box-shadow, border-radius, padding',
-            transitionDuration: '500ms',
-            transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
+          className="pointer-events-auto mx-auto flex h-16 w-full items-center justify-between gap-4 sm:gap-6 rounded-2xl bg-white/85 backdrop-blur-xl border border-white/60 shadow-[0_10px_35px_rgba(0,0,0,0.06)] px-5 sm:px-8"
         >
           <button onClick={() => navigate('home')} aria-label="KitchenBots home" className="shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-kb-tertiary">
-            <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className={`w-auto object-contain transition-all duration-300 ${isScrolled ? 'h-9 md:h-10' : 'h-11 md:h-12'}`} />
+            <img src="/images/kitchenbots-logo.svg" alt="KitchenBots" className="h-9 md:h-10 w-auto object-contain" />
           </button>
 
           <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
@@ -349,7 +324,7 @@ export default function Navigation({ currentPage, onNavigate, onCartClick, onCat
       </div>
 
       {searchOpen && (
-        <div className="absolute right-6 top-[calc(100%+8px)] w-[min(560px,calc(100%-3rem))] rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-xl lg:right-[80px]">
+        <div className="pointer-events-auto absolute right-3 sm:right-6 lg:right-10 top-[calc(100%+8px)] w-[min(560px,calc(100%-1.5rem))] rounded-2xl border border-[#E2E8F0] bg-white/95 backdrop-blur-xl p-4 shadow-2xl">
           <form role="search" className="flex gap-2" onSubmit={submitSearch} onKeyDown={event => {
             if (event.key === 'Escape') {
               setSearchOpen(false);

@@ -9,7 +9,7 @@ interface AboutPageProps {
 
 export default function AboutPage({ onNavigate }: AboutPageProps) {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pt-20">
+    <div className="min-h-screen bg-[#F8FAFC] pt-24 sm:pt-28">
       {/* 1. HERO SECTION */}
       <section className="border-b border-[#E2E8F0] bg-white py-14 lg:py-20">
         <div className="mx-auto max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
