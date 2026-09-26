@@ -130,7 +130,7 @@ export default function PoliciesPage() {
     const currentPolicy = policies[activeTab];
 
     return (
-        <section className="pt-20 bg-[#F7FAF7] min-h-screen">
+        <section className="pt-24 sm:pt-28 bg-[#F7FAF7] min-h-screen">
             <div className="container mx-auto px-6 md:px-[80px] py-12 md:py-20">
                 {/* Header */}
                 <div className="text-center max-w-2xl mx-auto mb-12">

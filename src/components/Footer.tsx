@@ -20,9 +20,9 @@ export default function Footer({ onNavigate }: FooterProps) {
               className="mb-6 inline-block text-left focus:outline-none group"
               aria-label="KitchenBots home"
             >
-              <div className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2.5 shadow-sm transition-transform duration-200 group-hover:scale-[1.02]">
+              <div className="inline-flex items-center justify-center transition-transform duration-200 group-hover:scale-[1.02]">
                 <img
-                  src="/images/kitchenbots-logo.svg"
+                  src="/images/kitchenbots-logo-white.svg"
                   alt="KitchenBots"
                   className="h-8 md:h-9 w-auto object-contain"
                 />

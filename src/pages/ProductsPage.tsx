@@ -18,6 +18,7 @@ import { PRODUCTS } from '../data/products';
 import type { Page } from '../App';
 import type { Product, ProductCategory } from '../types/product';
 import { useCart } from '../hooks/use-cart';
+import { MAX_ITEM_QUANTITY } from '../context/CartContextData';
 import { useToast } from '../hooks/use-toast';
 import { Button } from '../components/ui/button';
 import ProductImage from '../components/ProductImage';
@@ -107,8 +108,8 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
-      {/* Header & Catalog Controls */}
-      <section className="border-b border-[#E2E8F0] bg-white pb-8 pt-6 sm:pt-8">
+      {/* Unified Header & Catalog Controls (Seamless, no gap below navbar) */}
+      <section className="border-b border-[#E2E8F0] bg-white pb-8 pt-24 sm:pt-28">
         <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
           <nav className="mb-4 flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-[#94A3B8]" aria-label="Breadcrumb">
             <button className="hover:text-[#111827]" onClick={() => onNavigate?.('home')}>Home</button>
@@ -349,8 +350,10 @@ export default function ProductsPage({ onProductClick, onCartOpen, onNavigate }:
                                 e.stopPropagation();
                                 updateQuantity(product.id, quantityInCart + 1);
                               }}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-xs hover:bg-[#9A3412] active:scale-95 transition-all"
+                              disabled={quantityInCart >= MAX_ITEM_QUANTITY}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C] text-white shadow-xs hover:bg-[#9A3412] active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:bg-[#C2410C]"
                               aria-label={`Increase quantity of ${product.name}`}
+                              title={quantityInCart >= MAX_ITEM_QUANTITY ? `Maximum limit of ${MAX_ITEM_QUANTITY} items per order` : undefined}
                             >
                               <Plus size={14} className="stroke-[2.5]" />
                             </button>

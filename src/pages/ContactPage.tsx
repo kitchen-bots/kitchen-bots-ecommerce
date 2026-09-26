@@ -74,7 +74,6 @@ export default function ContactPage() {
 
       setSubmittedRef(response.reference || response.id);
       setFormData({ name: '', email: '', phone: '', company: '', city: '', message: '' });
-      setTurnstileToken('');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to submit enquiry. Please try again.';
       setErrorMessage(message);
@@ -90,7 +89,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-20">
+    <div className="min-h-screen bg-[#FAFAFA] pt-24 sm:pt-28">
       {/* Header */}
       <section className="border-b border-[#F1F5F9] bg-white pb-12 pt-8 lg:pb-16">
         <div className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1480px] px-6 lg:px-12 2xl:px-16">
@@ -335,7 +334,6 @@ export default function ContactPage() {
                         }}
                       />
                     </div>
-
                     <Button
                       type="submit"
                       disabled={isSubmitting || !turnstileToken}

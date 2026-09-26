@@ -1,4 +1,5 @@
 import { PRODUCTS, getProductById } from '../data/products';
+import { getMediaUrl } from './cdn';
 import type { Product, ProductCategory } from '../types/product';
 export const DEFAULT_API_BASE_URL = '';
 export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || import.meta.env?.VITE_API_URL || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
@@ -78,7 +79,7 @@ export function toStorefrontProduct(apiProduct: any): Product {
         ? apiProduct.imageUrls
         : (local?.images || [])));
 
-  const images: string[] = rawImages
+  const extractedImageUrls: string[] = rawImages
     .map((img: unknown) => {
       if (typeof img === 'string') return img;
       if (img && typeof img === 'object' && 'url' in img && typeof (img as { url?: string }).url === 'string') {
@@ -88,9 +89,11 @@ export function toStorefrontProduct(apiProduct: any): Product {
     })
     .filter(Boolean);
 
+  const images = extractedImageUrls.map((img) => getMediaUrl(img));
+
   const primaryImage = (typeof apiProduct.image === 'string' && apiProduct.image)
-    ? apiProduct.image
-    : (images[0] || local?.image || '');
+    ? getMediaUrl(apiProduct.image)
+    : (images[0] || (local?.image ? getMediaUrl(local.image) : ''));
 
   let specifications: Record<string, string> = {};
   if (Array.isArray(apiProduct.specifications) && apiProduct.specifications.length > 0) {
@@ -110,7 +113,6 @@ export function toStorefrontProduct(apiProduct: any): Product {
   } else {
     specifications = local?.specifications || {};
   }
-
   const priceRupees =
     apiProduct.price !== undefined && apiProduct.price !== null
       ? Number(apiProduct.price)

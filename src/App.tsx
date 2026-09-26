@@ -211,7 +211,7 @@ function MainAppContent() {
       case 'wishlist':
         return <WishlistPage onProductClick={(id) => navigateTo('product-detail', id)} onNavigate={navigateTo} />;
       case 'bulk-enquiry':
-        return <BulkEnquiryPage onNavigate={navigateTo} />;
+        return <BulkEnquiryPage onNavigate={navigateTo} selectedProductId={selectedProductId} />;
       case 'home':
       default:
         return (

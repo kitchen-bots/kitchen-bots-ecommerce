@@ -6,6 +6,7 @@ import {
   toStorefrontProduct,
   type ApiProduct,
 } from './api';
+import { getMediaUrl } from './cdn';
 
 const mockApiProduct: ApiProduct = {
   id: 'prod-1',
@@ -60,8 +61,8 @@ describe('Storefront API Client', () => {
     };
 
     const product = toStorefrontProduct(rawApiProduct);
-    expect(product.images).toEqual(['/images/img1.jpg', '/images/img2.jpg']);
-    expect(product.image).toBe('/images/img1.jpg');
+    expect(product.images).toEqual([getMediaUrl('/images/img1.jpg'), getMediaUrl('/images/img2.jpg')]);
+    expect(product.image).toBe(getMediaUrl('/images/img1.jpg'));
     expect(product.specifications).toEqual({
       Material: '304 Stainless Steel',
       'Grate Type': 'V-Groove Grate'

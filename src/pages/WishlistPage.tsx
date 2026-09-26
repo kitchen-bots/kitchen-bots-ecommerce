@@ -5,6 +5,7 @@ import type { Page } from '../App';
 import { useCart } from '../hooks/use-cart';
 import { useToast } from '../hooks/use-toast';
 import { Button } from '../components/ui/button';
+import ProductImage from '../components/ProductImage';
 
 interface WishlistPageProps {
   onProductClick: (id: string) => void;
@@ -26,7 +27,7 @@ export default function WishlistPage({ onProductClick, onNavigate }: WishlistPag
     }).format(price);
 
   return (
-    <section className="pt-20 min-h-screen bg-[#FAFAFA]">
+    <section className="pt-24 sm:pt-28 min-h-screen bg-[#FAFAFA]">
       <div className="container mx-auto px-6 md:px-[80px] py-12 md:py-20">
         <div className="max-w-6xl mx-auto">
           {/* HEADER */}
@@ -63,9 +64,9 @@ export default function WishlistPage({ onProductClick, onNavigate }: WishlistPag
                     className="relative aspect-[4/3] bg-[#F8FAFC] cursor-pointer overflow-hidden p-8 flex items-center justify-center"
                     onClick={() => onProductClick(product.id)}
                   >
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
+                    <ProductImage
+                      src={product.image}
+                      alt={product.name}
                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
                     />
                     <Button 

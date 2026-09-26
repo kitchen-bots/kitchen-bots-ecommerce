@@ -11,12 +11,33 @@ export function renderFrame(
     index: number
 ): void {
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx || !images || images.length === 0) return;
 
-    const img = images[Math.round(index)];
+    const total = images.length;
+    const targetIndex = wrapIndex(Math.round(index), total);
+    let img = images[targetIndex];
+
+    // Fallback: If target frame is not loaded or missing, find nearest loaded frame
+    if (!img || !img.complete || img.naturalWidth === 0) {
+        for (let offset = 1; offset <= Math.floor(total / 2); offset++) {
+            const forward = (targetIndex + offset) % total;
+            const backward = (targetIndex - offset + total) % total;
+            if (images[forward]?.complete && images[forward]?.naturalWidth) {
+                img = images[forward];
+                break;
+            }
+            if (images[backward]?.complete && images[backward]?.naturalWidth) {
+                img = images[backward];
+                break;
+            }
+        }
+    }
+
     if (!img || !img.complete || img.naturalWidth === 0) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
     const scale = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
     const w = img.naturalWidth * scale;
@@ -31,6 +52,15 @@ export function renderFrame(
 export function wrapIndex(index: number, total: number): number {
     if (total === 0) return 0;
     return ((Math.round(index) % total) + total) % total;
+}
+
+/** Shortest distance between two circular frame indices. */
+export function shortestFrameDistance(from: number, to: number, total: number): number {
+    if (total === 0) return 0;
+    const diff = (to - from) % total;
+    if (diff > total / 2) return diff - total;
+    if (diff < -total / 2) return diff + total;
+    return diff;
 }
 
 /** Drag/swipe state manager. Returns handlers to attach to a container. */
@@ -49,7 +79,7 @@ export function dragToFrame(
     drag: DragState,
     clientX: number,
     total: number,
-    sensitivity = 5
+    sensitivity = 8
 ): number {
     const delta = clientX - drag.startX;
     return wrapIndex(drag.startFrame + Math.round(delta / sensitivity), total);

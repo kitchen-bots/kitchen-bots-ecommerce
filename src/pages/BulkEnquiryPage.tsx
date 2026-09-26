@@ -3,24 +3,34 @@ import {
   NotebookPen,
   Send,
   CheckCircle,
-  Building2,
+  ShoppingBag,
   MessageCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Plus,
+  Minus,
+  Trash2
 } from 'lucide-react';
 import type { Page } from '../App';
 import { Button } from '../components/ui/button';
 import TurnstileWidget, { type TurnstileWidgetRef } from '../components/TurnstileWidget';
 import { submitEnquiry } from '../lib/api';
 import { useCart } from '../hooks/use-cart';
-import { getMediaUrl } from '../lib/cdn';
+import { MAX_ITEM_QUANTITY } from '../context/CartContextData';
+import ProductImage from '../components/ProductImage';
+import { getProductById } from '../data/products';
 
 interface BulkEnquiryPageProps {
   onNavigate: (page: Page) => void;
+  selectedProductId?: string | null;
 }
 
-export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
-  const { items, clearCart } = useCart();
+export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkEnquiryPageProps) {
+  const { items, clearCart, updateQuantity, removeFromCart, totalPrice } = useCart();
+
+  const selectedFallbackProduct = items.length === 0 && selectedProductId
+    ? getProductById(selectedProductId)
+    : null;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -91,7 +101,7 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] pt-20">
+    <div className="min-h-screen bg-[#FAFAFA] pt-24 sm:pt-28">
       {/* BREADCRUMB */}
       <div className="container mx-auto px-6 md:px-[80px] pt-12 md:pt-20 pb-6">
         <nav className="flex items-center gap-2 text-[13px] text-[#64748B] font-medium font-['DM_Sans']">
@@ -125,23 +135,168 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
         <div className="grid lg:grid-cols-12 gap-12">
 
           {/* LEFT: Info & Benefits */}
-          <div className="lg:col-span-5 space-y-8">
-            <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl">
-              <img
-                src={getMediaUrl('/images/redesign/bulk-enquiry-hero.png')}
-                alt="Bulk Kitchen Equipment"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-10">
-                <div className="flex items-center gap-3 text-white mb-2">
-                  <Building2 size={24} />
-                  <span className="text-[20px] font-bold font-['Outfit']">Enterprise Ready</span>
+          <div className="lg:col-span-5 space-y-6">
+            {items.length > 0 ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#64748B] font-['Outfit']">
+                      Quotation Items
+                    </span>
+                    <span className="bg-[#FFF7ED] text-[#C2410C] border border-[#FFEDD5] text-xs font-bold px-2.5 py-0.5 rounded-full font-['Outfit']">
+                      {items.length} {items.length === 1 ? 'item' : 'items'}
+                    </span>
+                  </div>
+                  <span className="text-sm font-bold text-[#111827] font-['Outfit']">
+                    Est. Total: ₹{totalPrice.toLocaleString('en-IN')}
+                  </span>
                 </div>
-                <p className="text-white/80 text-[15px] font-['DM_Sans']">
-                  Supporting hotels, restaurants, and cloud kitchens across India with smart automation.
-                </p>
+
+                <div className="space-y-4">
+                  {items.map((item, index) => (
+                    <div
+                      key={item.id}
+                      className="bg-white border border-[#E2E8F0] rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      {/* Top: Item Index, Product Name & Remove button */}
+                      <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#F1F5F9]">
+                        <div className="min-w-0">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
+                            Item {index + 1} of {items.length}
+                          </span>
+                          <h3
+                            className="font-['Outfit'] font-bold text-base sm:text-lg text-[#111827] truncate mt-0.5"
+                            title={item.name}
+                          >
+                            {item.name}
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#FFF7ED] text-[#C2410C] border border-[#FFEDD5] font-['Outfit']">
+                            In Cart
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeFromCart(item.id)}
+                            className="text-[#94A3B8] hover:text-[#EF4444] p-1.5 rounded-lg hover:bg-[#FEF2F2] transition-colors"
+                            title={`Remove ${item.name} from quotation`}
+                            aria-label={`Remove ${item.name}`}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Center: Product Image */}
+                      <div className="w-full h-44 sm:h-52 flex items-center justify-center py-3 my-1">
+                        <ProductImage
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+                        />
+                      </div>
+
+                      {/* Bottom: Price & Quantity */}
+                      <div className="pt-3 border-t border-[#F1F5F9] flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
+                            Price
+                          </span>
+                          <div className="text-xl sm:text-2xl font-bold text-[#111827] font-['Outfit']">
+                            ₹{item.price.toLocaleString('en-IN')}
+                          </div>
+                          {item.quantity > 1 && (
+                            <span className="text-xs text-[#64748B] font-['DM_Sans'] block">
+                              Subtotal: ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-[#64748B] font-['Outfit']">Qty:</span>
+                          <div className="flex items-center border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] overflow-hidden h-9">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                              aria-label="Decrease quantity"
+                              className="w-8 h-full flex items-center justify-center text-[#475569] hover:bg-[#E2E8F0] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Minus size={13} />
+                            </button>
+                            <span className="w-8 text-center text-sm font-bold text-[#111827] font-['Outfit'] select-none">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= MAX_ITEM_QUANTITY}
+                              aria-label="Increase quantity"
+                              title={item.quantity >= MAX_ITEM_QUANTITY ? `Maximum limit of ${MAX_ITEM_QUANTITY} items` : undefined}
+                              className="w-8 h-full flex items-center justify-center text-[#475569] hover:bg-[#E2E8F0] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Plus size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : selectedFallbackProduct ? (
+              <div className="bg-white border border-[#E2E8F0] rounded-[28px] p-6 sm:p-7 shadow-sm">
+                <div className="w-full flex items-center justify-between gap-3 pb-3 border-b border-[#F1F5F9]">
+                  <div className="min-w-0">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
+                      Quotation Item
+                    </span>
+                    <h3 className="font-['Outfit'] font-bold text-base sm:text-lg text-[#111827] truncate mt-0.5">
+                      {selectedFallbackProduct.name}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="w-full h-48 sm:h-56 flex items-center justify-center py-3 my-2">
+                  <ProductImage
+                    src={selectedFallbackProduct.image}
+                    alt={selectedFallbackProduct.name}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-[#F1F5F9] flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-['Outfit'] block">
+                      Price
+                    </span>
+                    <div className="text-xl sm:text-2xl font-bold text-[#111827] font-['Outfit']">
+                      {selectedFallbackProduct.price ? `₹${selectedFallbackProduct.price.toLocaleString('en-IN')}` : 'Price on Request'}
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] font-bold text-sm text-[#111827] font-['Outfit']">
+                    Qty: 1
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden bg-white border border-[#E2E8F0] shadow-sm flex flex-col items-center justify-center p-8 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-[#FFF7ED] flex items-center justify-center mb-4 text-[#C2410C]">
+                  <ShoppingBag size={28} />
+                </div>
+                <h4 className="font-['Outfit'] font-bold text-xl text-[#111827] mb-2">No Product in Cart</h4>
+                <p className="text-sm text-[#64748B] font-['DM_Sans'] mb-6 max-w-xs leading-relaxed">
+                  Add equipment to your cart or select a machine from our catalog to review and request a commercial quotation.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => onNavigate('products')}
+                  className="rounded-xl font-bold border-[#CBD5E1] text-[#0F172A] hover:bg-[#F8FAFC]"
+                >
+                  Browse Products
+                </Button>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-6 bg-white rounded-2xl border border-[#F1F5F9] shadow-sm">
@@ -304,7 +459,6 @@ export default function BulkEnquiryPage({ onNavigate }: BulkEnquiryPageProps) {
                         }}
                       />
                     </div>
-
                     <Button
                       type="submit"
                       disabled={isSubmitting || !turnstileToken}

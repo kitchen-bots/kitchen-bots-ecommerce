@@ -10,9 +10,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 13999,
     mrp: 16999,
     featured: true,
-    image: '/images/products/kb-flip-bbq-std.webp',
+    image: '/images/products/1_Visualise Files - Flip Base/Flip BBQ with Standard Base V1 2.png',
     images: [
-      '/images/products/kb-flip-bbq-std.webp',
       '/images/products/1_Visualise Files - Flip Base/Flip BBQ with Standard Base V1 2.png',
       '/images/products/1_Visualise Files - Flip Base/Flip BBQ with Standard Base V1 3.png',
       '/images/products/1_Visualise Files - Flip Base/Flip BBQ with Standard Base V1 4.png',
@@ -64,9 +63,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 16499,
     mrp: 19999,
     featured: true,
-    image: '/images/products/kb-flip-bbq-adj.webp',
+    image: '/images/products/2_Visualise Files - Flip Base Height Adjustable/Flip Height Adjustable Open Model Pint 3.png',
     images: [
-      '/images/products/kb-flip-bbq-adj.webp',
       '/images/products/2_Visualise Files - Flip Base Height Adjustable/Flip Height Adjustable Open Model Pint 3.png',
       '/images/products/2_Visualise Files - Flip Base Height Adjustable/Flip Height Adjustable Pinted 2.png',
       '/images/products/2_Visualise Files - Flip Base Height Adjustable/Flip Height Adjustable Pinted 3.png',
@@ -117,9 +115,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 12499,
     mrp: 15499,
     featured: true,
-    image: '/images/products/kb-collapsible-bbq-big.webp',
+    image: '/images/products/3_Visualise Files - Collapsible_BBQ/Collapasible Big with Grill Plate.png',
     images: [
-      '/images/products/kb-collapsible-bbq-big.webp',
       '/images/products/3_Visualise Files - Collapsible_BBQ/Collapasible Big with Grill Plate.png',
       '/images/products/3_Visualise Files - Collapsible_BBQ/Collapasible Big with Hot Plate.png',
       '/images/products/3_Visualise Files - Collapsible_BBQ/Coal Jug 3.png',
@@ -171,9 +168,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 18999,
     mrp: 22999,
     featured: true,
-    image: '/images/products/kb-collapsible-flip.webp',
+    image: '/images/products/4_Visualise Files  - Collapsible_Flip/Collapsible BBQ and Flip 2.jpg',
     images: [
-      '/images/products/kb-collapsible-flip.webp',
       '/images/products/4_Visualise Files  - Collapsible_Flip/Collapsible BBQ and Flip 2.jpg',
       '/images/products/4_Visualise Files  - Collapsible_Flip/Collapsible BBQ and Flip 3.jpg',
       '/images/products/4_Visualise Files  - Collapsible_Flip/Collapsible BBQ and Flip 4.jpg',
@@ -224,9 +220,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 6499,
     mrp: 7999,
     featured: false,
-    image: '/images/products/kb-collapsible-bbq-small.webp',
+    image: '/images/products/5_Visualise Files  - Collapsible_BBQ Small/Collapsible BBQ Small - Paint Version 2.jpg',
     images: [
-      '/images/products/kb-collapsible-bbq-small.webp',
       '/images/products/5_Visualise Files  - Collapsible_BBQ Small/Collapsible BBQ Small - Paint Version 2.jpg',
       '/images/products/5_Visualise Files  - Collapsible_BBQ Small/Collapsible BBQ Small - Paint Version 3.jpg',
       '/images/products/5_Visualise Files  - Collapsible_BBQ Small/Collapsible BBQ Small - Paint Version 4.jpg',
@@ -234,12 +229,12 @@ const RAW_PRODUCTS: Product[] = [
       '/images/products/5_Visualise Files  - Collapsible_BBQ Small/Collapsible BBQ Small - Paint Version 6.jpg',
       '/images/products/5_Visualise Files  - Collapsible_BBQ Small/Collapsible BBQ Small - Paint Version 7.jpg'
     ],
-    video: '/videos/1_Collapasible Big SS Model 2.mp4',
-    videoPath: '/videos/1_Collapasible Big SS Model 2.mp4',
+    video: undefined,
+    videoPath: undefined,
     sequenceId: 'kb-collapsible-bbq-small',
     sequenceFrameCount: 6,
     has3D: true,
-    hasVideo: true,
+    hasVideo: false,
     description: 'Ultra-compact flat-pack barbecue designed for balcony cookouts, rooftop sundowners, and weekend picnics. Assembles in 30 seconds into an ultra-rigid steel charcoal grill.',
     shortDescription: 'Compact flat-pack charcoal BBQ with ultra-fast 30s assembly.',
     features: [
@@ -279,9 +274,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 4499,
     mrp: 5499,
     featured: true,
-    image: '/images/products/kb-rocket-stove-150.webp',
+    image: '/images/products/6_Visualise Files - Rocket Stove_150MM/Rocket Stove 150MM Painted Model 2.jpg',
     images: [
-      '/images/products/kb-rocket-stove-150.webp',
       '/images/products/6_Visualise Files - Rocket Stove_150MM/Rocket Stove 150MM Painted Model 2.jpg',
       '/images/products/6_Visualise Files - Rocket Stove_150MM/Rocket Stove 150MM Painted Model 3.jpg',
       '/images/products/6_Visualise Files - Rocket Stove_150MM/Rocket Stove 150MM Painted Model 4.jpg',
@@ -330,9 +324,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 3999,
     mrp: 4999,
     featured: false,
-    image: '/images/products/kb-rocket-stove-coll.webp',
+    image: '/images/products/7_Visualise Files - Rocket Stove_Collapsible/Rocket Stove Collapsible Small 2.jpg',
     images: [
-      '/images/products/kb-rocket-stove-coll.webp',
       '/images/products/7_Visualise Files - Rocket Stove_Collapsible/Rocket Stove Collapsible Small 2.jpg',
       '/images/products/7_Visualise Files - Rocket Stove_Collapsible/Rocket Stove Collapsible Small 3.jpg',
       '/images/products/7_Visualise Files - Rocket Stove_Collapsible/Rocket Stove Collapsible Small 4.jpg',
@@ -381,17 +374,16 @@ const RAW_PRODUCTS: Product[] = [
     price: 21999,
     mrp: 26999,
     featured: true,
-    image: '/images/products/kb-auto-bbq-ss.webp',
+    image: '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ SS Model 2.png',
     images: [
-      '/images/products/kb-auto-bbq-ss.webp',
-      '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ Paint Model V2.png',
-      '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ Paint Model.png',
       '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ SS Model 2.png',
       '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ SS Model 3.png',
       '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ SS Model 4.png',
       '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ SS Model 5.png',
       '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ SS Model 6.png',
-      '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ SS Model 7.png'
+      '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ SS Model 7.png',
+      '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ Paint Model V2.png',
+      '/images/products/8_Visualise Renders  - Automatic BBQ/Automatic BBQ Paint Model.png'
     ],
     video: '/videos/Automatic BBQ SS Model.mp4',
     videoPath: '/videos/Automatic BBQ SS Model.mp4',
@@ -436,9 +428,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 48000,
     mrp: 56000,
     featured: true,
-    image: '/images/products/kb-santa-maria-med.webp',
+    image: '/images/products/9_Visualise Files -Santa Maria Grill Medium/SantaMaria BBQ Meduim- Paint Model 1.jpg',
     images: [
-      '/images/products/kb-santa-maria-med.webp',
       '/images/products/9_Visualise Files -Santa Maria Grill Medium/SantaMaria BBQ Meduim- Paint Model 1.jpg',
       '/images/products/9_Visualise Files -Santa Maria Grill Medium/SantaMaria BBQ Meduim- Paint Model 2.jpg',
       '/images/products/9_Visualise Files -Santa Maria Grill Medium/SantaMaria BBQ Meduim- Paint Model 3.jpg'
@@ -487,11 +478,10 @@ const RAW_PRODUCTS: Product[] = [
     price: 34999,
     mrp: 42000,
     featured: false,
-    image: '/images/products/kb-santa-maria-small.webp',
+    image: '/images/products/10_Visualise Files -Santa Maria Grill Small/SantaMaria BBQ Meduim- Paint Model 2.jpg',
     images: [
-      '/images/products/kb-santa-maria-small.webp',
-      '/images/products/10_Visualise Files -Santa Maria Grill Small/SantaMaria BBQ Meduim- Paint Model 1.jpg',
       '/images/products/10_Visualise Files -Santa Maria Grill Small/SantaMaria BBQ Meduim- Paint Model 2.jpg',
+      '/images/products/10_Visualise Files -Santa Maria Grill Small/SantaMaria BBQ Meduim- Paint Model 1.jpg',
       '/images/products/10_Visualise Files -Santa Maria Grill Small/SantaMaria BBQ Meduim- Paint Model 3.jpg'
     ],
     video: '/videos/SantaMaria BBQ Meduim- Paint Model 4.1.mp4',
@@ -538,9 +528,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 9999,
     mrp: 12499,
     featured: true,
-    image: '/images/products/kb-suitcase-bbq-big.webp',
+    image: '/images/products/11_Visualise Files - Suitcase BBQ Big/1_Suitcase BBQ Big Painted 4.jpg',
     images: [
-      '/images/products/kb-suitcase-bbq-big.webp',
       '/images/products/11_Visualise Files - Suitcase BBQ Big/1_Suitcase BBQ Big Painted 4.jpg',
       '/images/products/11_Visualise Files - Suitcase BBQ Big/2_Suitcase BBQ Big Painted 5.jpg',
       '/images/products/11_Visualise Files - Suitcase BBQ Big/3_Suitcase BBQ Big Painted 2.jpg'
@@ -590,9 +579,8 @@ const RAW_PRODUCTS: Product[] = [
     price: 5499,
     mrp: 6999,
     featured: false,
-    image: '/images/products/kb-suitcase-bbq-small.webp',
+    image: '/images/products/12_Visualise Files - Suitcase BBQ Small/Suitcase BBQ Small - Paint Model.jpg',
     images: [
-      '/images/products/kb-suitcase-bbq-small.webp',
       '/images/products/12_Visualise Files - Suitcase BBQ Small/Suitcase BBQ Small - Paint Model.jpg',
       '/images/products/12_Visualise Files - Suitcase BBQ Small/Suitcase BBQ Small - Paint Model 2.jpg',
       '/images/products/12_Visualise Files - Suitcase BBQ Small/Suitcase BBQ Small - Paint Model 3.jpg',
