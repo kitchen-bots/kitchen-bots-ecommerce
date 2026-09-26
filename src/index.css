@@ -297,8 +297,8 @@
   scrollbar-color: #CBD5E1 transparent;
 }
 .thin-scrollbar::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 .thin-scrollbar::-webkit-scrollbar-track {
   background: transparent;
