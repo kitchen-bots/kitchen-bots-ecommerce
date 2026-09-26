@@ -266,7 +266,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
               Shopping Cart
             </h1>
             <p className="mt-1 text-sm text-[#64748B] font-['DM_Sans']">
-              Review your items, then place a direct order or request a commercial quote.
+              Review your items, then place an order or request a commercial quote.
             </p>
           </div>
           <span className="text-sm font-medium text-[#64748B] shrink-0">
@@ -441,7 +441,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                   size="lg"
                   className="w-full text-base font-bold flex items-center justify-center gap-2 bg-kb-primary hover:bg-[#145e2e] text-white focus-visible:ring-2 focus-visible:ring-kb-primary focus-visible:ring-offset-2"
                 >
-                  Place Direct Order
+                  Place Order
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Button>
 
@@ -464,7 +464,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0F172A]/50 p-4"
             role="dialog"
             aria-modal="true"
-            aria-label="Place direct order"
+            aria-label="Place order"
           >
             <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-y-auto max-h-[92vh]">
               {/* Modal header */}
