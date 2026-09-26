@@ -140,11 +140,11 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
                   </span>
                 </div>
 
-                <div className="space-y-4">
+                <div className="max-h-[580px] overflow-y-auto pr-2.5 pl-0.5 py-1 space-y-4 thin-scrollbar">
                   {items.map((item, index) => (
                     <div
                       key={item.id}
-                      className="bg-white border border-[#E2E8F0] rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow"
+                      className="bg-white border border-[#E2E8F0] rounded-[22px] sm:rounded-[24px] p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow"
                     >
                       {/* Top: Item Index, Product Name & Remove button */}
                       <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#F1F5F9]">
@@ -176,7 +176,7 @@ export default function BulkEnquiryPage({ onNavigate, selectedProductId }: BulkE
                       </div>
 
                       {/* Center: Product Image */}
-                      <div className="w-full h-44 sm:h-52 flex items-center justify-center py-3 my-1">
+                      <div className="w-full h-36 sm:h-44 flex items-center justify-center py-2 my-1">
                         <ProductImage
                           src={item.image}
                           alt={item.name}
