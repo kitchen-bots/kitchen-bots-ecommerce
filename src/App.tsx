@@ -208,7 +208,7 @@ function App() {
                 </AnimatePresence>
               </main>
 
-              <Footer onNavigate={navigateTo} />
+              {currentPage !== 'contact' && <Footer onNavigate={navigateTo} />}
               
               <CartDrawer 
                 isOpen={isCartOpen} 
